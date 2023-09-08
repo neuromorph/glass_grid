@@ -1,14 +1,17 @@
 {
   "name": "Extensions Glass Grid",
-  "description": "Display an overlay panel showing a grid of installed extensions",
+  "description": "An overlay glass panel showing a grid to view / manage extensions",
   "uuid": "extgrid@neuromorph",
   "settings-schema": "org.gnome.shell.extensions.extgrid",
   "gettext-domain": "extgrid",
   "shell-version": [
-    "42"
+    "42",
+    "43",
+    "44"
   ],
   "donations": {
     "buymeacoffee": "neuromorph"
   },
+  "url": "https://github.com/neuromorph/glass_grid",
   "version": 1
 }

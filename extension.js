@@ -18,19 +18,16 @@
 
 /* exported init */
 
-const { Clutter, Gio, GLib, GObject, St, Pango } = imports.gi;
-const Dialog = imports.ui.dialog;
-const ModalDialog = imports.ui.modalDialog;
-const Meta = imports.gi.Meta;
-const Shell = imports.gi.Shell;
+const { Clutter, Gio, GLib, GObject, St, Pango, Atk, Meta, Shell } = imports.gi;
+
 const Main = imports.ui.main;
 const ExtensionManager = Main.extensionManager;
-const ExtensionUtils = imports.misc.extensionUtils;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
+const Dialog = imports.ui.dialog;
+const ModalDialog = imports.ui.modalDialog;
 const Util = imports.misc.util;
-const IconGrid = imports.ui.iconGrid;
-const Atk = imports.gi.Atk;
+const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const ExtensionState = ExtensionUtils.ExtensionState;
 
@@ -50,13 +47,10 @@ const PopupEntryMenuItem = GObject.registerClass(
                 y_align: Clutter.ActorAlign.CENTER,
                 x_align: Clutter.ActorAlign.START,
                 x_expand: true,
-                // y_expand: true,
-                // style_class: 'popup-menu-item-label'
             });
             this.add_child(this._label);
 
             this._entry = new St.Entry({
-                // style_class: 'popup-menu-item-entry',
                 can_focus: true,
                 track_hover: true,
                 reactive: true,
@@ -89,18 +83,12 @@ const PopupEntryMenuItem = GObject.registerClass(
 );
 
 
-// This is the class for the overlay window
+// Class for the overlay window
 var GlassGrid = GObject.registerClass(
     class GlassGrid extends St.BoxLayout {
         _init() {
             super._init({
                 accessible_role: Atk.Role.WINDOW,
-                // style_class: 'extension-window-color',
-                // x: pMonitor.x + SCREEN_WIDTH/2 - WINDOW_WIDTH/2,
-                // y: pMonitor.y + SCREEN_HEIGHT/2 - WINDOW_HEIGHT/2,
-                // width: WINDOW_WIDTH,
-                // height: WINDOW_HEIGHT,
-                // hover: true,
                 visible: false,
                 reactive: true,
                 track_hover: true,
@@ -116,28 +104,22 @@ var GlassGrid = GObject.registerClass(
             this.dialogOpen = false;
             this.disablingSelf = false;
 
-            // global.stage.connectObject('notify::key-focus',
-            //     this._focusActorChanged.bind(this), this);
-
             global.focus_manager.add_group(this);
         }
 
         _focusActorChanged() {
             let focusedActor = global.stage.get_key_focus();
-            // log('focused actor =====>>========' + focusedActor);
-            // if (this.contains(focusedActor) || this.settingsBtn.menu.box.contains(focusedActor))
+
             if (this.enablingDisablingAll || this.dialogOpen || this.disablingSelf)
                 return;
 
             if ((!focusedActor && !this.menuOpen) || !(this.contains(focusedActor) || this.settingsBtn.menu.box.contains(focusedActor))) {
-                // log('no focus '+ focusedActor + ' ' + !focusedActor + ' ' + this.contains(focusedActor) + ' ' + this.enablingDisablingAll);
                 if (this.visible) 
-                    log("HIDE called ]]]]]]]]]]] ");
                     this.hide();
             }
-            else {
-                log('has focus');
-            }
+            // else {
+            //     log('has focus');
+            // }
         }
 
         // Create header box with buttons
@@ -192,7 +174,6 @@ var GlassGrid = GObject.registerClass(
                 height: this.height*0.052, //40,
                 width: this.height*0.065, //80,
             });
-            // log('ego btn h, w ' + egoBtn.height + ' ' + egoBtn.width);
             egoBtn.connect('clicked', () => {
                 this.hide();
                 Util.spawn(['gio', 'open', 'https://extensions.gnome.org/']);
@@ -202,7 +183,7 @@ var GlassGrid = GObject.registerClass(
             ////// Settings button
             this.menuOpen = false;
             let settingsIcon = new St.Icon({
-                icon_name: 'extensions-symbolic',
+                icon_name: 'preferences-system-symbolic',
                 icon_size: this.height*0.030, //40,
             });
             this.settingsBtn = new PanelMenu.Button(0.0, 'extgridSettingsBtn', false);
@@ -211,7 +192,6 @@ var GlassGrid = GObject.registerClass(
             this.settingsBtn.add_child(settingsIcon);
             this.settingsBtn.menu.connect('open-state-changed', (actor, open) => {
                 if (open) {
-                    // global.stage.set_key_focus(this.settingsBtn.menu.box.get_child_at_index(1));
                     this.menuOpen = true;
                 }
                 else {
@@ -323,10 +303,10 @@ var GlassGrid = GObject.registerClass(
             this.allStateBtn.connect('clicked', () => {
                 allExtSwch.toggle();
                 if (allExtSwch.state) {
-                    this.enableAllExtensions();
+                    this._enableAllExtensions();
                     this._settings.set_boolean('all-switch-state', true);
                 } else {
-                    this.disableAllExtensions();
+                    this._disableAllExtensions();
                     this._settings.set_boolean('all-switch-state', false);
                 }
             });
@@ -350,25 +330,6 @@ var GlassGrid = GObject.registerClass(
             });
             this.scroll.get_vscroll_bar().style_class = 'extgrid-scrollbar';
             this.add_child(this.scroll);
-
-            // Create a grid layout for the extensions
-            // this.grid = new Clutter.GridLayout({
-            //     orientation: Clutter.Orientation.HORIZONTAL,
-            //     column_spacing: 10,
-            //     row_spacing: 10,
-            //     column_homogeneous: true,
-            //     row_homogeneous: true
-            // });
-            // this.gridActor = new St.Viewport({
-            //     layout_manager: this.grid,
-            //     clip_to_view: true,
-            //     x_align: Clutter.ActorAlign.CENTER,
-            //     y_align: Clutter.ActorAlign.CENTER,
-            //     x_expand: true,
-            //     y_expand: true,
-            //     reactive: true,                
-            // });
-            // this.scroll.add_actor(this.gridActor);
 
         }
 
@@ -400,7 +361,8 @@ var GlassGrid = GObject.registerClass(
                 this.show();
             }
         }
-        // This function adds or removes the panel indicator
+
+        // Add or removes the panel indicator
         _addRemovePanelIndicator(state) {
             if (state) {
                 if (this.panelIndicator) {
@@ -409,7 +371,7 @@ var GlassGrid = GObject.registerClass(
                 this.panelIndicator = new PanelMenu.Button(0.0, 'extgridPanelIndicator', true);
 
                 let icon = new St.Icon({
-                    icon_name: 'preferences-system-symbolic',
+                    icon_name: 'extensions-symbolic',
                     style_class: 'system-status-icon'
                 });
                 this.panelIndicator.add_child(icon);
@@ -423,13 +385,14 @@ var GlassGrid = GObject.registerClass(
                 if (this.panelIndicator) {
                     this.panelIndicator.disconnect(this.panelIndicatorId);
                     this.panelIndicator.destroy();
+                    this.panelIndicator = null;
                 }
             }
 
             this._settings.set_boolean('show-indicator', state);
         }
 
-        sortExtList() {
+        _sortExtList() {
             // Get the list of installed extensions
             let extensions = ExtensionManager.getUuids();
 
@@ -452,7 +415,7 @@ var GlassGrid = GObject.registerClass(
             let col, row, child=null;         
 
             while (true) {
-                [col, row] = this.getGridXY(i);   
+                [col, row] = this._getGridXY(i);   
                 child = this.grid.get_child_at(col, row);
                 if (child)
                     child.destroy();
@@ -465,18 +428,18 @@ var GlassGrid = GObject.registerClass(
             }
         }
 
-        // This function creates the grid of extensions
+        // Fill the grid with extensions
         _fillGrid() {
 
             this._destroyGridChildren();            
-            this.sortExtList();
+            this._sortExtList();
 
             // Loop through the extensions and add them to the grid
             let i = 0;
             for (let idx in this.extList) {
                 let uuid = this.extList[idx][0];
                 let extension = this.extList[idx][1];
-                // log('hgt, wdth in fillgrid: ' + this.extBoxHeight + ' ' + this.extBoxWidth);
+
                 // Create a box container for the extension
                 let extBox = new St.BoxLayout({
                     style_class: 'extension-box',
@@ -495,11 +458,8 @@ var GlassGrid = GObject.registerClass(
                     y_align: Clutter.ActorAlign.CENTER,
                 });
                 let nameTxt = nameLabel.get_clutter_text();
-                // nameTxt.set_markup(`<span>${extension.metadata.name}</span>`);
                 nameTxt.set_line_wrap(true);
                 nameTxt.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
-                // if (extension.error != '')
-                //     nameLabel.set_style('color: red;');
                 
                 let nameBtn = new St.Button({
                     style_class: 'extension-name-button',
@@ -511,40 +471,32 @@ var GlassGrid = GObject.registerClass(
                     width: this.height*0.20, //150,
                 });
                 if (extension.hasUpdate) {
-                    // log('EXTNSN UPDATTE===');
                     nameBtn.add_style_class_name('extension-name-button-update');
                 }
                 if (extension.state == ExtensionState.ERROR) {
-                    // log('EXTNSN ERRROR===');
                     nameBtn.add_style_class_name('extension-name-button-error');
                 }
-                log('Name button: ' + nameBtn);
+                // log('Name button: ' + nameBtn);
                 
                 nameBtn.set_child(nameLabel);
                 nameBtn.connect('clicked', () => {
                     if (extension.state == ExtensionState.ERROR){
-                        log('click on error');
                         if (nameLabel.text == extension.metadata.name) {
-                            log('label is name, chg to: ' + extension.error);
                             nameLabel.text = extension.error;
                             nameBtn.add_style_class_name('extension-name-button-error-msg');
 
                         }
                         else {
-                            log('label is error, chg to: ' + extension.metadata.name);
                             nameLabel.text = extension.metadata.name;
                             nameBtn.remove_style_class_name('extension-name-button-error-msg');
                         }
                     }
                     else if (extension.hasUpdate) {
-                        log('click on update');
                         if (nameLabel.text == extension.metadata.name) {
-                            log('label is name, chg to: Update Available');
                             nameLabel.text = "Update Available. It'll apply on next login. ";
                             nameBtn.add_style_class_name('extension-name-button-update-msg');
                         }
                         else {
-                            log('label is update, chg to: ' + extension.metadata.name);
                             nameLabel.text = extension.metadata.name;
                             nameBtn.remove_style_class_name('extension-name-button-update-msg');
                         }
@@ -556,7 +508,6 @@ var GlassGrid = GObject.registerClass(
                         }
                     }
                 });
-                // nameBtn.accessible_role = Atk.Role.PUSH_BUTTON;
                 if(i==0)
                     this._nameBtn1 = nameBtn;
 
@@ -606,7 +557,7 @@ var GlassGrid = GObject.registerClass(
                     can_focus: true,
                 });
                 reloadStyleBtn.connect('clicked', () => {
-                    this.reloadStylesheet(extension);
+                    this._reloadStylesheet(extension);
                 });
                 btnBox.add_child(reloadStyleBtn);
 
@@ -625,7 +576,7 @@ var GlassGrid = GObject.registerClass(
                     height: this.height*0.03,
                     width: this.height*0.05,
                 });
-                log('State button: ' + stateButton);
+                // log('State button: ' + stateButton);
                 stateButton.connect('clicked', () => {
                     if (extension.state == ExtensionState.ERROR){
                         stateSwitch.state = false;
@@ -642,20 +593,8 @@ var GlassGrid = GObject.registerClass(
                         }
                     }  
                     else {
-                        try {
-                            // if (uuid == Me.metadata.uuid) {
-                            //     this.hide();
-                            //     // this.disablingSelf = true;
-                            //     global.stage.set_key_focus(null);
-                            //     log('calling async disable');
-                            //     // disableSelf();
-                            //     ExtensionManager.disableExtension(uuid);
-                            //     log('returned from async disable');
-                            //     // this._settings.set_boolean('disable-self', true);
-                            // }
-                            // else {                              
+                        try {                            
                                 ExtensionManager.disableExtension(uuid);  
-                            // }
                         }
                         catch (error) {
                             log('Error disabling extension: ' + uuid + ' ' + error);
@@ -667,8 +606,7 @@ var GlassGrid = GObject.registerClass(
                 extBox.add_child(btnBox);
 
                 // Add each Extension Box to the grid
-                // let col, row;
-                let [col, row] = this.getGridXY(i);
+                let [col, row] = this._getGridXY(i);
                 this.grid.attach(extBox, col, row, 1, 1);
 
                 i++;
@@ -676,14 +614,13 @@ var GlassGrid = GObject.registerClass(
 
         }
 
-        // This function reloads the grid and shows the window
+        // Reload the grid and shows the window
         show() {
 
-            let extArr = ExtensionManager._extensionOrder; log('extArr '  + extArr);
+            let extArr = ExtensionManager._extensionOrder; 
             let extGridIdx = extArr.indexOf(Me.metadata.uuid);    
             if (extGridIdx != 0) {        
                 extArr.splice(0, 0, extArr.splice(extGridIdx, 1)[0]); 
-                log('ExtensionManager._extensionOrder ' + ExtensionManager._extensionOrder);
             }
             
             // Initialize keyboard navigation steps
@@ -692,9 +629,9 @@ var GlassGrid = GObject.registerClass(
             this.leftStepsFull = true; 
             this.rightStepsFull = false;
 
-            // this._createGridBox();
-            // this.scroll.add_actor(this.gridActor);
             this._fillGrid();
+
+            this.scroll.hscroll.adjustment.value = 0;
 
             this.visible = true;
 
@@ -704,23 +641,15 @@ var GlassGrid = GObject.registerClass(
             global.stage.set_key_focus(this._nameBtn1);
         }
 
-        // Hide the window and destroy the grid
+        // Hide the window. Grid children get destroyed in show()
         hide() {
             
             this.visible = false;
-            // this.gridActor.destroy();
-            // if (this.scroll) {
-            //     // this.scroll.destroy();
-            //     this.scroll.remove_all_children();
-            //     this.scroll = null;
-            //     this.grid = null;
-            //     this.gridActor = null;
-            // }
 
             global.stage.disconnectObject(this);
         }
 
-        getGridXY(idx) {
+        _getGridXY(idx) {
             let col = Math.floor(idx / this.gridRows) + 1;
             let row = idx % this.gridRows;
 
@@ -732,10 +661,10 @@ var GlassGrid = GObject.registerClass(
             if (idx == -1)
                 return;
 
-            let [col, row] = this.getGridXY(idx); log('GRID XY ' + col + ' ' + row);
+            let [col, row] = this._getGridXY(idx); 
             let extBox = this.grid.get_child_at(col, row);
-            let extNameBtn = extBox.get_child_at_index(0); log('nameBtn ' + extNameBtn);
-            let extSwitchBtn = extBox.get_child_at_index(1).get_child_at_index(2); log('extSwitchBtn ' + extSwitchBtn);
+            let extNameBtn = extBox.get_child_at_index(0); 
+            let extSwitchBtn = extBox.get_child_at_index(1).get_child_at_index(2); 
             let extSwitch = extSwitchBtn.child;
 
             switch (extension.state) {
@@ -746,27 +675,21 @@ var GlassGrid = GObject.registerClass(
 
                 case ExtensionState.ENABLED:
                     extSwitch.state = true;
-                    // extSwitch.add_style_pseudo_class('checked');
                     break;
 
                 case ExtensionState.DISABLED:
-                    log('disabling switch');
                     extSwitch.state = false;
-                    // extSwitch.remove_style_pseudo_class('checked');
                     break;
 
                 default:
                     break;
-
             }
         }
 
-        // This function handles key press events for keyboard navigation
+        // Handle key press events for keyboard navigation
         vfunc_key_press_event(event) {
             let scrollAdjust = this.scroll.hscroll.adjustment;
             let oldValue, newValue;
-            // log('lower, upper, value ' + scrollAdjust.lower + ' ' + scrollAdjust.upper + ' ' + scrollAdjust.value);
-            // log('step incre ' + scrollAdjust.step_increment + ' page incre' + scrollAdjust.page_increment);
 
             if (event.keyval == Clutter.KEY_Escape) {
                 this.hide();
@@ -838,10 +761,10 @@ var GlassGrid = GObject.registerClass(
                     }
                     break;
 
-                case Clutter.KEY_Down:
+                case Clutter.KEY_Down: // when in last column, last element, down will move to left, so handle it
                     let lastIdx = this.extList.length - 1; log('last idx: ' + lastIdx);
                     let r =  lastIdx % 4 + 1;
-                    let [col, row] = this.getGridXY(lastIdx); log('GRID XY ' + col + ' ' + row);
+                    let [col, row] = this._getGridXY(lastIdx); log('GRID XY ' + col + ' ' + row);
                     let extBox = this.grid.get_child_at(col, row);
                     let extNameBtn = extBox.get_child_at_index(0); log('nameBtn ' + extNameBtn);
                     let extSwitchBtn = extBox.get_child_at_index(1).get_child_at_index(2); log('extSwitchBtn ' + extSwitchBtn);
@@ -865,7 +788,7 @@ var GlassGrid = GObject.registerClass(
             return Clutter.EVENT_PROPAGATE;
         }                
 
-        reloadStylesheet(ext) {
+        _reloadStylesheet(ext) {
             try {
                 this._unloadExtensionStylesheet(ext);
                 this._loadExtensionStylesheet(ext);
@@ -911,64 +834,37 @@ var GlassGrid = GObject.registerClass(
             }
         }
 
-        enableAllExtensions() {
+        _enableAllExtensions() {
             let enabledExtensions = this._settings.get_strv('enabled-extensions');
 
             this.enablingDisablingAll = true;
-            for (const uuid of enabledExtensions) { log('enabling uuid: ' + uuid);
+            for (const uuid of enabledExtensions) { 
                 try {
-                    ExtensionManager.enableExtension(uuid); log('enabled uuid: ' + uuid);
+                    ExtensionManager.enableExtension(uuid); 
                 }
                 catch (error) {
                     log('Error enabling extension: ' + uuid + ' ' + error);
                 }
             }
             
-            // await ExtensionManager._enableAllExtensions();
             this.enablingDisablingAll = false;
         }
 
-        disableAllExtensions() {
-            // let extensions = ExtensionManager.getUuids();
-            // let enabledExtensions = [];
-            // for (let idx in extensions) {
-            //     let uuid = extensions[idx];
-            //     let extension = ExtensionManager.lookup(uuid);
-            //     if (extension.state == ExtensionUtils.ExtensionState.ENABLED) {
-            //         enabledExtensions.push(uuid);   log('saving uuid: ' + uuid);
-            //         // if (uuid != Me.metadata.uuid) {   log('disabling uuid: ' + uuid);
-            //         //     try {
-            //         //         ExtensionManager.disableExtension(uuid);
-            //         //     } catch (error) {
-            //         //         log('Error disabling extension: ' + uuid + ' ' + error);
-            //         //     }
-            //         // }
-            //     }
-            // }
-            
+        _disableAllExtensions() {
+            // Does not disable self here so extensions can be enabled again
 
-            // Below code from ExtensionManager _disableAllExtensions() with edit to not disable Me.
-            // Wait for extensions to finish loading before starting
-            // to disable, otherwise some extensions may enable after
-            // this function.
-            // if (ExtensionManager._initializationPromise)
-            // await ExtensionManager._initializationPromise;
-            // let enabledExtensions = [];
             const extensionsToDisable = ExtensionManager._extensionOrder.slice();
 
-            // for (const uuid of extensionsToDisable) {
-            //     enabledExtensions.push(uuid);   
-            // }
-            log('saving uuids: ' + extensionsToDisable);
             this._settings.set_strv('enabled-extensions', extensionsToDisable);
-            this.enablingDisablingAll = true; log("disabling ALLLLL");
+            this.enablingDisablingAll = true; 
+
             // Extensions are disabled in the reverse order
             // from when they were enabled.
             extensionsToDisable.reverse();
 
             for (const uuid of extensionsToDisable) {
                 if (uuid != Me.metadata.uuid) {
-                    log('disabling uuid: ' + uuid);
+                    // log('disabling uuid: ' + uuid);
                     try {
                         ExtensionManager.disableExtension(uuid);
                     }
@@ -979,7 +875,6 @@ var GlassGrid = GObject.registerClass(
             }
 
             global.stage.set_key_focus(this._nameBtn1);
-            log("enableDisalbe going Offfff");
             this.enablingDisablingAll = false; 
         }
 
@@ -1023,28 +918,18 @@ var GlassGrid = GObject.registerClass(
             });
             this.aboutDialog.x_expand = true;
 
-            // let reminderId = null;
             let openedId = this.aboutDialog.connect('opened', () => {
                 this.dialogOpen = true;
-                console.debug('The dialog was opened');
+                // console.debug('The dialog was opened');
             });
             let closedId = this.aboutDialog.connect('closed', () => {
-                console.debug('The dialog was dismissed');
+                // console.debug('The dialog was dismissed');
                 global.stage.set_key_focus(this._nameBtn1);
                 this.dialogOpen = false;
-                // if (!reminderId) {
-                //     reminderId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 60,
-                //         () => {
-                //             this.aboutDialog.open(global.get_current_time());
-
-                //             reminderId = null;
-                //             return GLib.SOURCE_REMOVE;
-                //         });
-                // }
             });
 
             this.aboutDialog.connect('destroy', () => {
-                console.debug('The dialog was destroyed, so reset everything');
+                // console.debug('The dialog was destroyed, so reset everything');
 
                 if (closedId) {
                     this.aboutDialog.disconnect(closedId);
@@ -1074,8 +959,6 @@ var GlassGrid = GObject.registerClass(
             this.aboutDialog.contentLayout.add_child(listLayout);
 
             const ego = new Dialog.ListSectionItem({
-                // icon_actor: new St.Icon({icon_name: 'dialog-information-symbolic'}),
-                // title: 'ẹg̣ọ',
                 description: 'ẹg̣ọ            Extensions web: extensions.gnome.org',
             });
             listLayout.list.add_child(ego);
@@ -1083,7 +966,6 @@ var GlassGrid = GObject.registerClass(
             const setting = new Dialog.ListSectionItem({
                 icon_actor: new St.Icon({icon_name: 'preferences-system-symbolic', 
                                          icon_size: 12}),
-                // title: 'Task Two',
                 description: `               Top: Open settings menu
                 Grid: Open extension preferences `,
             });
@@ -1092,7 +974,6 @@ var GlassGrid = GObject.registerClass(
             const extApp = new Dialog.ListSectionItem({
                 icon_actor: new St.Icon({icon_name: 'extensions-symbolic', 
                                          icon_size: 12}),
-                // title: 'Task Two',
                 description: '               Open Extensions app',
             });
             listLayout.list.add_child(extApp);
@@ -1101,17 +982,15 @@ var GlassGrid = GObject.registerClass(
             const switchIcon = Gio.FileIcon.new(Gio.File.new_for_path(switchIconPath));
             const allSwitch = new Dialog.ListSectionItem({
                 icon_actor: new St.Icon({gicon: switchIcon, 
-                                         height: 4,
-                                         width: 12,}),
-                // title: 'Task Two',
-                description: `               Top: Enable/Disable all extensions except this
+                                         width: 13,
+                                         height: 3, 
+                                         }),
+                description: `              Top: Enable/Disable all extensions except this
                 Grid: Enable/Disable selected extension`,
             });
             listLayout.list.add_child(allSwitch);
 
             const styleReload = new Dialog.ListSectionItem({
-                // icon_actor: new St.Icon({icon_name: 'dialog-information-symbolic'}),
-                // title: '↺',
                 description: '↺                Reload stylesheet for the extension',
             });
             listLayout.list.add_child(styleReload);
@@ -1123,40 +1002,25 @@ var GlassGrid = GObject.registerClass(
                     label: 'OK',
                     action: () => this.aboutDialog.close(),
                 },
-                // {
-                //     label: 'Later',
-                //     isDefault: true,
-                //     action: () => this.aboutDialog.close(global.get_current_time()),
-                // },
             ]);
 
         }
     }
 );
 
-async function disableSelf() {
-    log('disabling SELF');
-    try {
-        ExtensionManager.disableExtension(Me.metadata.uuid);
-    }
-    catch (error) {
-        log('Error disabling SELF: ' + error);
-    }
-}
-
 
 class GlassGridExtension {
 
     setGlassGridParams() {
 
-        const pMonitor = Main.layoutManager.primaryMonitor;  //pMonitor = Main.layoutManager.monitors[0];
+        const pMonitor = Main.layoutManager.primaryMonitor;  // pMonitor = Main.layoutManager.monitors[0];
         const SCREEN_WIDTH = pMonitor.width;
         const SCREEN_HEIGHT = pMonitor.height;
         const WINDOW_WIDTH = SCREEN_HEIGHT*1.35;
         const WINDOW_HEIGHT = SCREEN_HEIGHT*0.75;
         const GRID_ROWS = 4;
-        const GRID_COLS = 5; //Math.floor(WINDOW_WIDTH*0.8/213.33);
-        const pageSize = GRID_COLS*2; log('page size: ' + pageSize);
+        const GRID_COLS = 5; 
+        const pageSize = GRID_COLS*2; 
 
         this.extGrid.x = pMonitor.x + SCREEN_WIDTH/2 - WINDOW_WIDTH/2;
         this.extGrid.y = pMonitor.y + SCREEN_HEIGHT/2 - WINDOW_HEIGHT/2;
@@ -1166,43 +1030,26 @@ class GlassGridExtension {
         this.extGrid.gridRows = GRID_ROWS;
         this.extGrid.pageSize = pageSize; 
         this.extGrid.extBoxWidth = (WINDOW_WIDTH - 170) / GRID_COLS; //subtract margin/spacing
-        this.extGrid.extBoxHeight = this.extGrid.extBoxWidth / 1.75; log('extBox width, height: ' + this.extGrid.extBoxWidth + ' ' + this.extGrid.extBoxHeight);
-        //WINDOW_HEIGHT*0.18; //150,
-        //WINDOW_HEIGHT*0.315, //250,
+        this.extGrid.extBoxHeight = this.extGrid.extBoxWidth / 1.75; 
     }
-
-    // disableSelf () {
-        
-    //     if (this.extGrid._settings.get_boolean('disable-self')){
-    //         this.extGrid._settings.set_boolean('disable-self', false);
-    //     }
-    //     else
-    //         return;
-
-    //     log('disabling SELF');
-    //     try {
-    //         ExtensionManager.disableExtension(Me.metadata.uuid);
-    //     }
-    //     catch (error) {
-    //         log('Error disabling SELF: ' + error);
-    //     }
-    // }
 
     enable() {
 
         this.extGrid = new GlassGrid();
         this.setGlassGridParams();
+
         // Create header box with buttons
         this.extGrid._createHeaderBox();
+
         // Create Scroll Grid
         this.extGrid._createScrollView();
         this.extGrid._createGridBox();
         this.extGrid.scroll.add_actor(this.extGrid.gridActor);
+        // Create about dialog
         this.extGrid._createAboutDialog();
+
         // Panel indicator initialize as per settings
         this.extGrid._addRemovePanelIndicator(this.extGrid._settings.get_boolean('show-indicator'));
-
-        // this.extGrid._settings.connect(`changed::disable-self`, () => this.disableSelf());
     
         // Add the extGrid to the ui group
         Main.layoutManager.addChrome(this.extGrid);
@@ -1229,7 +1076,7 @@ class GlassGridExtension {
             if (this.extGrid.visible) {
                 this.extGrid.hide();
             }
-            // global.stage.disconnectObject(this.extGrid);
+
             global.focus_manager.remove_group(this.extGrid);
             Main.layoutManager.removeChrome(this.extGrid);
             ExtensionManager.disconnectObject(this);
@@ -1241,6 +1088,7 @@ class GlassGridExtension {
             if (this.extGrid.panelIndicator) {
                 this.extGrid.panelIndicator.disconnect(this.extGrid.panelIndicatorId);
                 this.extGrid.panelIndicator.destroy();
+                this.extGrid.panelIndicator = null;
             }
 
             this.extGrid._destroyGridChildren();

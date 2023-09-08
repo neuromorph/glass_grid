@@ -25,10 +25,5 @@
       <summary>Enable/Disable All switch state</summary>
       <description>State of the Enable/Disable All switch.</description>
     </key>
-    <key type="b" name="disable-self">
-      <default>false</default>
-      <summary>Disable Glass Grid</summary>
-      <description>Trigger to disable itself from GlassGridExtension.</description>
-    </key>
   </schema>
 </schemalist>
