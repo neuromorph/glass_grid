@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="extgrid">
+  <schema id="org.gnome.shell.extensions.extgrid" path="/org/gnome/shell/extensions/extgrid/">
+    <key type="as" name="enabled-extensions">
+      <default>[]</default>
+      <summary>Enabled Extensions</summary>
+      <description>Uuids for enabled extensions to restore when all extensions are enabled.</description>
+    </key>
+    <key type="b" name="dark-theme">
+      <default>false</default>
+      <summary>Dark Theme</summary>
+      <description>Use dark theme.</description>
+    </key>
+    <key type="b" name="show-indicator">
+      <default>true</default>
+      <summary>Indicator</summary>
+      <description>Show panel indicator.</description>
+    </key>
+    <key type="as" name="hotkey">
+      <default><![CDATA[['<Super>E']]]></default>
+      <summary>Hotkey to launch extension.</summary>
+    </key>
+    <key type="b" name="all-switch-state">
+      <default>true</default>
+      <summary>Enable/Disable All switch state</summary>
+      <description>State of the Enable/Disable All switch.</description>
+    </key>
+    <key type="b" name="disable-self">
+      <default>false</default>
+      <summary>Disable Glass Grid</summary>
+      <description>Trigger to disable itself from GlassGridExtension.</description>
+    </key>
+  </schema>
+</schemalist>

@@ -1,0 +1,319 @@
+/* 
+  You may customize the extension styling here. Try small changes and then reload the extension to verify.
+  Note: Gnome Shell uses its own CSS parser, many browser CSS properties are not supported.
+*/
+
+/* @font-face {
+  font-family: system-ui;
+  font-style: normal;
+  font-weight: 300;
+  src: local(".SFNSText-Light"), local("Ubuntu Light"), local("Segoe UI Light"), local("Cantarell"), local(".HelveticaNeueDeskInterface-Light"), local(".LucidaGrandeUI"), local("Roboto-Light"), local("DroidSans"), local("Tahoma");
+} */
+
+.extension-window-color {
+  
+  background-image: url(media/tablet.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-color: rgba(255, 255, 255, 0.3);
+  border-width: 3px;
+  border-radius: 30px;
+  padding: 30px 30px;
+  /* -st-background-image-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.5); */
+  /* background-color: rgba(0, 0, 0, 0.4); */
+}
+/* .extension-window-color::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 30px;
+  box-shadow: 1px 1px 4px 0px rgba(50, 50, 50, 0.5);
+  z-index: -1;
+} */
+
+
+.extension-window-dark {
+  /* background-color: rgba(80, 80, 80, 0.95); */
+  background-image: url(media/darkmode.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-color: rgba(255, 255, 255, 0.5); 
+  border-width: 2px;
+  border-radius: 30px;
+  padding: 30px 30px;
+  /* box-shadow: 0px 0px 4px 0px rgba(50, 50, 50, 0.3); */
+}
+
+.extension-window-header {
+  /* border-color: #7e7c68;
+   border-width: 2px; 
+   border-radius: 15px; */
+  padding: 5px 10px 5px 0px;
+}
+
+.extension-about-label {
+  font-weight: 900;
+  font-size: 24px;
+  font-family: 'Open Sans', sans-serif;
+  padding: 0px 0px 0px 0px;
+}
+
+.extension-about-button {
+  border-radius: 10px; 
+  border-width: 2px;
+  /* border-color: #7e7c68; */
+  padding: 0px 2px 2px 2px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-right: 6px;
+}
+
+.extension-ego-label {
+  font-weight: 500;
+  font-size: 23px;
+  font-family: 'Open Sans', sans-serif;
+  padding: 0px 0px 0px 0px;
+}
+
+.extension-ego-button {
+  border-radius: 10px; 
+  border-width: 2px;
+  /* border-color: #7e7c68; */
+  padding: 0px 2px 5px 2px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-right: 8px;
+}
+/* .extension-ego-button:hover, .extension-ego-button:focus
+ {
+  color: black;
+} */
+
+.extension-title-label {
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 700;
+  font-size: 30px;
+  font-family: serif;
+  padding: 0px 0px;
+  letter-spacing: 4px;
+  text-shadow: 0px 1px 0px 0px rgba(0, 0, 0, 0.1);
+  /* text-decoration-style: double; 2.1em; */
+}
+.extension-title-label:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+.ext-app-button {
+  border-radius: 10px; 
+  border-width: 2px;
+  /* border-color: #7e7c68; */
+  padding: 2px 8px;
+  margin-right: 6px;
+  color: rgba(255, 255, 255, 0.9);
+} 
+
+.all-state-button {
+  /* border-radius: 10px; 
+  border-width: 2px;
+  border-color: #7e7c68; */
+  padding: 8px 8px;
+  color: white;
+} 
+.all-state-button:hover {
+  padding: 6px 8px;
+}
+.all-state-switch:hover {
+  border: 5px solid #000;
+}
+
+.settings-button-container {
+  border-radius: 10px; 
+  border-width: 2px;
+  /* border-color: #7e7c68; */
+  padding: 2px 3px !important;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.extension-about-button:hover, .extension-about-button:focus,
+.extension-ego-button:hover, .extension-ego-button:focus,
+.ext-app-button:hover, .ext-app-button:focus, 
+/* .all-state-button:hover, .all-state-button:focus,  */
+.settings-button:hover, .settings-button:focus,
+.settings-button-container:hover, .settings-button-container:focus {
+  /* border-color: white; */
+  color: rgb(255, 255, 255);
+  /* border: 1px solid;
+  border-color: #fff #0000 #fff #0000; */
+  box-shadow: 0px 0px 1px 0px rgba(255, 255, 255, 0.2);
+}
+
+.extension-box {
+  color: white;
+  border-radius: 10px; 
+  /* border-width: 2px;
+  border-color: #7e7c68; */
+}
+
+.extension-button-box {
+  border-radius: 10px; 
+  /* border-width: 2px;
+  border-color: #7e7c68; */
+}
+
+.extension-name-button:hover, .extension-name-button:focus
+ {
+  border-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.5);
+  font-weight: normal;
+  color: rgba(30, 30, 30, 1.0);
+}
+
+.extension-name-button {
+  border-radius: 15px; 
+  border-width: 2px;
+  border-color: rgba(255, 255, 255, 0.5);
+  /* background-color: rgba(180, 180, 180, 0.15); */
+  background-image: url(media/label.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  /* -st-background-image-shadow: 0px 0px 2px rgba(255, 255, 255, 0.2); */
+  margin-left: 10px;
+  margin-right: 5px;
+  color: rgba(255, 255, 255, 1.0);
+  padding: 5px 5px;
+  /* font-weight: 600; */
+  font-size: 20px;
+}.extension-name-button-error, 
+
+.extension-name-label {
+  font-weight: 550;
+  /* font-size: 1.45em; */
+  font-family: 'Open Sans', sans-serif;
+  white-space: normal;
+  text-align: center;
+  padding: 5px 5px;
+}
+
+.extension-name-button-update {
+  background-image: url(media/label_update.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  /* color: rgb(192, 32, 255); */
+}
+.extension-name-button-update:hover, .extension-name-button-update:focus {
+  color: rgb(143, 2, 199);
+}
+/* .extension-name-button-update-dark {
+  background-image: url(media/label_update.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: rgb(211, 98, 255);
+}
+.extension-name-button-update-dark:hover, .extension-name-button-update-dark:focus {
+  color: rgb(183, 0, 255);
+} font-size: 1.15em;*/
+.extension-name-button-update-msg {
+  font-weight: 250;
+  font-size: 15px;
+}
+
+.extension-name-button-error {
+  background-image: url(media/label_error.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  /* color: rgb(216, 86, 0);  */
+}
+.extension-name-button-error:hover, .extension-name-button-error:focus {
+  color: rgb(194, 0, 0);
+}
+/* .extension-name-button-error-dark {
+  background-image: url(media/label_error.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: rgb(255, 124, 124); 
+}
+.extension-name-button-error-dark:hover, .extension-name-button-error-dark:focus {
+  color: rgb(255, 32, 32);
+} */
+.extension-name-button-error-msg {
+  font-weight: 200;
+  font-size: 15px;
+}
+
+.extension-pref-button {
+  border-radius: 10px; 
+  border-width: 2px;
+  /* border-color: #7e7c68; */
+  padding: 2px 5px;
+  margin-top: 2px;
+  margin-bottom: 6px;
+}
+
+.extension-pref-button:hover, .extension-pref-button:focus
+ {
+  border-color: white;
+  color: white;
+}
+
+.extension-pref-button-disabled {
+  border-radius: 10px; 
+  border-width: 2px;
+  /* border-color: #7e7c68; */
+  padding: 2px 5px;
+  margin-top: 0px;
+  margin-bottom: 6px;
+  color: #8d8c8c;
+  opacity: 0.5;
+}
+
+.extension-pref-button-disabled:hover, .extension-pref-button-disabled:focus {
+  border-color: #8d8c8c;
+}
+
+.reload-style-button {
+  border-radius: 10px; 
+  border-width: 2px;
+  /* border-color: #7e7c68; */
+  padding: -2px -2px;
+  margin-top: 0px;
+  margin-bottom: 8px;
+  font-size: 22px;
+  font-weight: 500;
+}
+.reload-style-button:hover, .reload-style-button:focus
+ {
+  border-color: white;
+  color: white;
+}
+
+
+.extension-state-button {
+  border-radius: 10px; 
+  border-width: 2px;
+  /* border-color: #7e7c68; */
+  padding: 1px 3px;
+}
+
+.extension-state-button:hover, .extension-state-button:focus
+ {
+  border-color: white;
+  color: white;
+}
+
+.extension-state-switch
+ {
+  border-color: white;
+ }
+.extension-state-switch:hover, .extension-state-switch:focus
+ {
+  border-width: 1px;
+  border-color: black; 
+}
+
+.extension-window-scroll {
+  margin: 2px 30px 2px 30px;
+}
+
+
+
