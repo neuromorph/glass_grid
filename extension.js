@@ -589,7 +589,7 @@ var GlassGrid = GObject.registerClass(
                             ExtensionManager.enableExtension(uuid);
                         }
                         catch (error) {
-                            log('Error enabling extension: ' + uuid + ' ' + error);
+                            logError('Error enabling extension: ' + uuid + ' ' + error);
                         }
                     }  
                     else {
@@ -597,7 +597,7 @@ var GlassGrid = GObject.registerClass(
                                 ExtensionManager.disableExtension(uuid);  
                         }
                         catch (error) {
-                            log('Error disabling extension: ' + uuid + ' ' + error);
+                            logError('Error disabling extension: ' + uuid + ' ' + error);
                         }
                     }
                 });
@@ -698,7 +698,6 @@ var GlassGrid = GObject.registerClass(
             else if (event.keyval != Clutter.KEY_Left && event.keyval != Clutter.KEY_Right && event.keyval != Clutter.KEY_Down)
                 return Clutter.EVENT_PROPAGATE;
 
-            log('key event: ' + event.keyval);
             // rightSteps: left to right steps of key press. Go from left 1 to right pageSize.
             // leftSteps: right to left steps of key press. Go from right 1 to left pageSize.
             switch (event.keyval) {
@@ -716,7 +715,7 @@ var GlassGrid = GObject.registerClass(
                             this.leftStepsFull = true;
                         else
                             this.leftStepsFull = false;
-                        log('rightStep FULL ' + 'rightSteps: ' + this.rightSteps + ' leftSteps: ' + this.leftSteps);
+                        console.debug('rightStep FULL ' + 'rightSteps: ' + this.rightSteps + ' leftSteps: ' + this.leftSteps);
                     }
                     else { // Go to next extension
                         this.rightSteps += 1;
@@ -726,14 +725,12 @@ var GlassGrid = GObject.registerClass(
                         this.leftSteps -= 1;
                         if (this.leftSteps < this.pageSize)
                             this.leftStepsFull = false;
-                        log('rightStep NotFull ' + 'rightSteps: ' + this.rightSteps + ' leftSteps: ' + this.leftSteps);
+                        console.debug('rightStep NotFull ' + 'rightSteps: ' + this.rightSteps + ' leftSteps: ' + this.leftSteps);
                     }
                     break;
                 
                 case Clutter.KEY_Left:
-                    log('INN LEFFTT');
                     if (this.leftStepsFull) { // Go to previous page 
-                        log('INN IFFF');
                         oldValue = scrollAdjust.value;
                         if (oldValue == 0) break; // If already at beginning of scroll, do nothing
                         scrollAdjust.value -= scrollAdjust.page_increment;
@@ -746,10 +743,9 @@ var GlassGrid = GObject.registerClass(
                             this.rightStepsFull = true;
                         else
                             this.rightStepsFull = false;
-                        log('leftStep FULL ' + 'rightSteps: ' + this.rightSteps + ' leftSteps: ' + this.leftSteps);
+                        console.debug('leftStep FULL ' + 'rightSteps: ' + this.rightSteps + ' leftSteps: ' + this.leftSteps);
                     }
                     else { // Go to previous extension
-                        log('INN ELLSSE');
                         this.leftSteps += 1;
                         if (this.leftSteps == this.pageSize) {
                             this.leftStepsFull = true;
@@ -757,26 +753,26 @@ var GlassGrid = GObject.registerClass(
                         this.rightSteps -= 1;
                         if (this.rightSteps < this.pageSize)
                             this.rightStepsFull = false;
-                        log('leftStep NotFull ' + 'rightSteps: ' + this.rightSteps + ' leftSteps: ' + this.leftSteps);
+                        console.debug('leftStep NotFull ' + 'rightSteps: ' + this.rightSteps + ' leftSteps: ' + this.leftSteps);
                     }
                     break;
 
                 case Clutter.KEY_Down: // when in last column, last element, down will move to left, so handle it
-                    let lastIdx = this.extList.length - 1; log('last idx: ' + lastIdx);
+                    let lastIdx = this.extList.length - 1; 
                     let r =  lastIdx % 4 + 1;
-                    let [col, row] = this._getGridXY(lastIdx); log('GRID XY ' + col + ' ' + row);
+                    let [col, row] = this._getGridXY(lastIdx); 
                     let extBox = this.grid.get_child_at(col, row);
-                    let extNameBtn = extBox.get_child_at_index(0); log('nameBtn ' + extNameBtn);
-                    let extSwitchBtn = extBox.get_child_at_index(1).get_child_at_index(2); log('extSwitchBtn ' + extSwitchBtn);
+                    let extNameBtn = extBox.get_child_at_index(0); 
+                    let extSwitchBtn = extBox.get_child_at_index(1).get_child_at_index(2); 
                     let activeBtn = global.stage.get_key_focus();
                     if ([1,2,3].includes(r)) {
                         if (activeBtn == extNameBtn) {
-                            this.rightSteps -= 1; log('rightsteps: ' + this.rightSteps);
+                            this.rightSteps -= 1; 
                             this.leftSteps += 1;
                         }
                         else if (activeBtn == extSwitchBtn) {
                             this.rightSteps -= 2; 
-                            this.leftSteps += 2; log('leftsteps: ' + this.leftSteps);
+                            this.leftSteps += 2; 
                         }
                     }
                     break;
@@ -843,7 +839,7 @@ var GlassGrid = GObject.registerClass(
                     ExtensionManager.enableExtension(uuid); 
                 }
                 catch (error) {
-                    log('Error enabling extension: ' + uuid + ' ' + error);
+                    logError('Error enabling extension: ' + uuid + ' ' + error);
                 }
             }
             
@@ -869,7 +865,7 @@ var GlassGrid = GObject.registerClass(
                         ExtensionManager.disableExtension(uuid);
                     }
                     catch (error) {
-                        log('Error disabling extension: ' + uuid + ' ' + error);
+                        logError('Error disabling extension: ' + uuid + ' ' + error);
                     }
                 }
             }
@@ -1071,30 +1067,28 @@ class GlassGridExtension {
     
     disable() {
     
-        if(this.extGrid) {
-            global.stage.set_key_focus(null);
-            if (this.extGrid.visible) {
-                this.extGrid.hide();
-            }
-
-            global.focus_manager.remove_group(this.extGrid);
-            Main.layoutManager.removeChrome(this.extGrid);
-            ExtensionManager.disconnectObject(this);
-            Main.wm.removeKeybinding('hotkey');
-
-            if (this.extGrid.aboutDialog)
-                this.extGrid.aboutDialog.destroy();
-            
-            if (this.extGrid.panelIndicator) {
-                this.extGrid.panelIndicator.disconnect(this.extGrid.panelIndicatorId);
-                this.extGrid.panelIndicator.destroy();
-                this.extGrid.panelIndicator = null;
-            }
-
-            this.extGrid._destroyGridChildren();
-            this.extGrid._settings = null;
-            this.extGrid.destroy();
+        global.stage.set_key_focus(null);
+        if (this.extGrid.visible) {
+            this.extGrid.hide();
         }
+
+        global.focus_manager.remove_group(this.extGrid);
+        Main.layoutManager.removeChrome(this.extGrid);
+        ExtensionManager.disconnectObject(this);
+        Main.wm.removeKeybinding('hotkey');
+
+        if (this.extGrid.aboutDialog)
+            this.extGrid.aboutDialog.destroy();
+        
+        if (this.extGrid.panelIndicator) {
+            this.extGrid.panelIndicator.disconnect(this.extGrid.panelIndicatorId);
+            this.extGrid.panelIndicator.destroy();
+            this.extGrid.panelIndicator = null;
+        }
+
+        this.extGrid._destroyGridChildren();
+        this.extGrid._settings = null;
+        this.extGrid.destroy();
         this.extGrid = null;
 
         Main.layoutManager.disconnect(this._monitorsChangedId);

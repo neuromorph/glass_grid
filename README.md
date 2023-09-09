@@ -41,12 +41,13 @@ You may need to restart the gnome shell environnment (for manual install):
     - ego button: Opens extensions.gnome.org
     - Settings button: Opens a menu with settings for Dark/Color mode, Indicator button Add/Remove, launch Hotkey.
     - Extension app button: Launches the Extensions app.
-    - Switch: Enable / Disable all the extensions. It does not disable itself here for obvious reasons. Specifically disabling Glass Grid from it's own entry in grid will disable itself. Enabling all will enable the extensions that were enabled before you pressed Disable All.
+    - Switch: Enable / Disable all the extensions. It does not disable itself here for obvious reasons. Specifically disabling Glass Grid from it's own entry in the grid will disable itself. Enabling all will enable the extensions that were enabled before you pressed Disable All.
 - Grid Layout:
     - Extension Name button: By default, it will open the extension preferences. If the extension has an update, it will show update-message. If the extension has an error, it will show error-message.
     - Settings button: It will open the extension preferences. Gray button means the extension does not have preferences (so disabled).
     - Reload button: It will reload the extension stylesheet css file(s). This is useful when you are trying to customize the stylesheet.
     - The grid layout scrolls horizontally when number of extensions are more than a page capacity.
+    - You can use keyboard arrow keys to navigate (supports automatic pagination when key-focus moves to another page). When opened, key focus would be on the first extension in the grid.
 
 
 
