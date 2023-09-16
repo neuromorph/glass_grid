@@ -18,8 +18,7 @@
 
 /* exported init */
 
-const { Clutter, Gio, GLib, GObject, St, Pango, Atk, Meta, Shell, Graphene } = imports.gi;
-
+const { Clutter, Gio, GObject, St, Pango, Atk, Meta, Shell, Graphene } = imports.gi;
 const Main = imports.ui.main;
 const ExtensionManager = Main.extensionManager;
 const PanelMenu = imports.ui.panelMenu;
@@ -35,86 +34,10 @@ const Me = ExtensionUtils.getCurrentExtension();
 const ExtensionState = ExtensionUtils.ExtensionState;
 
 const {gettext: _, pgettext} = ExtensionUtils;
+const BackgroundGroup = Me.imports.backgroundGroup;
+const HeaderBox = Me.imports.headerBox;
 
 
-// Class for Popup menu item with Entry for the hotkey
-const PopupEntryMenuItem = GObject.registerClass(
-    class PopupEntryMenuItem extends PopupMenu.PopupBaseMenuItem {
-        _init(text, params) {
-            super._init(params);
-
-            this._settings = ExtensionUtils.getSettings();
-
-            this._label = new St.Label({
-                text: text,
-                y_align: Clutter.ActorAlign.CENTER,
-                x_align: Clutter.ActorAlign.START,
-                x_expand: true,
-            });
-            this.add_child(this._label);
-
-            this._entry = new St.Entry({
-                can_focus: true,
-                track_hover: true,
-                reactive: true,
-                x_align: Clutter.ActorAlign.END,
-                y_align: Clutter.ActorAlign.CENTER,
-                x_expand: true,
-                y_expand: false,
-                width: 100,
-                height: 30,
-                text: this._settings.get_strv('hotkey')[0],
-                hint_text: 'Enter hotkey',
-            });
-            this.add_child(this._entry);
-        }
-
-        activate(event) {
-            this._entry.grab_key_focus();
-            this._entry.clutter_text.connect('text-changed', () => {
-                this._settings.set_strv('hotkey', [this._entry.text]);
-            });
-        }
-
-        set entryText(text) {
-            this._entry.text = text;
-        }
-
-        get entryText() {
-            return this._entry.text;
-        }
-    }
-);
-
-// MAINBOX_STYLE = {
-//     "Color Gradient": {"Dark": ["mainbox-color-gradient", "mainbox-gradient-dark"],
-//                        "Light": ["mainbox-color-gradient", "mainbox-gradient-light"]},
-//     "Grey Gradient": {"Dark": ["mainbox-grey-gradient","mainbox-gradient-dark"],
-//                       "Light": ["mainbox-grey-gradient","mainbox-gradient-light"]},
-//     "Background Crop": {"Dark": ["mainbox-bg-crop", "mainbox-bg-dark"],
-//                         "Light": ["mainbox-bg-crop", "mainbox-bg-light"]},
-//     "Background Blur": {"Dark": ["mainbox-bg-blur","mainbox-bg-dark"],
-//                         "Light": ["mainbox-bg-blur","mainbox-bg-light"]},
-//     "Dynamic Blur": {"Dark": ["mainbox-bg-blur","mainbox-bg-dark"],
-//                      "Light": ["mainbox-bg-blur","mainbox-bg-light"]},
-// }
-
-MAINBOX_STYLE = {
-    "Color Gradient": "mainbox-color-gradient",
-    "Grey Gradient": "mainbox-grey-gradient",
-    "Background Crop": "mainbox-bg-crop", 
-    "Background Blur": "mainbox-bg-blur",
-    "Dynamic Blur": "mainbox-dynamic-blur",
-}
-
-MAINBOX_MODE = {
-    "Gradient_Dark": "mainbox-gradient-dark",
-    "Gradient_Light": "mainbox-gradient-light",
-    "Crop_Dark": "mainbox-crop-dark",
-    "Crop_Light": "mainbox-crop-light",
-    "Blur_Dark": "mainbox-blur-dark",
-    "Blur_Light": "mainbox-blur-light",
-}
 
 // Class for the overlay window
 var GlassGrid = GObject.registerClass(
@@ -135,19 +58,17 @@ var GlassGrid = GObject.registerClass(
             this.grid = null;
             this.enablingDisablingAll = false;
             this.menuOpen = false;
-            this.dialogOpen = false;
-            this.disablingSelf = false;
+            this.menuOpening = false;
+            // this.disablingSelf = false;
 
             global.focus_manager.add_group(this);
 
-
-
-            
+          
             // this.add_constraint(new Layout.MonitorConstraint({primary: true}));
-            this._backgroundGroup = new Clutter.Actor({z_position: -3});
-            this.insert_child_below(this._backgroundGroup, null);
+            this.backgroundGroup = new BackgroundGroup.BackgroundGroup(this); //Clutter.Actor();  // {z_position: -3}
+            this.insert_child_below(this.backgroundGroup, null);
 
-            this._bgManagers = [];
+            // this._bgManagers = [];
 
             // const themeContext = St.ThemeContext.get_for_stage(global.stage);
             // themeContext.connectObject('notify::scale-factor',
@@ -161,24 +82,64 @@ var GlassGrid = GObject.registerClass(
                 x_align: Clutter.ActorAlign.CENTER,
                 y_align: Clutter.ActorAlign.CENTER,
                 // x_expand: true,
-                y_expand:true,
+                // y_expand:true,
                 // style_class: 'unlock-dialog'
             })
             // this.mainbox.add_constraint(new Layout.MonitorConstraint({primary: true}));
-            // MAINBOX_STYLE[this._settings.get_string('bg-theme')][this._settings.get_string('theme-mode')]
-            //     .forEach(styClass => 
-            // this.mainbox.add_style_class_name(styClass));
+
             this.add_child(this.mainbox);
+
+            // Initialize position / size params
+            this._setGlassGridParams();
+
+            // Create header box with buttons
+            this.headerBox = new HeaderBox.HeaderBox(this);
+            this.mainbox.add_child(this.headerBox);
+            
+            // Create Scroll Grid
+            this._createScrollView();
+            this._createGridBox();
+ 
+        }
+
+        _setGlassGridParams() {
+
+            const pMonitor = Main.layoutManager.primaryMonitor;  // pMonitor = Main.layoutManager.monitors[0];
+            const SCREEN_WIDTH = pMonitor.width;
+            const SCREEN_HEIGHT = pMonitor.height;
+            const WINDOW_WIDTH = SCREEN_HEIGHT*1.38; //1.35
+            const WINDOW_HEIGHT = SCREEN_HEIGHT*0.76; //0.75
+            const GRID_ROWS = 4;
+            const GRID_COLS = 5; 
+            const pageSize = GRID_COLS*2; 
+    
+            this.x = pMonitor.x + SCREEN_WIDTH/2 - WINDOW_WIDTH/2;  log('pmontor x y '+pMonitor.x+' '+pMonitor.y);
+            this.y = pMonitor.y + SCREEN_HEIGHT/2 - WINDOW_HEIGHT/2; log('grid x y '+this.x+' '+this.y);
+            this.width = WINDOW_WIDTH;
+            this.height = WINDOW_HEIGHT;
+            // this.mainbox.x = pMonitor.x + SCREEN_WIDTH/2 - WINDOW_WIDTH/2;
+            // this.mainbox.y = pMonitor.y + SCREEN_HEIGHT/2 - WINDOW_HEIGHT/2;
+            this.mainbox.width = WINDOW_WIDTH;
+            this.mainbox.height = WINDOW_HEIGHT;
+    
+            this.gridCols = GRID_COLS;
+            this.gridRows = GRID_ROWS;
+            this.pageSize = pageSize; 
+            this.extBoxWidth = (WINDOW_WIDTH - 175) / GRID_COLS; //subtract margin/spacing 170
+            this.extBoxHeight = this.extBoxWidth / 1.75; 
+    
+            // this.extGrid.effect = new Shell.BlurEffect({name: 'blur'}); log('effect '+this.extGrid.effect);
+            this.backgroundGroup._updateBackgrounds();
             
         }
 
         _focusActorChanged() {
             let focusedActor = global.stage.get_key_focus();
 
-            if (this.enablingDisablingAll || this.dialogOpen || this.disablingSelf)
+            if (this.enablingDisablingAll || this.headerBox.dialogOpen)
                 return;
 
-            if ((!focusedActor && !this.menuOpen) || !(this.contains(focusedActor) || this.settingsBtn.menu.box.contains(focusedActor))) {
+            if ((!focusedActor && !this.menuOpen) || !(this.contains(focusedActor) || this.headerBox.settingsBtn.menu.box.contains(focusedActor))) {
                 if (this.mainbox.visible) 
                     this.hide();
             }
@@ -187,269 +148,6 @@ var GlassGrid = GObject.registerClass(
             // }
         }
 
-        _setBgTheme(item) {
-            log('Active theme ' + item.label.text);
-            // let activeTheme = this._settings.get_string("bg-theme");
-            this.bgItems.forEach(bgItem => {
-                (item == bgItem)? bgItem.setOrnament(PopupMenu.Ornament.CHECK): bgItem.setOrnament(PopupMenu.Ornament.NONE);
-            });
-            this._settings.set_string("bg-theme", item.label.text);
-
-            this._updateBackgrounds();
-        }
-
-        // Create header box with buttons
-        _createHeaderBox() {
-
-            let headerBox = new St.BoxLayout({
-                style_class: 'extension-window-header',
-                x_align: Clutter.ActorAlign.CENTER,
-                x_expand: true,
-                reactive: true,
-                track_hover: true,
-            });
-            this.mainbox.add_child(headerBox);
-
-            // ⓘ About
-            let aboutLabel = new St.Label({
-                text: 'ⓘ',
-                style_class: 'extension-about-label',
-                x_align: Clutter.ActorAlign.CENTER,
-                y_align: Clutter.ActorAlign.CENTER,
-            });
-            let aboutBtn = new St.Button({
-                child: aboutLabel,
-                style_class: 'extension-about-button',
-                x_align: Clutter.ActorAlign.START,
-                y_align: Clutter.ActorAlign.CENTER,
-                track_hover: true,
-                reactive: true,
-                height: this.height*0.052, //40,
-                width: this.height*0.052, //80,
-            });
-            aboutBtn.connect('clicked', () => {
-                this.dialogOpen = true;
-                this.aboutDialog.open(global.get_current_time(), true);
-            });          
-            headerBox.add_child(aboutBtn);
-
-            //  ẹg̣ọ
-            let egoLabel = new St.Label({
-                text: 'ẹg̣ọ',
-                style_class: 'extension-ego-label',
-                x_align: Clutter.ActorAlign.CENTER,
-                y_align: Clutter.ActorAlign.CENTER,
-            });
-            let egoBtn = new St.Button({
-                child: egoLabel,
-                style_class: 'extension-ego-button',
-                x_align: Clutter.ActorAlign.START,
-                y_align: Clutter.ActorAlign.CENTER,
-                track_hover: true,
-                reactive: true,
-                height: this.height*0.052, //40,
-                width: this.height*0.065, //80,
-            });
-            egoBtn.connect('clicked', () => {
-                this.hide();
-                Util.spawn(['gio', 'open', 'https://extensions.gnome.org/']);
-            });          
-            headerBox.add_child(egoBtn);
-
-            ////// Settings button
-            this.menuOpen = false;
-            let settingsIcon = new St.Icon({
-                icon_name: 'preferences-system-symbolic',
-                icon_size: this.height*0.029, //40,
-            });
-            this.settingsBtn = new PanelMenu.Button(0.0, 'extgridSettingsBtn', false);
-            this.settingsBtn.can_focus = false;
-            this.settingsBtn.add_style_class_name('settings-button');
-            this.settingsBtn.style = ` margin-right: ${this.height*0.40}px;`;
-            this.settingsBtn.add_child(settingsIcon);
-            this.settingsBtn.menu.sensitive = true;
-            this.settingsBtn.menu.connect('open-state-changed', (actor, open) => {
-                if (open) {
-                    this.menuOpen = true;
-                    this.menuOpening = true;
-                    global.stage.set_key_focus(this.settingsBtn.menu.firstMenuItem);
-                    setTimeout(() => {this.menuOpening = false;}, 200);
-                }
-                else {
-                    global.stage.set_key_focus(this._nameBtn1);
-                    this.menuOpen = false;
-                }
-                return Clutter.EVENT_PROPAGATE;
-            });
-
-            let themeMenuItem = new PopupMenu.PopupSubMenuMenuItem('Background Theme', false, {can_focus: true});
-            let themeMenuSection = new PopupMenu.PopupMenuSection({can_focus: true, isOpen: false});
-            themeMenuItem.menu.addMenuItem(themeMenuSection);
-            let activeTheme = this._settings.get_string("bg-theme");
-            this.bgItems = [];
-            Object.keys(MAINBOX_STYLE).forEach(theme => {
-                let bgItem = new PopupMenu.PopupMenuItem(theme, {can_focus: true,});
-                this.bgItems.push(bgItem);
-                (theme == activeTheme)? bgItem.setOrnament(PopupMenu.Ornament.CHECK): bgItem.setOrnament(PopupMenu.Ornament.NONE);
-                bgItem.connect('activate', (item, event) => {
-                    this._setBgTheme(item); 
-                    return Clutter.EVENT_PROPAGATE;
-                });
-                themeMenuSection.addMenuItem(bgItem);
-            });
-            
-            // let themeMenuItem = new PopupMenu.PopupSwitchMenuItem("Dark Mode", this._settings.get_boolean('dark-theme'), { can_focus: false });
-            // themeMenuItem.connect('toggled', (actor, state) => {
-            //     if (state) {
-            //         this.remove_style_class_name('extension-window-color');
-            //         this.add_style_class_name('extension-window-dark');
-            //     }
-            //     else {
-            //         this.remove_style_class_name('extension-window-dark');
-            //         this.add_style_class_name('extension-window-color');
-            //     }
-            //     this._settings.set_boolean('dark-theme', state);
-            // });
-            this.settingsBtn.menu.addMenuItem(themeMenuItem);
-
-            let hotkeyMenuItem = new PopupEntryMenuItem("Hotkey", { can_focus: true });
-            this.settingsBtn.menu.addMenuItem(hotkeyMenuItem);
-
-            let indicatorMenuItem = new PopupMenu.PopupSwitchMenuItem("Panel Indicator", this._settings.get_boolean('show-indicator'), { can_focus: true }); 
-            indicatorMenuItem.connect('toggled', (actor, state) => this._addRemovePanelIndicator(state));
-            indicatorMenuItem._switch.y_align = Clutter.ActorAlign.CENTER;
-            indicatorMenuItem._switch.height = this.height*0.028;
-            indicatorMenuItem._switch.width = this.height*0.052;
-            this.settingsBtn.menu.addMenuItem(indicatorMenuItem);
-
-            // let hotkeyMenuItem = new PopupEntryMenuItem("Hotkey", { can_focus: true });
-            // this.settingsBtn.menu.addMenuItem(hotkeyMenuItem);
-
-            // Panel Menu button (settings button) already has a parent so we need to remove it and add it to the header box
-            let container = this.settingsBtn.container;
-            container.add_style_class_name('settings-button-container');
-            container.show();
-            let parent = container.get_parent();
-            if (parent)
-                parent.remove_actor(container);
-
-            headerBox.add_child(container);
-
-            log('num of menu items '+this.settingsBtn.menu.numMenuItems);
-            // // Dummy button to close the menu when clicked near settings menu button
-            // let menuCloseLabel = new St.Label({
-            //     text: '       ',
-            // });
-
-            // let menuCloseBtn = new St.Button({
-            //     style_class: 'menu-close-button',
-            //     x_align: Clutter.ActorAlign.START,
-            //     y_align: Clutter.ActorAlign.CENTER,
-            //     can_focus: false,
-            //     height: this.height*0.03, //40,
-            //     width: this.height*0.06, //40,
-            //     reactive: true,
-            // });
-            // menuCloseBtn.style = ` margin-right: ${this.height*0.35}px;`;
-            // menuCloseBtn.connect('clicked', () => {
-            //     if (this.menuOpen) {
-            //         this.settingsBtn.menu.close();
-            //     }
-            // });
-            // menuCloseBtn.set_child(menuCloseLabel);
-            // headerBox.add_child(menuCloseBtn);
-
-            ////////////////////////////////
-
-
-            let titleLabel = new St.Label({
-                text: 'Glass Grid ᎒᎒᎒',
-                style_class: 'extension-title-label',
-                x_align: Clutter.ActorAlign.CENTER,
-                y_align: Clutter.ActorAlign.CENTER,
-                width: this.height*0.4, //300,
-                track_hover: true,
-                reactive: true,
-            });
-            titleLabel.style = ` margin-right: ${this.height*0.35}px;`;
-            headerBox.add_child(titleLabel);
-
-            let extAppIcon = new St.Icon({
-                icon_name: 'extensions-symbolic',
-                icon_size: this.height*0.028, //40,
-            });
-            this.extAppButton = new St.Button({
-                child: extAppIcon,
-                style_class: 'ext-app-button',
-                x_align: Clutter.ActorAlign.END,
-                reactive: true,
-            });
-            this.extAppButton.connect('clicked', () => {
-                this.hide();
-                Util.spawn(['gnome-extensions-app']);
-            });
-            headerBox.add_child(this.extAppButton);
-
-            let allExtSwch = new PopupMenu.Switch(this._settings.get_boolean('all-switch-state'));
-            allExtSwch.add_style_class_name('all-state-switch');
-            allExtSwch.track_hover = true;
-            this.allStateBtn = new St.Button({
-                child: allExtSwch,
-                style_class: 'all-state-button',
-                x_align: Clutter.ActorAlign.END,
-                y_align: Clutter.ActorAlign.CENTER,
-                height: this.height*0.045, // 40,
-                // width: 100,
-                reactive: true,
-            });
-            this.allStateBtn.connect('clicked', () => {
-                allExtSwch.toggle();
-                if (allExtSwch.state) {
-                    this._enableAllExtensions();
-                    this._settings.set_boolean('all-switch-state', true);
-                } else {
-                    this._disableAllExtensions();
-                    this._settings.set_boolean('all-switch-state', false);
-                }
-            });
-            headerBox.add_child(this.allStateBtn);
-
-            // 🌑︎ 🌓︎ Theme Mode ✱ ✸
-            let modeLabel = new St.Label({
-                // text: '🌓︎',
-                style_class: 'extension-mode-label',
-                x_align: Clutter.ActorAlign.CENTER,
-                y_align: Clutter.ActorAlign.CENTER,
-            });
-            const mode = this._settings.get_string('theme-mode');
-            if(mode == 'Dark')
-                modeLabel.text = '🌑︎';
-            else
-                modeLabel.text = '🌓︎';
-            let modeBtn = new St.Button({
-                child: modeLabel,
-                style_class: 'extension-mode-button',
-                x_align: Clutter.ActorAlign.END,
-                y_align: Clutter.ActorAlign.CENTER,
-                track_hover: true,
-                reactive: true,
-                height: this.height*0.052, //40,
-                width: this.height*0.052, //80,
-            });
-            modeBtn.connect('clicked', () => {
-                if (modeLabel.text == '🌓︎') {
-                    modeLabel.text = '🌑︎';
-                    this._settings.set_string('theme-mode','Dark');
-                }
-                else {
-                    modeLabel.text = '🌓︎';
-                    this._settings.set_string('theme-mode','Light');
-                }
-                this._updateBackgrounds();
-            });          
-            headerBox.add_child(modeBtn);
-
-        }
 
         // Create ScrollView
         _createScrollView() {
@@ -581,36 +279,6 @@ var GlassGrid = GObject.registerClass(
                 // this._updateBackgroundEffects();
                 this.show();
             }
-        }
-
-        // Add or removes the panel indicator
-        _addRemovePanelIndicator(state) {
-            if (state) {
-                if (this.panelIndicator) {
-                    return;
-                }
-                this.panelIndicator = new PanelMenu.Button(0.0, 'extgridPanelIndicator', true);
-
-                let icon = new St.Icon({
-                    icon_name: 'extensions-symbolic',
-                    style_class: 'system-status-icon'
-                });
-                this.panelIndicator.add_child(icon);
-
-                // Add the panel button to the right of the panel
-                Main.panel.addToStatusArea('extgridPanelIndicator', this.panelIndicator, 0, 'right');
-
-                this.panelIndicatorId = this.panelIndicator.connect('button-press-event', () => this._toggleGlassGridView());
-            }
-            else {
-                if (this.panelIndicator) {
-                    this.panelIndicator.disconnect(this.panelIndicatorId);
-                    this.panelIndicator.destroy();
-                    this.panelIndicator = null;
-                }
-            }
-
-            this._settings.set_boolean('show-indicator', state);
         }
 
         _sortExtList() {
@@ -914,40 +582,6 @@ var GlassGrid = GObject.registerClass(
             }
         }
 
-        _repaintWidget() {
-            if (this.bgEffect){
-                this.bgEffect.queue_repaint();
-            }
-
-            return Clutter.EVENT_PROPAGATE;
-        }
-
-        _connectRepaintWidgets() {
-
-            const repaintEvents = ['enter-event', 'leave-event', 'key-focus-in', 'key-focus-out'];
-            const connectRp = (child) => {
-                repaintEvents.forEach(event => child.connect(event, () => this._repaintWidget));
-            };
-
-            const mainChildren = this.mainbox.get_children();
-            mainChildren.forEach(child => connectRp(child));
-
-            const header = mainChildren[0];
-            const scroll = mainChildren[1];
-            const grid = scroll.get_child();
-
-            header.get_children().forEach(child => connectRp(child));
-            connectRp(grid);
-
-            grid.get_children().forEach(extbox => {
-                connectRp(extbox);
-                const boxChildren = extbox.get_children();
-                boxChildren.forEach(child => connectRp(child));
-                boxChildren[1].get_children().forEach(child => connectRp(child));
-            })
-            
-        }
-
         vfunc_button_press_event(event) {
             if (this.menuOpen && !this.menuOpening){
                 this.settingsBtn.menu.close(true);
@@ -1104,49 +738,6 @@ var GlassGrid = GObject.registerClass(
             }
         }
 
-        _enableAllExtensions() {
-            let enabledExtensions = this._settings.get_strv('enabled-extensions');
-
-            this.enablingDisablingAll = true;
-            for (const uuid of enabledExtensions) { 
-                try {
-                    ExtensionManager.enableExtension(uuid); 
-                }
-                catch (error) {
-                    console.error('Error enabling extension: ' + uuid + ' ' + error);
-                }
-            }
-            
-            this.enablingDisablingAll = false;
-        }
-
-        _disableAllExtensions() {
-            // Does not disable self here so extensions can be enabled again
-
-            const extensionsToDisable = ExtensionManager._extensionOrder.slice();
-
-            this._settings.set_strv('enabled-extensions', extensionsToDisable);
-            this.enablingDisablingAll = true; 
-
-            // Extensions are disabled in the reverse order
-            // from when they were enabled.
-            extensionsToDisable.reverse();
-
-            for (const uuid of extensionsToDisable) {
-                if (uuid != Me.metadata.uuid) {
-                    // log('disabling uuid: ' + uuid);
-                    try {
-                        ExtensionManager.disableExtension(uuid);
-                    }
-                    catch (error) {
-                        console.error('Error disabling extension: ' + uuid + ' ' + error);
-                    }
-                }
-            }
-
-            global.stage.set_key_focus(this._nameBtn1);
-            this.enablingDisablingAll = false; 
-        }
 
         getStyleVariant() {
             const {colorScheme} = St.Settings.get();
@@ -1179,380 +770,23 @@ var GlassGrid = GObject.registerClass(
         
         }
       
-        _createAboutDialog() {
-
-            // Creating a modal dialog
-            this.aboutDialog = new ModalDialog.ModalDialog({
-                destroyOnClose: false,
-                styleClass: 'about-dialog',
-            });
-            this.aboutDialog.x_expand = true;
-
-            let openedId = this.aboutDialog.connect('opened', () => {
-                this.dialogOpen = true;
-                // console.debug('The dialog was opened');
-            });
-            let closedId = this.aboutDialog.connect('closed', () => {
-                // console.debug('The dialog was dismissed');
-                global.stage.set_key_focus(this._nameBtn1);
-                this.dialogOpen = false;
-            });
-
-            this.aboutDialog.connect('destroy', () => {
-                // console.debug('The dialog was destroyed, so reset everything');
-
-                if (closedId) {
-                    this.aboutDialog.disconnect(closedId);
-                    closedId = null;
-                }
-
-                if (openedId) {
-                    this.aboutDialog.disconnect(openedId);
-                    openedId = null;
-                }
-
-                this.aboutDialog = null;
-            });
-
-            const messageLayout = new Dialog.MessageDialogContent({
-                title: 'Glass Grid',
-                description: `Overlay glass panel for quick view of installed extensions.
-                Version: ${Me.metadata.version}  |  © neuromorph`,
-            });
-            this.aboutDialog.contentLayout.add_child(messageLayout);
-
-            // Adding a widget to the content area
-            const listLayout = new Dialog.ListSection({
-                title: `Tool Guide`,
-            });
-            listLayout.x_expand = true;
-            this.aboutDialog.contentLayout.add_child(listLayout);
-
-            const ego = new Dialog.ListSectionItem({
-                description: 'ẹg̣ọ            Extensions web: extensions.gnome.org',
-            });
-            listLayout.list.add_child(ego);
-
-            const setting = new Dialog.ListSectionItem({
-                icon_actor: new St.Icon({icon_name: 'preferences-system-symbolic', 
-                                         icon_size: 12}),
-                description: `               Top: Open settings menu
-                Grid: Open extension preferences `,
-            });
-            listLayout.list.add_child(setting);
-
-            const extApp = new Dialog.ListSectionItem({
-                icon_actor: new St.Icon({icon_name: 'extensions-symbolic', 
-                                         icon_size: 12}),
-                description: '               Open Extensions app',
-            });
-            listLayout.list.add_child(extApp);
-
-            const switchIconPath = Me.path + '/media/toggle-on.svg';
-            const switchIcon = Gio.FileIcon.new(Gio.File.new_for_path(switchIconPath));
-            const allSwitch = new Dialog.ListSectionItem({
-                icon_actor: new St.Icon({gicon: switchIcon, 
-                                         width: 14,
-                                         height: 2, 
-                                         }),
-                description: `              Top: Enable/Disable all extensions except this
-                Grid: Enable/Disable selected extension`,
-            });
-            listLayout.list.add_child(allSwitch);
-
-            const styleReload = new Dialog.ListSectionItem({
-                description: '↺                Reload stylesheet for the extension',
-            });
-            listLayout.list.add_child(styleReload);
-
-
-            // Adding buttons
-            this.aboutDialog.setButtons([
-                {
-                    label: 'OK',
-                    action: () => this.aboutDialog.close(),
-                },
-            ]);
-
-        }
-
-        _createBackground(mode) {
-            
-            let pMonitor = Main.layoutManager.primaryMonitor;
-            
-            let widget = new St.Widget({
-                style_class: 'bg-widget',
-                x_align: Clutter.ActorAlign.CENTER,
-                y_align: Clutter.ActorAlign.CENTER,
-                x_expand: false,
-                y_expand: false,
-                clip_to_allocation: true,
-            });
-            
-            if (mode == 'crop' || mode == 'blur') {
-
-                if (mode == 'crop') {
-                    widget.x = 0;
-                    widget.y = 0;
-                    widget.width = this.width ;
-                    widget.height = this.height ;
-                    widget.opacity = 250;
-                }
-                else{ // mode == 'blur'
-                    widget.x = 2;
-                    widget.y = 3;
-                    widget.width = this.width - 4;
-                    widget.height = this.height - 6;
-                    widget.opacity = 250;
-                    widget.effect = new Shell.BlurEffect({name: 'extgrid-blur'});
-                }
-
-                let monitorIndex = Main.layoutManager.primaryIndex;
-                let bgManager = new Background.BackgroundManager({
-                    container: widget,
-                    monitorIndex,
-                    controlPosition: false,
-                });
-                bgManager.connect('changed',this._updateBackgrounds.bind(this));
-
-                // log('trans x , y: ' + pMonitor.x + ' '+ pMonitor.y+' '+ bgManager.backgroundActor.translation_x+' '+bgManager.backgroundActor.translation_y);
-
-                bgManager.backgroundActor.set_position(pMonitor.x-this.x, pMonitor.y-this.y);
-
-                this._bgManagers.push(bgManager);
-            }
-            else if (mode == 'dynamic') {
-                widget.x = 5;
-                widget.y = 4;
-                widget.width = this.width - 10;
-                widget.height = this.height - 8;
-                widget.opacity = 255;
-                widget.effect = new Shell.BlurEffect({name: 'extgrid-dynamic'});
-            }
-    
-
-            this._backgroundGroup.add_child(widget);
-
-        }
-    
-        _updateBackgroundEffects(mode) {
-            const themeContext = St.ThemeContext.get_for_stage(global.stage);
-    
-            for (const widget of this._backgroundGroup) {
-                const effect = widget.get_effect('extgrid-'+mode);
-    
-                if (effect) {
-                    effect.set({
-                        brightness: BLUR_BRIGHTNESS,
-                        sigma: BLUR_SIGMA * themeContext.scale_factor,
-                        mode: (mode == 'blur')? Shell.BlurMode.ACTOR: Shell.BlurMode.BACKGROUND, 
-                    });
-
-                    // this.bgEffect = effect;
-                }
-
-            }
-        }
-    
-        _updateBackgrounds() {
-            for (let i = 0; i < this._bgManagers.length; i++)
-                this._bgManagers[i].destroy();
-    
-            this._bgManagers = [];
-            this._backgroundGroup.get_children().forEach(child => {
-                child.remove_effect_by_name('extgrid-blur');
-                child.remove_effect_by_name('extgrid-dynamic');
-            });
-            this._backgroundGroup.destroy_all_children();
-            // this.bgEffect = null;
-    
-            const activeTheme = this._settings.get_string('bg-theme');
-            const activeMode = this._settings.get_string('theme-mode');
-
-            // Object.keys(MAINBOX_STYLE).forEach(theme => {
-            //     if (theme == activeTheme) {
-            //         Object.keys(MAINBOX_STYLE[theme]).forEach(mode => {
-            //             if (mode == themeMode) 
-            //                 MAINBOX_STYLE[theme][mode].forEach(styClass => {this.mainbox.add_style_class_name(styClass); log('add sty class: '+ styClass);});
-            //             else
-            //                 MAINBOX_STYLE[theme][mode].forEach(styClass => {this.mainbox.remove_style_class_name(styClass); log('remove sty class: '+ styClass);});
-            //         });
-            //     }
-            //     else {
-            //         Object.keys(MAINBOX_STYLE[theme]).forEach(mode => {
-            //             MAINBOX_STYLE[theme][mode].forEach(styClass => {this.mainbox.remove_style_class_name(styClass); log('remove sty class: '+ styClass);});
-            //         });
-            //     }
-            // });
-
-            Object.keys(MAINBOX_STYLE).forEach(theme => {
-                this.mainbox.remove_style_class_name(MAINBOX_STYLE[theme]); 
-                // log('remove sty class: '+ MAINBOX_STYLE[theme]);
-                if (theme == activeTheme) {
-                    this.mainbox.add_style_class_name(MAINBOX_STYLE[theme]); 
-                    // log('add sty class: '+ MAINBOX_STYLE[theme]);
-                }
-            });
-            Object.keys(MAINBOX_MODE).forEach(modeKey => {
-                const [themeId, mode] = modeKey.split('_');
-                const activeThemeId = activeTheme.split(' ')[1];
-                // const mode = modeKey.split('_')[1];
-                this.mainbox.remove_style_class_name(MAINBOX_MODE[modeKey]); 
-                // log('remove sty class: '+ MAINBOX_MODE[modeKey]);
-                if (themeId == activeThemeId && mode == activeMode) {
-                    this.mainbox.add_style_class_name(MAINBOX_MODE[modeKey]); 
-                    // log('add sty class: '+ MAINBOX_MODE[modeKey]);
-                }
-            });
-
-
-            if (activeTheme == "Dynamic Blur") {
-                Meta.add_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
-            }
-            else {
-                Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
-            }
-
-            switch (activeTheme) {
-                case "Color Gradient":
-                    log('color');
-                    // this.mainbox.remove_style_class_name('mainbox-dark-gradient');
-                    // this.mainbox.remove_style_class_name('mainbox-bg-crop');
-                    // this.mainbox.remove_style_class_name('mainbox-bg-blur');
-                    // this.mainbox.add_style_class_name('mainbox-color-gradient');
-                    // Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
-                    break;
-
-                case "Dark Gradient":
-                    log('dark');
-                    // this.mainbox.remove_style_class_name('mainbox-color-gradient');
-                    // this.mainbox.remove_style_class_name('mainbox-bg-crop');
-                    // this.mainbox.remove_style_class_name('mainbox-bg-blur');
-                    // this.mainbox.add_style_class_name('mainbox-dark-gradient');
-                    // Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
-                    break;
-
-                case "Background Crop":
-                    log('crop');
-                    // this.mainbox.remove_style_class_name('mainbox-color-gradient');
-                    // this.mainbox.remove_style_class_name('mainbox-dark-gradient');
-                    // this.mainbox.remove_style_class_name('mainbox-bg-blur');
-                    // this.mainbox.add_style_class_name('mainbox-bg-crop');
-                    this._createBackground('crop');
-                    this._updateBorderRadius();
-                    this._updateRoundedClipBounds();
-                    // Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
-                    break;
-
-                case "Background Blur":
-                    log('bg blur');
-                //     this.mainbox.remove_style_class_name('mainbox-color-gradient');
-                //     this.mainbox.remove_style_class_name('mainbox-dark-gradient');
-                //     this.mainbox.remove_style_class_name('mainbox-bg-crop');
-                //     this.mainbox.add_style_class_name('mainbox-bg-blur');
-                    this._createBackground('blur');
-                    this._updateBackgroundEffects('blur');
-                    // Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
-                    break;
-
-                case "Dynamic Blur":
-                    log('dyn blur');
-                    // this.mainbox.remove_style_class_name('mainbox-color-gradient');
-                    // this.mainbox.remove_style_class_name('mainbox-dark-gradient');
-                    // this.mainbox.remove_style_class_name('mainbox-bg-crop');
-                    // this.mainbox.add_style_class_name('mainbox-bg-blur');
-                    this._createBackground('dynamic');
-                    this._updateBackgroundEffects('dynamic');
-                    // Meta.add_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
-                    break;
-
-                default:
-                    break;
-            }
-        }
         
-        _updateBorderRadius() {
-            const {scaleFactor} = St.ThemeContext.get_for_stage(global.stage); log('scale factor: '+ scaleFactor);
-            const cornerRadius = scaleFactor * BACKGROUND_CORNER_RADIUS_PIXELS; log('corner radis '+cornerRadius);  
-            
-            const backgroundContent = this._bgManagers[0].backgroundActor.content;
-            backgroundContent.rounded_clip_radius = Util.lerp(0, cornerRadius, 1.0);
-
-            log('rounded clip radis '+backgroundContent.rounded_clip_radius);
-        }
-
-        _updateRoundedClipBounds() {
-            const pMonitor = Main.layoutManager.primaryMonitor;
-    
-            const rect = new Graphene.Rect();
-            rect.origin.x = this.x - pMonitor.x;
-            rect.origin.y = this.y - pMonitor.y;
-            rect.size.width = this.width  ;
-            rect.size.height = this.height ;
-            log('graphene x y w h '+rect.origin.x+' '+rect.origin.y+' '+rect.size.width+' '+rect.size.height);
-            this._bgManagers[0].backgroundActor.content.set_rounded_clip_bounds(rect);
-        }
     }
 );
 
-const BLUR_BRIGHTNESS = 0.75; //0.65
-const BLUR_SIGMA = 45; //45
-const BACKGROUND_CORNER_RADIUS_PIXELS = 15;
 
 
 class GlassGridExtension {
 
-    setGlassGridParams() {
 
-        const pMonitor = Main.layoutManager.primaryMonitor;  // pMonitor = Main.layoutManager.monitors[0];
-        const SCREEN_WIDTH = pMonitor.width;
-        const SCREEN_HEIGHT = pMonitor.height;
-        const WINDOW_WIDTH = SCREEN_HEIGHT*1.38; //1.35
-        const WINDOW_HEIGHT = SCREEN_HEIGHT*0.76; //0.75
-        const GRID_ROWS = 4;
-        const GRID_COLS = 5; 
-        const pageSize = GRID_COLS*2; 
-
-        this.extGrid.x = pMonitor.x + SCREEN_WIDTH/2 - WINDOW_WIDTH/2;  log('pmontor x y '+pMonitor.x+' '+pMonitor.y);
-        this.extGrid.y = pMonitor.y + SCREEN_HEIGHT/2 - WINDOW_HEIGHT/2; log('grid x y '+this.extGrid.x+' '+this.extGrid.y);
-        this.extGrid.width = WINDOW_WIDTH;
-        this.extGrid.height = WINDOW_HEIGHT;
-        // this.extGrid.mainbox.x = pMonitor.x + SCREEN_WIDTH/2 - WINDOW_WIDTH/2;
-        // this.extGrid.mainbox.y = pMonitor.y + SCREEN_HEIGHT/2 - WINDOW_HEIGHT/2;
-        this.extGrid.mainbox.width = WINDOW_WIDTH;
-        this.extGrid.mainbox.height = WINDOW_HEIGHT;
-
-        this.extGrid.gridCols = GRID_COLS;
-        this.extGrid.gridRows = GRID_ROWS;
-        this.extGrid.pageSize = pageSize; 
-        this.extGrid.extBoxWidth = (WINDOW_WIDTH - 175) / GRID_COLS; //subtract margin/spacing 170
-        this.extGrid.extBoxHeight = this.extGrid.extBoxWidth / 1.75; 
-
-        // this.extGrid.effect = new Shell.BlurEffect({name: 'blur'}); log('effect '+this.extGrid.effect);
-        this.extGrid._updateBackgrounds();
-        
-    }
 
     enable() {
 
+        // Create new Glass Grid
         this.extGrid = new GlassGrid();
-        this.setGlassGridParams();
-
-
-        // Create header box with buttons
-        this.extGrid._createHeaderBox();
-
-        // Create Scroll Grid
-        this.extGrid._createScrollView();
-        this.extGrid._createGridBox();
-        // this.setGlassGridParams();
-        // this.extGrid.scroll.add_actor(this.extGrid.gridActor);
-
-        // Create about dialog
-        this.extGrid._createAboutDialog();
 
         // Panel indicator initialize as per settings
-        this.extGrid._addRemovePanelIndicator(this.extGrid._settings.get_boolean('show-indicator'));
+        this.extGrid.headerBox._addRemovePanelIndicator(this.extGrid._settings.get_boolean('show-indicator'));
     
         // Add the extGrid to the ui group
         Main.layoutManager.addChrome(this.extGrid);
@@ -1569,7 +803,8 @@ class GlassGridExtension {
             this.extGrid._toggleGlassGridView.bind(this.extGrid)
         );
     
-        this._monitorsChangedId = Main.layoutManager.connect('monitors-changed', () => this.setGlassGridParams());
+        // Connect monitors-changed with setting Glass Grid position/size params
+        this._monitorsChangedId = Main.layoutManager.connect('monitors-changed', () => this.extGrid.setGlassGridParams());
     }
     
     disable() {
@@ -1584,13 +819,15 @@ class GlassGridExtension {
         ExtensionManager.disconnectObject(this);
         Main.wm.removeKeybinding('hotkey');
 
-        if (this.extGrid.aboutDialog)
-            this.extGrid.aboutDialog.destroy();
+        const headerBox = this.extGrid.headerBox;
+
+        if (headerBox.aboutDialog)
+            headerBox.aboutDialog.destroy();
         
-        if (this.extGrid.panelIndicator) {
-            this.extGrid.panelIndicator.disconnect(this.extGrid.panelIndicatorId);
-            this.extGrid.panelIndicator.destroy();
-            this.extGrid.panelIndicator = null;
+        if (headerBox.panelIndicator) {
+            headerBox.panelIndicator.disconnect(headerBox.panelIndicatorId);
+            headerBox.panelIndicator.destroy();
+            headerBox.panelIndicator = null;
         }
 
         this.extGrid._destroyGridChildren();

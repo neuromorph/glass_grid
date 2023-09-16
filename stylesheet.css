@@ -75,10 +75,10 @@
 }
 
 .extension-window-header {
-  /* border-color: #7e7c68; */
-  /* border-width: 2px;  */
+  border-color: rgba(255, 255, 255, 0.45);
+  border-width: 1px; 
   border-radius: 25px;
-  background-color: rgba(50, 50, 50, 0.25);
+  background-color: rgba(255, 255, 255, 0.18);
   padding: 8px 12px 8px 12px;
 }
 
@@ -115,9 +115,9 @@
 }
 
 .extension-title-label {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 525;
-  font-size: 27px;
+  font-size: 24px;
   font-family: serif;
   padding: 0px 0px;
   letter-spacing: 5px;
@@ -218,7 +218,7 @@
 
 .extension-name-button {
   border-radius: 15px; 
-  border-width: 2px;
+  border-width: 1px;
   border-color: rgba(255, 255, 255, 0.6);
   background-image: url(media/label.svg);
   background-repeat: no-repeat;
