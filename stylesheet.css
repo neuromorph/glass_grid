@@ -3,35 +3,83 @@
   Note: Gnome Shell uses its own CSS parser, many browser CSS properties are not supported.
 */
 
+.extension-grid-wrapper {
+  /* background-image: url(media/darkmode.svg);
+  background-repeat: no-repeat;
+  background-size: cover; */
+  /* background-color: rgba(255, 255, 255, 0.6);  */
+  /* border-color: rgba(255, 255, 255, 0.6);
+  border-width: 6px;
+  border-radius: 10px !important; */
+  /* overflow: clip; */
+}
 
-.extension-window-color {
+.mainbox-color-gradient {
   
   background-image: url(media/tablet.svg);
   background-repeat: no-repeat;
   background-size: cover;
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
   border-width: 3px;
-  border-radius: 30px;
+  border-radius: 15px;
   padding: 30px 30px;
-  /* -st-background-image-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.5); */
+  
 }
 
-.extension-window-dark {
+.mainbox-grey-gradient {
   background-image: url(media/darkmode.svg);
   background-repeat: no-repeat;
   background-size: cover;
   border-color: rgba(255, 255, 255, 0.5); 
-  border-width: 2px;
-  border-radius: 30px;
+  border-width: 3px;
+  border-radius: 15px;
   padding: 30px 30px;
   /* -st-background-image-shadow: 0px 0px 4px 0px rgba(50, 50, 50, 0.3); */
 }
 
+.mainbox-bg-crop {
+  border-color: rgba(255, 255, 255, 0.5); 
+  border-width: 3px;
+  border-radius: 15px;
+  padding: 30px 30px;
+  /* background-color: rgba(60, 60, 60, 0.3); */
+  /* -st-background-image-shadow: 0px 0px 4px 0px rgba(50, 50, 50, 0.3); */
+}
+
+.mainbox-bg-blur, .mainbox-dynamic-blur {
+  border-color: rgba(225, 225, 225, 0.95); 
+  border-width:4px;
+  border-radius: 12px;
+  padding: 30px 30px;
+  /* background-color: rgba(255, 255, 255, 0.5); */
+  /* -st-background-image-shadow: 0px 0px 4px 0px rgba(50, 50, 50, 0.3); */
+}
+
+.mainbox-gradient-dark {
+  /* -st-background-image-shadow: 0px 0px 4px 4px rgba(0, 0, 0, 0.15); */
+  background-color: rgba(50, 50, 50, 0.4);
+}
+.mainbox-gradient-light {
+  /* -st-background-image-shadow: 0px 5px 0px rgba(255, 255, 255, 0.15); */
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.mainbox-crop-dark, .mainbox-blur-dark {
+  box-shadow: 0px 4px 30px 0px rgba(0,0,0,0.3);
+}
+.mainbox-crop-light, .mainbox-blur-light {
+  box-shadow: 0px 4px 20px 0px rgba(225,225,225,0.15);
+}
+
+.bg-widget {
+  /* box-shadow: 0px 0px 4px 2px rgba(0,0,0,0.3); */
+}
+
 .extension-window-header {
-  /* border-color: #7e7c68;
-   border-width: 2px; 
-   border-radius: 15px; */
-  padding: 5px 10px 5px 0px;
+  /* border-color: #7e7c68; */
+  /* border-width: 2px;  */
+  border-radius: 25px;
+  background-color: rgba(50, 50, 50, 0.25);
+  padding: 8px 12px 8px 12px;
 }
 
 .extension-about-label {
@@ -47,7 +95,7 @@
   /* border-color: #7e7c68; */
   padding: 0px 2px 2px 2px;
   color: rgba(255, 255, 255, 0.9);
-  margin-right: 6px;
+  margin-right: 8px;
 }
 
 .extension-ego-label {
@@ -67,13 +115,13 @@
 }
 
 .extension-title-label {
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 700;
-  font-size: 30px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 525;
+  font-size: 27px;
   font-family: serif;
   padding: 0px 0px;
-  letter-spacing: 4px;
-  text-shadow: 0px 1px 0px 0px rgba(0, 0, 0, 0.1);
+  letter-spacing: 5px;
+  text-shadow: 0px 1px 0px 0px rgba(50, 50, 50, 0.1);
 }
 .extension-title-label:hover {
   color: rgba(255, 255, 255, 1);
@@ -108,8 +156,27 @@
   /* border-color: #7e7c68; */
   padding: 2px 3px !important;
   color: rgba(255, 255, 255, 0.9);
+  margin-left: 4px;
 }
 
+.extension-mode-label {
+  font-weight: 800;
+  font-size: 21px;
+  font-family: 'Open Sans', sans-serif;
+  padding: 0px 0px 0px 0px;
+}
+
+.extension-mode-button {
+  border-radius: 10px; 
+  border-width: 2px;
+  /* border-color: #7e7c68; */
+  padding: 0px 2px 2px 2px;
+  color: rgba(255, 255, 255, 0.9);
+  /* margin-right: 6px; */
+  margin-left: 6px;
+}
+
+.extension-mode-button:hover, .extension-mode-button:focus,
 .extension-about-button:hover, .extension-about-button:focus,
 .extension-ego-button:hover, .extension-ego-button:focus,
 .ext-app-button:hover, .ext-app-button:focus, 
@@ -127,6 +194,12 @@
   border-radius: 10px; 
   /* border-width: 2px;
   border-color: #7e7c68; */
+  /* padding: 2px 0px 2px 0px; */
+  background-color: transparent;
+}
+.extension-box:hover, .extension-box:focus {
+  padding: 0px 0px 0px 0px;
+  transform: scale(1.2);
 }
 
 .extension-button-box {
@@ -138,7 +211,7 @@
 .extension-name-button:hover, .extension-name-button:focus
  {
   border-color: rgba(255, 255, 255, 0.9);
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.6);
   font-weight: normal;
   color: rgba(30, 30, 30, 1.0);
 }
@@ -146,7 +219,7 @@
 .extension-name-button {
   border-radius: 15px; 
   border-width: 2px;
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.6);
   background-image: url(media/label.svg);
   background-repeat: no-repeat;
   background-size: cover;
@@ -264,7 +337,14 @@
 }
 
 .extension-window-scroll {
-  margin: 2px 30px 2px 30px;
+  margin: 2px 30px 0px 30px;
+  /* padding-bottom: 25px; */
+  /* border-width: 1px;
+  border-color: black;  */
+}
+
+.grid-viewport {
+  padding: 5px 4px 10px 10px;
 }
 
 
