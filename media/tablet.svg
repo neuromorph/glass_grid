@@ -2,14 +2,12 @@
   <!-- Background Gradient -->
   <defs>
     <linearGradient id="glass-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <!-- Add your gradient stops here ff73b3  d681e5 7cbee8  44e7d6  ffb36b -->
       <stop offset="0%" style="stop-color:#ff73b3;stop-opacity:1" />
       <stop offset="25%" style="stop-color:#d681e5;stop-opacity:1" />
       <stop offset="50%" style="stop-color:#7cbee8;stop-opacity:1" />
       <stop offset="75%" style="stop-color:#22d3c2;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#f8b169;stop-opacity:1" />
     </linearGradient>
-
 
     <radialGradient id="SvgjsLinearGradient1000">
         <stop stop-color="hsl(190, 70%, 40%)" offset="0"></stop>
@@ -28,25 +26,6 @@
         <stop stop-color="hsl(299, 72%, 80%)" offset="1"></stop>
     </radialGradient>
 
-    <!-- <filter id='shadow' color-interpolation-filters="sRGB">
-      <feComponentTransfer in="SourceGraphic">
-        <feFuncR type="discrete" tableValues=".3"/>
-        <feFuncG type="discrete" tableValues=".3"/>
-        <feFuncB type="discrete" tableValues=".3"/>
-      </feComponentTransfer>
-      <feGaussianBlur stdDeviation="20"/>
-      <feOffset dx="0" dy="0" result="shadow"/>
-      <feComposite in="SourceGraphic" in2="shadow" operator="over"/>
-    </filter> -->
-
-    <!-- <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-	    <feDropShadow stdDeviation="8 8" in="SourceGraphic" dx="0" dy="0" flood-color="#77767b" flood-opacity="0.9" x="0%" y="0%" width="100%" height="100%" result="dropShadow"/>
-    </filter> -->
-
-    <!-- <filter id='shadow' color-interpolation-filters="sRGB">
-    <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.5"/>
-  </filter> -->
-
     <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="shadow">
       <feOffset dx="1" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/>
       <feGaussianBlur stdDeviation="20" in="shadowOffsetOuter1" result="shadowBlurOuter1"/>
@@ -56,10 +35,7 @@
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-    <!-- <filter id="bbblurry-filter" x="-200%" y="-200%" width="200%" height="200%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-	    <feGaussianBlur stdDeviation="20" x="0%" y="0%" width="100%" height="100%" in="SourceGraphic" edgeMode="none" result="blur"></feGaussianBlur>
-	  </filter> 
-    -->
+
     <filter id="blurry-filter" x="-100%" y="-100%" width="400%" height="400%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feGaussianBlur stdDeviation="16 32" x="0%" y="0%" width="100%" height="100%" in="SourceGraphic" edgeMode="none" result="blur"></feGaussianBlur>
     </filter>
@@ -67,73 +43,9 @@
   </defs>
 
   <g filter="url(#blurry-filter)">
-  
   <rect width="100%" height="100%" fill="url(#glass-gradient)" rx="30" /> 
-  <!-- <rect width="100%" height="100%" fill="#999" rx="30" opacity="0.2"/> -->
-    
+  <!-- <rect width="100%" height="100%" fill="#999" rx="30" opacity="0.2"/> -->   
    </g>
-
-
-
-  <!-- <text x="50%" y="19%" fill="#fffa" stroke="#5552" stroke-width="0.5px" font-family="Open Sans" font-size="20" font-weight="600" text-anchor="middle">Glass Grid</text> -->
-
-
-  <!-- <g filter="url(#bbblurry-filter)">
-  
-  <path d="M54.188479704881615 351.8324567711884C36.38743396920455 318.062823795928 63.48166970732302 131.15182068313493 94.24083261015505 84.03140086298521C124.99999551298708 36.91098104283546 203.92670500598837 49.47642853225605 238.7434571218738 69.1099378502899C273.56020923775924 88.74344716832374 309.4240703217436 165.57591329381205 303.14134530546755 201.83245677118833C296.8586202891915 238.08900024856473 242.5392512909819 261.64919871454777 201.04710702421755 286.64919871454777C159.55496275745327 311.64919871454777 71.98952544055871 385.60208974644877 54.188479704881615 351.8324567711884C36.38743396920455 318.062823795928 63.48166970732302 131.15182068313493 94.24083261015505 84.03140086298521 " fill="url(&quot;#SvgjsLinearGradient1000&quot;)" transform="matrix(1,0.17632698070846498,0,1,0,-31.06725160645749)">
-  </path>
-  <path d="M322.93794991608183 434.00297636634775C305.13690418040477 400.2333433910873 332.23113991852324 213.32234027829435 362.9903028213553 166.20192045814463C393.7494657241873 119.08150063799488 472.6761752171886 131.64694812741547 507.492927333074 151.28045744544931C542.3096794489595 170.91396676348316 578.1735405329438 247.74643288897147 571.8908155166678 284.00297636634775C565.6080905003917 320.25951984372404 511.28872150218217 343.8197183097071 469.7965772354178 368.8197183097071C428.3044329686535 393.8197183097071 340.73899565175896 467.7726093416081 322.93794991608183 434.00297636634775C305.13690418040477 400.2333433910873 332.23113991852324 213.32234027829435 362.9903028213553 166.20192045814463 " fill-opacity="1" fill="url(&quot;#SvgjsLinearGradient1001&quot;)" opacity="1" stroke-opacity="1" stroke-width="0" stroke="hsl(340, 45%, 30%)" transform="matrix(-0.2593683617559387,-0.6627477308032402,0.6881798061174443,-0.5499797021645123,318.0703042505915,798.935123142963)">
-  </path>
-
-  </g> -->
-
-
-<!-- <g filter="url(#bbblurry-filter)" opacity="0.9">
-<defs>
-<linearGradient id="gradient" x1="0%" y1="52%" x2="100%" y2="48%">
-<stop offset="5%" stop-color="#f78da7"></stop>
-<stop offset="95%" stop-color="#9900ef"></stop>
-</linearGradient>
-</defs>
-<path d="M 0,700 C 0,700 0,175 0,175 C 80.48251104565537,188.10548600883652 160.96502209131074,201.21097201767301 212,208 C 263.03497790868926,214.78902798232699 284.62242268041234,215.26159793814435 334,202 C 383.37757731958766,188.73840206185565 460.5452871870398,161.74263622974965 523,163 C 585.4547128129602,164.25736377025035 633.1964285714286,193.76785714285714 691,190 C 748.8035714285714,186.23214285714286 816.668998527246,149.18593519882177 874,133 C 931.331001472754,116.81406480117822 978.1275773195875,121.48840206185568 1047,127 C 1115.8724226804125,132.51159793814432 1206.8206921944036,138.86045655375554 1276,147 C 1345.1793078055964,155.13954344624446 1392.589653902798,165.06977172312224 1440,175 C 1440,175 1440,700 1440,700 Z" stroke="none" stroke-width="0" fill="url(#gradient)" fill-opacity="0.45" class="transition-all duration-300 ease-in-out delay-150 path-0"></path>
-<defs>
-<linearGradient id="gradient" x1="0%" y1="52%" x2="100%" y2="48%">
-<stop offset="5%" stop-color="#f78da7"></stop>
-<stop offset="95%" stop-color="#9900ef"></stop>
-</linearGradient>
-</defs>
-<path d="M 0,700 C 0,700 0,350 0,350 C 66.74300441826216,369.8488586156112 133.48600883652432,389.6977172312224 195,402 C 256.5139911634757,414.3022827687776 312.79896907216494,419.0579896907216 374,398 C 435.20103092783506,376.9420103092784 501.3181148748158,330.07032400589105 555,306 C 608.6818851251842,281.92967599410895 649.9285714285714,280.66071428571433 711,295 C 772.0714285714286,309.33928571428567 852.9675994108983,339.28681885125184 910,335 C 967.0324005891017,330.71318114874816 1000.2010309278351,292.1920103092784 1054,289 C 1107.798969072165,285.8079896907216 1182.2282768777616,317.9451399116348 1250,334 C 1317.7717231222384,350.0548600883652 1378.8858615611193,350.0274300441826 1440,350 C 1440,350 1440,700 1440,700 Z" stroke="none" stroke-width="0" fill="url(#gradient)" fill-opacity="0.65" class="transition-all duration-300 ease-in-out delay-150 path-1"></path>
-<defs>
-<linearGradient id="gradient" x1="0%" y1="52%" x2="100%" y2="48%">
-<stop offset="5%" stop-color="#f78da7"></stop>
-<stop offset="95%" stop-color="#9900ef"></stop>
-</linearGradient>
-</defs>
-<path d="M 0,700 C 0,700 0,525 0,525 C 69.91844624447717,499.30357142857144 139.83689248895433,473.60714285714283 195,486 C 250.16310751104567,498.39285714285717 290.57087628865986,548.875 351,553 C 411.42912371134014,557.125 491.8796023564065,514.8928571428571 565,521 C 638.1203976435935,527.1071428571429 703.9107142857143,581.5535714285714 753,582 C 802.0892857142857,582.4464285714286 834.4775405007363,528.8928571428571 890,518 C 945.5224594992637,507.10714285714295 1024.1791237113405,538.8749999999999 1087,553 C 1149.8208762886595,567.1250000000001 1196.8059646539027,563.6071428571429 1253,556 C 1309.1940353460973,548.3928571428571 1374.5970176730486,536.6964285714286 1440,525 C 1440,525 1440,700 1440,700 Z" stroke="none" stroke-width="0" fill="url(#gradient)" fill-opacity="0.95" class="transition-all duration-300 ease-in-out delay-150 path-2"></path>
-</g> -->
-
-
-    <!-- Tablet Shape (Glass Effect) filter="url(#shadow)" -->
-  <!-- <rect x="0%" y="0%" width="100%" height="100%" fill="#ffffff" opacity="0.05"  rx="30" >  
-    <feGaussianBlur in="SourceGraphic" stdDeviation="5" edgeMode="none" result="blur"/>
-  </rect> -->
-
-  <!-- <g filter="url(#blurry-filter)" opacity="0.8">  -->
-	  <!-- <ellipse rx="90" ry="90" cx="-4%" cy="20%" fill="url(&quot;#SvgjsLinearGradient1001&quot;)"></ellipse> -->
-	  <!-- <ellipse rx="300" ry="300" cx="50%" cy="100%" fill="url(&quot;#SvgjsLinearGradient1002&quot;)"></ellipse> -->
-    <!-- <ellipse rx="100" ry="100" cx="99%" cy="30%" fill="url(&quot;#SvgjsLinearGradient1001&quot;)"></ellipse> -->
-	  <!-- <ellipse rx="200" ry="200" cx="30%" cy="95%" fill="url(&quot;#SvgjsLinearGradient1000&quot;)"></ellipse> -->
-    <!-- <ellipse rx="120" ry="120" cx="50%" cy="5%" fill="url(&quot;#SvgjsLinearGradient1003&quot;)"></ellipse> -->
-	<!-- </g> -->
-
-  <!-- Buttons with Labels -->
-  <!-- <rect x="200" y="200" width="200" height="100" fill="#ffffff" opacity="0" />
-  <text x="300" y="250" fill="#ffffff" font-size="24" text-anchor="middle">Button 1</text>
-
-  <rect x="400" y="200" width="200" height="100" fill="#ffffff" opacity="0.7" />
-  <text x="500" y="250" fill="#000000" font-size="24" text-anchor="middle">Button 2</text> -->
-  
-  <!-- Add more buttons and labels as needed -->
 
 </svg>
 

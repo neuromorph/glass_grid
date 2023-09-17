@@ -1,3 +1,23 @@
+/* headerBox.js
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
+
+/* exported HeaderBox */
+
 const { Clutter, GObject, Gio, St } = imports.gi;
 const Main = imports.ui.main;
 const ExtensionManager = Main.extensionManager;
@@ -5,6 +25,7 @@ const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const Dialog = imports.ui.dialog;
 const ModalDialog = imports.ui.modalDialog;
+const Util = imports.misc.util;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const BackgroundGroup = Me.imports.backgroundGroup;
@@ -13,10 +34,10 @@ const BackgroundGroup = Me.imports.backgroundGroup;
 // Class for Popup menu item with Entry for the hotkey
 const PopupEntryMenuItem = GObject.registerClass(
     class PopupEntryMenuItem extends PopupMenu.PopupBaseMenuItem {
-        _init(text, settings, params) {
+        _init(text, headerBox, params) {
             super._init(params);
 
-            this._settings = settings;
+            this._settings = headerBox._settings;
 
             this._label = new St.Label({
                 text: text,
@@ -40,13 +61,23 @@ const PopupEntryMenuItem = GObject.registerClass(
                 hint_text: 'Enter hotkey',
             });
             this.add_child(this._entry);
-        }
 
-        activate(event) {
-            this._entry.grab_key_focus();
             this._entry.clutter_text.connect('text-changed', () => {
                 this._settings.set_strv('hotkey', [this._entry.text]);
             });
+
+            this._entry.connect('key-press-event', (entry, event) => {
+                // log('entry key '+event.get_key_symbol());
+                if (event.get_key_symbol() == Clutter.KEY_Escape) {
+                    headerBox.settingsBtn.menu.close(true);
+                    return Clutter.EVENT_STOP;
+                }
+                return Clutter.EVENT_PROPAGATE;
+            });
+        }
+
+        activate(event) {
+            this._entry.grab_key_focus();           
         }
 
         set entryText(text) {
@@ -72,8 +103,6 @@ var HeaderBox = GObject.registerClass(
             track_hover: true,
         });
         this.extGrid = extGrid;
-        // this.height = this.extGrid.height;
-        // this.width = this.extGrid.width;
         this._settings = this.extGrid._settings;
         this.bgItems = [];
         this.dialogOpen = false;
@@ -87,8 +116,7 @@ var HeaderBox = GObject.registerClass(
 
     // Set background theme using backgroundGroup
     _setBgTheme(item) {
-        log('Active theme ' + item.label.text);
-        // let activeTheme = this._settings.get_string("bg-theme");
+        // console.debug('Active theme ' + item.label.text);
         this.bgItems.forEach(bgItem => {
             (item == bgItem)? bgItem.setOrnament(PopupMenu.Ornament.CHECK): bgItem.setOrnament(PopupMenu.Ornament.NONE);
         });
@@ -99,9 +127,6 @@ var HeaderBox = GObject.registerClass(
 
     // Create header box with buttons
     _createHeaderBox() {
-
-        // let this = new St.BoxLayout();
-        // this.extGrid.mainbox.add_child(this);
 
         // ⓘ About
         let aboutLabel = new St.Label({
@@ -156,7 +181,7 @@ var HeaderBox = GObject.registerClass(
             icon_size: this.extGrid.height*0.029, //40,
         });
         this.settingsBtn = new PanelMenu.Button(0.0, 'extgridSettingsBtn', false);
-        this.settingsBtn.can_focus = false;
+        this.settingsBtn.can_focus = true;
         this.settingsBtn.add_style_class_name('settings-button');
         this.settingsBtn.style = ` margin-right: ${this.extGrid.height*0.40}px;`;
         this.settingsBtn.add_child(settingsIcon);
@@ -189,20 +214,21 @@ var HeaderBox = GObject.registerClass(
                 return Clutter.EVENT_PROPAGATE;
             });
             themeMenuSection.addMenuItem(bgItem);
-        });
-        
+        });       
         this.settingsBtn.menu.addMenuItem(themeMenuItem);
 
-        let hotkeyMenuItem = new PopupEntryMenuItem("Hotkey", this._settings, { can_focus: true });
+        let hotkeyMenuItem = new PopupEntryMenuItem("Hotkey", this, { can_focus: true });
         this.settingsBtn.menu.addMenuItem(hotkeyMenuItem);
 
         let indicatorMenuItem = new PopupMenu.PopupSwitchMenuItem("Panel Indicator", this._settings.get_boolean('show-indicator'), { can_focus: true }); 
-        indicatorMenuItem.connect('toggled', (actor, state) => this._addRemovePanelIndicator(state));
+        indicatorMenuItem.connect('toggled', (actor, state) => {
+            this._addRemovePanelIndicator(state)
+            return Clutter.EVENT_PROPAGATE;
+        });
         indicatorMenuItem._switch.y_align = Clutter.ActorAlign.CENTER;
         indicatorMenuItem._switch.height = this.extGrid.height*0.028;
         indicatorMenuItem._switch.width = this.extGrid.height*0.052;
         this.settingsBtn.menu.addMenuItem(indicatorMenuItem);
-
 
         // Panel Menu button (settings button) already has a parent so we need to remove it and add it to the header box
         let container = this.settingsBtn.container;
@@ -214,11 +240,18 @@ var HeaderBox = GObject.registerClass(
 
         this.add_child(container);
 
-        // log('num of menu items '+this.settingsBtn.menu.numMenuItems);
-
+        let menuChildren = this.settingsBtn.menu.box.get_children();
+        menuChildren.forEach(menuItem => {
+            menuItem.connect('key-press-event', (actor, event) => {
+                // log('btn key event '+ event.get_key_symbol());
+                if (event.get_key_symbol() == Clutter.KEY_Escape) {
+                    this.settingsBtn.menu.close(true);
+                }
+                return Clutter.EVENT_PROPAGATE;
+            });
+        });
 
         ////////////////////////////////
-
 
         let titleLabel = new St.Label({
             text: '⋮⋮⋮ Glass Grid',
@@ -324,7 +357,7 @@ var HeaderBox = GObject.registerClass(
         });
         let closedId = this.aboutDialog.connect('closed', () => {
             // console.debug('The dialog was dismissed');
-            global.stage.set_key_focus(this._nameBtn1);
+            global.stage.set_key_focus(this.extGrid._nameBtn1);
             this.dialogOpen = false;
         });
 
@@ -359,22 +392,22 @@ var HeaderBox = GObject.registerClass(
         this.aboutDialog.contentLayout.add_child(listLayout);
 
         const ego = new Dialog.ListSectionItem({
-            description: 'ẹg̣ọ            Extensions web: extensions.gnome.org',
+            description: 'ẹg̣ọ          Extensions web: extensions.gnome.org',
         });
         listLayout.list.add_child(ego);
 
         const setting = new Dialog.ListSectionItem({
             icon_actor: new St.Icon({icon_name: 'preferences-system-symbolic', 
                                      icon_size: 12}),
-            description: `               Top: Open settings menu
-            Grid: Open extension preferences `,
+            description: `             Top: Open settings menu. Esc to close
+             Grid: Open extension preferences `,
         });
         listLayout.list.add_child(setting);
 
         const extApp = new Dialog.ListSectionItem({
             icon_actor: new St.Icon({icon_name: 'extensions-symbolic', 
                                      icon_size: 12}),
-            description: '               Open Extensions app',
+            description: '             Open Extensions app',
         });
         listLayout.list.add_child(extApp);
 
@@ -385,13 +418,13 @@ var HeaderBox = GObject.registerClass(
                                      width: 14,
                                      height: 2, 
                                      }),
-            description: `              Top: Enable/Disable all extensions except this
+            description: `            Top: Enable/Disable all extensions except this
             Grid: Enable/Disable selected extension`,
         });
         listLayout.list.add_child(allSwitch);
 
         const styleReload = new Dialog.ListSectionItem({
-            description: '↺                Reload stylesheet for the extension',
+            description: '↺             Reload stylesheet for the extension',
         });
         listLayout.list.add_child(styleReload);
 
@@ -453,7 +486,6 @@ var HeaderBox = GObject.registerClass(
     }
 
     _disableAllExtensions() {
-        // Does not disable self here so extensions can be enabled again
 
         const extensionsToDisable = ExtensionManager._extensionOrder.slice();
 
@@ -466,7 +498,7 @@ var HeaderBox = GObject.registerClass(
 
         for (const uuid of extensionsToDisable) {
             if (uuid != Me.metadata.uuid) {
-                // log('disabling uuid: ' + uuid);
+                // console.debug('disabling uuid: ' + uuid);
                 try {
                     ExtensionManager.disableExtension(uuid);
                 }

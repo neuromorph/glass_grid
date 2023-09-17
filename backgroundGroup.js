@@ -1,9 +1,28 @@
+/* backgroundGroup.js
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
+
+/* exported BackgroundGroup, MAINBOX_STYLE, MAINBOX_MODE */
 
 const { Clutter, GObject, St, Meta, Shell, Graphene } = imports.gi;
 const Main = imports.ui.main;
 const Background = imports.ui.background;
 
-const BLUR_BRIGHTNESS = 0.75; //0.65
+const BLUR_BRIGHTNESS = 0.8; //0.65
 const BLUR_SIGMA = 45; //45
 const BACKGROUND_CORNER_RADIUS_PIXELS = 15;
 
@@ -71,9 +90,6 @@ var BackgroundGroup = GObject.registerClass(
                 controlPosition: false,
             });
             bgManager.connect('changed',this._updateBackgrounds.bind(this));
-
-            // log('trans x , y: ' + pMonitor.x + ' '+ pMonitor.y+' '+ bgManager.backgroundActor.translation_x+' '+bgManager.backgroundActor.translation_y);
-
             bgManager.backgroundActor.set_position(pMonitor.x-this.extGrid.x, pMonitor.y-this.extGrid.y);
 
             this._bgManagers.push(bgManager);
@@ -87,9 +103,7 @@ var BackgroundGroup = GObject.registerClass(
             widget.effect = new Shell.BlurEffect({name: 'extgrid-dynamic'});
         }
 
-
         this.add_child(widget);
-
     }
 
     _updateBackgroundEffects(mode) {
@@ -115,7 +129,7 @@ var BackgroundGroup = GObject.registerClass(
         const backgroundContent = this._bgManagers[0].backgroundActor.content;
         backgroundContent.rounded_clip_radius = cornerRadius;
 
-        log('rounded clip radis '+backgroundContent.rounded_clip_radius);
+        // console.debug('rounded clip radis '+backgroundContent.rounded_clip_radius);
     }
 
     _updateRoundedClipBounds() {
@@ -126,7 +140,7 @@ var BackgroundGroup = GObject.registerClass(
         rect.origin.y = this.extGrid.y - pMonitor.y;
         rect.size.width = this.extGrid.width;
         rect.size.height = this.extGrid.height;
-        log('graphene x y w h '+rect.origin.x+' '+rect.origin.y+' '+rect.size.width+' '+rect.size.height);
+        // console.debug('graphene x y w h '+rect.origin.x+' '+rect.origin.y+' '+rect.size.width+' '+rect.size.height);
         this._bgManagers[0].backgroundActor.content.set_rounded_clip_bounds(rect);
     }
 
@@ -147,21 +161,21 @@ var BackgroundGroup = GObject.registerClass(
 
         Object.keys(MAINBOX_STYLE).forEach(theme => {
             this.extGrid.mainbox.remove_style_class_name(MAINBOX_STYLE[theme]); 
-            // log('remove sty class: '+ MAINBOX_STYLE[theme]);
+            // console.debug('remove sty class: '+ MAINBOX_STYLE[theme]);
             if (theme == activeTheme) {
                 this.extGrid.mainbox.add_style_class_name(MAINBOX_STYLE[theme]); 
-                // log('add sty class: '+ MAINBOX_STYLE[theme]);
+                // console.debug('add sty class: '+ MAINBOX_STYLE[theme]);
             }
         });
         Object.keys(MAINBOX_MODE).forEach(modeKey => {
             const [themeId, mode] = modeKey.split('_');
             const activeThemeId = activeTheme.split(' ')[1];
-            // const mode = modeKey.split('_')[1];
+
             this.extGrid.mainbox.remove_style_class_name(MAINBOX_MODE[modeKey]); 
-            // log('remove sty class: '+ MAINBOX_MODE[modeKey]);
+            // console.debug('remove sty class: '+ MAINBOX_MODE[modeKey]);
             if (themeId == activeThemeId && mode == activeMode) {
                 this.extGrid.mainbox.add_style_class_name(MAINBOX_MODE[modeKey]); 
-                // log('add sty class: '+ MAINBOX_MODE[modeKey]);
+                // console.debug('add sty class: '+ MAINBOX_MODE[modeKey]);
             }
         });
 
@@ -175,20 +189,17 @@ var BackgroundGroup = GObject.registerClass(
 
         switch (activeTheme) {
             case "Background Crop":
-                log('crop');
                 this._createBackground('crop');
                 this._updateBorderRadius();
                 this._updateRoundedClipBounds();
                 break;
 
             case "Background Blur":
-                log('bg blur');
                 this._createBackground('blur');
                 this._updateBackgroundEffects('blur');
                 break;
 
             case "Dynamic Blur":
-                log('dyn blur');
                 this._createBackground('dynamic');
                 this._updateBackgroundEffects('dynamic');
                 break;
