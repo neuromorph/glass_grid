@@ -18,31 +18,44 @@
 
 /* exported init */
 
-const { Clutter, Gio, GObject, St, Pango, Atk, Meta, Shell, GLib } = imports.gi;
-const Main = imports.ui.main;
+import Clutter from 'gi://Clutter';
+import St from 'gi://St';
+import Gio from 'gi://Gio';
+import GObject from 'gi://GObject';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
+import Atk from 'gi://Atk';
+import Pango from 'gi://Pango';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import * as Layout from 'resource:///org/gnome/shell/ui/layout.js';
+import * as SwipeTracker from 'resource:///org/gnome/shell/ui/swipeTracker.js';
+import * as ExtensionUtils from 'resource:///org/gnome/shell/misc/extensionUtils.js';
+
+import {Extension, gettext as _, pgettext} from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as BackgroundGroup from './backgroundGroup.js';
+import * as HeaderBox from './headerBox.js';
+// const { Clutter, Gio, GObject, St, Pango, Atk, Meta, Shell } = imports.gi;
+// const Main = imports.ui.main;
 const ExtensionManager = Main.extensionManager;
-const PopupMenu = imports.ui.popupMenu;
-// const PanelMenu = imports.ui.panelMenu;
-// const Util = imports.misc.util;
-// const Dialog = imports.ui.dialog;
-// const ModalDialog = imports.ui.modalDialog;
-// const Background = imports.ui.background;
-const Layout = imports.ui.layout;
-const SwipeTracker = imports.ui.swipeTracker;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
+// const PopupMenu = imports.ui.popupMenu;
+// const Layout = imports.ui.layout;
+// const SwipeTracker = imports.ui.swipeTracker;
+// const ExtensionUtils = imports.misc.extensionUtils;
+// const Me = ExtensionUtils.getCurrentExtension();
 const ExtensionState = ExtensionUtils.ExtensionState;
 
-const {gettext: _, pgettext} = ExtensionUtils;
-const BackgroundGroup = Me.imports.backgroundGroup;
-const HeaderBox = Me.imports.headerBox;
+// const {gettext: _, pgettext} = ExtensionUtils;
+// const BackgroundGroup = Me.imports.backgroundGroup;
+// const HeaderBox = Me.imports.headerBox;
+
 
 
 
 // Class for the overlay window
 var GlassGrid = GObject.registerClass(
     class GlassGrid extends St.Widget {
-        _init() {
+        _init(Ext) {
             super._init({
                 accessible_role: Atk.Role.WINDOW,
                 visible: false,
@@ -51,7 +64,9 @@ var GlassGrid = GObject.registerClass(
                 style_class: 'extension-grid-wrapper'
             });
 
-            this._settings = ExtensionUtils.getSettings();
+            this._settings = Ext.getSettings(); //ExtensionUtils.getSettings();
+            this.metadata = Ext.metadata;
+            this.path = Ext.path;
             this.extList = [];
             this.grid = null;
             this.enablingDisablingAll = false;
@@ -128,7 +143,7 @@ var GlassGrid = GObject.registerClass(
                 return;
 
             if ((!focusedActor && !this.menuOpen) || !(this.contains(focusedActor) || this.headerBox.settingsBtn.menu.box.contains(focusedActor))) {
-                if (this.mainbox.visible) 
+                if (this.visible) 
                     this.hide();
             }
         }
@@ -493,7 +508,7 @@ var GlassGrid = GObject.registerClass(
         // Reload the grid and show the window
         show() {
             let extArr = ExtensionManager._extensionOrder; 
-            let extGridIdx = extArr.indexOf(Me.metadata.uuid);    
+            let extGridIdx = extArr.indexOf(this.metadata.uuid);    
             if (extGridIdx != 0) {        
                 extArr.splice(0, 0, extArr.splice(extGridIdx, 1)[0]); 
             }
@@ -760,12 +775,15 @@ var GlassGrid = GObject.registerClass(
 );
 
 
-class GlassGridExtension {
+export default class GlassGridExtension extends Extension {
 
     enable() {
 
         // Create new Glass Grid
-        this.extGrid = new GlassGrid();
+        this.extGrid = new GlassGrid(this);
+        // this.extGrid.metadata = this.metadata;
+        // this.extGrid.path = this.path;
+        // this.extGrid._settings = this.getSettings();
 
         // Panel indicator initialize as per settings
         this.extGrid.headerBox._addRemovePanelIndicator(this.extGrid._settings.get_boolean('show-indicator'));
@@ -786,7 +804,7 @@ class GlassGridExtension {
         );
     
         // Connect monitors-changed with setting Glass Grid position/size params
-        this._monitorsChangedId = Main.layoutManager.connect('monitors-changed', () => this.extGrid.setGlassGridParams());
+        this._monitorsChangedId = Main.layoutManager.connect('monitors-changed', () => this.extGrid._setGlassGridParams());
     }
     
     disable() {
@@ -801,18 +819,10 @@ class GlassGridExtension {
         ExtensionManager.disconnectObject(this);
         Main.wm.removeKeybinding('hotkey');
 
-        const headerBox = this.extGrid.headerBox;
-
-        if (headerBox.aboutDialog)
-            headerBox.aboutDialog.destroy();
-        
-        if (headerBox.panelIndicator) {
-            headerBox.panelIndicator.disconnect(headerBox.panelIndicatorId);
-            headerBox.panelIndicator.destroy();
-            headerBox.panelIndicator = null;
-        }
-
+        this.extGrid.backgroundGroup.destroy();
+        this.extGrid.headerBox.destroy();      
         this.extGrid._destroyGridChildren();
+
         this.extGrid._settings = null;
         this.extGrid.destroy();
         this.extGrid = null;
@@ -823,7 +833,7 @@ class GlassGridExtension {
 
 
 
-function init() {
-    ExtensionUtils.initTranslations();
-    return new GlassGridExtension();
-}
+// function init() {
+//     ExtensionUtils.initTranslations();
+//     return new GlassGridExtension();
+// }

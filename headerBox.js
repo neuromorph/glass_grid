@@ -18,80 +18,37 @@
 
 /* exported HeaderBox */
 
-const { Clutter, GObject, Gio, St } = imports.gi;
-const Main = imports.ui.main;
+import Clutter from 'gi://Clutter';
+import St from 'gi://St';
+import Gio from 'gi://Gio';
+import GObject from 'gi://GObject';
+
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import * as Dialog from 'resource:///org/gnome/shell/ui/dialog.js';
+import * as ModalDialog from 'resource:///org/gnome/shell/ui/modalDialog.js';
+
+import * as Util from 'resource:///org/gnome/shell/misc/util.js';
+// import * as ExtensionUtils from 'resource:///org/gnome/shell/misc/extensionUtils.js';
+
+import * as BackgroundGroup from './backgroundGroup.js';
+
+// const { Clutter, GObject, Gio, St } = imports.gi;
+// const Main = imports.ui.main;
 const ExtensionManager = Main.extensionManager;
-const PanelMenu = imports.ui.panelMenu;
-const PopupMenu = imports.ui.popupMenu;
-const Dialog = imports.ui.dialog;
-const ModalDialog = imports.ui.modalDialog;
-const Util = imports.misc.util;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const BackgroundGroup = Me.imports.backgroundGroup;
+// const PanelMenu = imports.ui.panelMenu;
+// const PopupMenu = imports.ui.popupMenu;
+// const Dialog = imports.ui.dialog;
+// const ModalDialog = imports.ui.modalDialog;
+// const Util = imports.misc.util;
+// const ExtensionUtils = imports.misc.extensionUtils;
+// const Me = ExtensionUtils.getCurrentExtension();
+// const BackgroundGroup = Me.imports.backgroundGroup;
 
 
-// Class for Popup menu item with Entry for the hotkey
-const PopupEntryMenuItem = GObject.registerClass(
-    class PopupEntryMenuItem extends PopupMenu.PopupBaseMenuItem {
-        _init(text, headerBox, params) {
-            super._init(params);
 
-            this._settings = headerBox._settings;
-
-            this._label = new St.Label({
-                text: text,
-                y_align: Clutter.ActorAlign.CENTER,
-                x_align: Clutter.ActorAlign.START,
-                x_expand: true,
-            });
-            this.add_child(this._label);
-
-            this._entry = new St.Entry({
-                can_focus: true,
-                track_hover: true,
-                reactive: true,
-                x_align: Clutter.ActorAlign.END,
-                y_align: Clutter.ActorAlign.CENTER,
-                x_expand: true,
-                y_expand: false,
-                width: 100,
-                height: 30,
-                text: this._settings.get_strv('hotkey')[0],
-                hint_text: 'Enter hotkey',
-            });
-            this.add_child(this._entry);
-
-            this._entry.clutter_text.connect('text-changed', () => {
-                this._settings.set_strv('hotkey', [this._entry.text]);
-            });
-
-            this._entry.connect('key-press-event', (entry, event) => {
-                // log('entry key '+event.get_key_symbol());
-                if (event.get_key_symbol() == Clutter.KEY_Escape) {
-                    headerBox.settingsBtn.menu.close(true);
-                    return Clutter.EVENT_STOP;
-                }
-                return Clutter.EVENT_PROPAGATE;
-            });
-        }
-
-        activate(event) {
-            this._entry.grab_key_focus();           
-        }
-
-        set entryText(text) {
-            this._entry.text = text;
-        }
-
-        get entryText() {
-            return this._entry.text;
-        }
-    }
-);
-
-
-var HeaderBox = GObject.registerClass(
+export const HeaderBox = GObject.registerClass(
     class HeaderBox extends St.BoxLayout {
 
     _init(extGrid) {
@@ -380,7 +337,7 @@ var HeaderBox = GObject.registerClass(
         const messageLayout = new Dialog.MessageDialogContent({
             title: 'Glass Grid',
             description: `Overlay glass panel for quick view of installed extensions.
-            Version: ${Me.metadata.version}  |  © neuromorph`,
+            Version: ${this.extGrid.metadata.version}  |  © neuromorph`,
         });
         this.aboutDialog.contentLayout.add_child(messageLayout);
 
@@ -411,7 +368,7 @@ var HeaderBox = GObject.registerClass(
         });
         listLayout.list.add_child(extApp);
 
-        const switchIconPath = Me.path + '/media/toggle-on.svg';
+        const switchIconPath = this.extGrid.path + '/media/toggle-on.svg';
         const switchIcon = Gio.FileIcon.new(Gio.File.new_for_path(switchIconPath));
         const allSwitch = new Dialog.ListSectionItem({
             icon_actor: new St.Icon({gicon: switchIcon, 
@@ -497,7 +454,7 @@ var HeaderBox = GObject.registerClass(
         extensionsToDisable.reverse();
 
         for (const uuid of extensionsToDisable) {
-            if (uuid != Me.metadata.uuid) {
+            if (uuid != this.extGrid.metadata.uuid) {
                 // console.debug('disabling uuid: ' + uuid);
                 try {
                     ExtensionManager.disableExtension(uuid);
@@ -512,4 +469,77 @@ var HeaderBox = GObject.registerClass(
         this.extGrid.enablingDisablingAll = false; 
     }
 
+    destroy() {
+        if (this.aboutDialog)
+            this.aboutDialog.destroy();
+        
+        if (this.panelIndicator) {
+            this.panelIndicator.disconnect(this.panelIndicatorId);
+            this.panelIndicator.destroy();
+            this.panelIndicator = null;
+        }
+
+        super.destroy();
+    }
+
 });
+
+
+// Class for Popup menu item with Entry for the hotkey
+const PopupEntryMenuItem = GObject.registerClass(
+    class PopupEntryMenuItem extends PopupMenu.PopupBaseMenuItem {
+        _init(text, headerBox, params) {
+            super._init(params);
+
+            this._settings = headerBox._settings;
+
+            this._label = new St.Label({
+                text: text,
+                y_align: Clutter.ActorAlign.CENTER,
+                x_align: Clutter.ActorAlign.START,
+                x_expand: true,
+            });
+            this.add_child(this._label);
+
+            this._entry = new St.Entry({
+                can_focus: true,
+                track_hover: true,
+                reactive: true,
+                x_align: Clutter.ActorAlign.END,
+                y_align: Clutter.ActorAlign.CENTER,
+                x_expand: true,
+                y_expand: false,
+                width: 100,
+                height: 30,
+                text: this._settings.get_strv('hotkey')[0],
+                hint_text: 'Enter hotkey',
+            });
+            this.add_child(this._entry);
+
+            this._entry.clutter_text.connect('text-changed', () => {
+                this._settings.set_strv('hotkey', [this._entry.text]);
+            });
+
+            this._entry.connect('key-press-event', (entry, event) => {
+                // log('entry key '+event.get_key_symbol());
+                if (event.get_key_symbol() == Clutter.KEY_Escape) {
+                    headerBox.settingsBtn.menu.close(true);
+                    return Clutter.EVENT_STOP;
+                }
+                return Clutter.EVENT_PROPAGATE;
+            });
+        }
+
+        activate(event) {
+            this._entry.grab_key_focus();           
+        }
+
+        set entryText(text) {
+            this._entry.text = text;
+        }
+
+        get entryText() {
+            return this._entry.text;
+        }
+    }
+);

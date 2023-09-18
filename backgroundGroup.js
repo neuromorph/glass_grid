@@ -18,15 +18,24 @@
 
 /* exported BackgroundGroup, MAINBOX_STYLE, MAINBOX_MODE */
 
-const { Clutter, GObject, St, Meta, Shell, Graphene } = imports.gi;
-const Main = imports.ui.main;
-const Background = imports.ui.background;
+// const { Clutter, GObject, St, Meta, Shell, Graphene } = imports.gi;
+import Clutter from 'gi://Clutter';
+import St from 'gi://St';
+import Graphene from 'gi://Graphene';
+import GObject from 'gi://GObject';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
+// const Main = imports.ui.main;
+// const Background = imports.ui.background;
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as Background from 'resource:///org/gnome/shell/ui/background.js';
+
 
 const BLUR_BRIGHTNESS = 0.8; //0.65
 const BLUR_SIGMA = 45; //45
 const BACKGROUND_CORNER_RADIUS_PIXELS = 15;
 
-var MAINBOX_STYLE = {
+export const MAINBOX_STYLE = {
     "Color Gradient": "mainbox-color-gradient",
     "Grey Gradient": "mainbox-grey-gradient",
     "Background Crop": "mainbox-bg-crop", 
@@ -34,7 +43,7 @@ var MAINBOX_STYLE = {
     "Dynamic Blur": "mainbox-dynamic-blur",
 }
 
-var MAINBOX_MODE = {
+export const MAINBOX_MODE = {
     "Gradient_Dark": "mainbox-gradient-dark",
     "Gradient_Light": "mainbox-gradient-light",
     "Crop_Dark": "mainbox-crop-dark",
@@ -43,7 +52,7 @@ var MAINBOX_MODE = {
     "Blur_Light": "mainbox-blur-light",
 }
 
-var BackgroundGroup = GObject.registerClass(
+export const BackgroundGroup = GObject.registerClass(
     class BackgroundGroup extends Clutter.Actor {
 
     _init(extGrid) {
@@ -241,5 +250,21 @@ var BackgroundGroup = GObject.registerClass(
             boxChildren[1].get_children().forEach(child => connectRp(child));
         })
         
+    }
+
+    destroy() {
+        for (let i = 0; i < this._bgManagers.length; i++)
+            this._bgManagers[i].destroy();
+
+        this._bgManagers = [];
+        this.get_children().forEach(child => {
+            child.remove_effect_by_name('extgrid-blur');
+            child.remove_effect_by_name('extgrid-dynamic');
+        });
+        this.destroy_all_children();
+
+        Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+
+        super.destroy();
     }
 }); 
