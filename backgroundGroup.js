@@ -75,10 +75,10 @@ var BackgroundGroup = GObject.registerClass(
                 widget.opacity = 250;
             }
             else{ // mode == 'blur'
-                widget.x = 2;
-                widget.y = 3;
-                widget.width = this.extGrid.width - 4;
-                widget.height = this.extGrid.height - 6;
+                widget.x = 2 * this.extGrid.scaleFactor;
+                widget.y = 3 * this.extGrid.scaleFactor;
+                widget.width = this.extGrid.width - 4 * this.extGrid.scaleFactor;
+                widget.height = this.extGrid.height - 6 * this.extGrid.scaleFactor;
                 widget.opacity = 250;
                 widget.effect = new Shell.BlurEffect({name: 'extgrid-blur'});
             }
@@ -95,10 +95,10 @@ var BackgroundGroup = GObject.registerClass(
             this._bgManagers.push(bgManager);
         }
         else if (mode == 'dynamic') {
-            widget.x = 5;
-            widget.y = 4;
-            widget.width = this.extGrid.width - 10;
-            widget.height = this.extGrid.height - 8;
+            widget.x = 5 * this.extGrid.scaleFactor;
+            widget.y = 4 * this.extGrid.scaleFactor;
+            widget.width = this.extGrid.width - 10 * this.extGrid.scaleFactor;
+            widget.height = this.extGrid.height - 8 * this.extGrid.scaleFactor;
             widget.opacity = 255;
             widget.effect = new Shell.BlurEffect({name: 'extgrid-dynamic'});
         }

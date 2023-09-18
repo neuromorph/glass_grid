@@ -22,11 +22,6 @@ const { Clutter, Gio, GObject, St, Pango, Atk, Meta, Shell, GLib } = imports.gi;
 const Main = imports.ui.main;
 const ExtensionManager = Main.extensionManager;
 const PopupMenu = imports.ui.popupMenu;
-// const PanelMenu = imports.ui.panelMenu;
-// const Util = imports.misc.util;
-// const Dialog = imports.ui.dialog;
-// const ModalDialog = imports.ui.modalDialog;
-// const Background = imports.ui.background;
 const Layout = imports.ui.layout;
 const SwipeTracker = imports.ui.swipeTracker;
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -54,6 +49,7 @@ var GlassGrid = GObject.registerClass(
             this._settings = ExtensionUtils.getSettings();
             this.extList = [];
             this.grid = null;
+            this.enablingDisabling = false;
             this.enablingDisablingAll = false;
             this.menuOpen = false; // To avoid hiding window since focus changed
             this.menuOpening = false; // To void closing menu as soon as opened (on click)
@@ -61,9 +57,11 @@ var GlassGrid = GObject.registerClass(
             global.focus_manager.add_group(this);
             // this.add_constraint(new Layout.MonitorConstraint({primary: true}));
 
-            // const themeContext = St.ThemeContext.get_for_stage(global.stage);
-            // themeContext.connectObject('notify::scale-factor',
-            //     () => this._updateBackgroundEffects(), this);
+            this.themeContext = St.ThemeContext.get_for_stage(global.stage);
+            this.themeContext.connectObject('notify::scale-factor',
+                () => this._updateScale(), this);
+            this.globalTheme = this.themeContext.get_theme();
+            this.scaleFactor = this.themeContext.scale_factor;
 
             this.backgroundGroup = new BackgroundGroup.BackgroundGroup(this); 
             this.insert_child_below(this.backgroundGroup, null);
@@ -92,12 +90,14 @@ var GlassGrid = GObject.registerClass(
 
         _setGlassGridParams() {
 
-            const pMonitor = Main.layoutManager.primaryMonitor;  // pMonitor = Main.layoutManager.monitors[0];
+            const scale = this.scaleFactor; log('scale '+scale);
+            const pMonitor = Main.layoutManager.primaryMonitor;  
+            // const pMonitor = Main.layoutManager.monitors[0];
             const SCREEN_WIDTH = pMonitor.width;
             const SCREEN_HEIGHT = pMonitor.height;
-            const WINDOW_WIDTH = SCREEN_HEIGHT*1.38; //1.35
-            const WINDOW_HEIGHT = SCREEN_HEIGHT*0.76; //0.75
-            const GRID_ROWS = 4;
+            const WINDOW_WIDTH = 1300 * scale; //SCREEN_HEIGHT*1.38; //1.35
+            const WINDOW_HEIGHT = 750 * scale; //SCREEN_HEIGHT*0.76; //0.75
+            const GRID_ROWS = 3;
             const GRID_COLS = 5; 
             const pageSize = GRID_COLS*2; 
     
@@ -105,8 +105,8 @@ var GlassGrid = GObject.registerClass(
             this.y = pMonitor.y + SCREEN_HEIGHT/2 - WINDOW_HEIGHT/2; 
             this.width = WINDOW_WIDTH;
             this.height = WINDOW_HEIGHT;
-            // console.debug('pmontor x y '+pMonitor.x+' '+pMonitor.y);
-            // console.debug('grid x y width height'+this.x+' '+this.y+' '+this.width+' '+this.height);
+            console.log('pmontor x y '+pMonitor.x+' '+pMonitor.y);
+            console.log('grid x y width height'+this.x+' '+this.y+' '+this.width+' '+this.height);
 
             this.mainbox.width = WINDOW_WIDTH;
             this.mainbox.height = WINDOW_HEIGHT;
@@ -114,23 +114,40 @@ var GlassGrid = GObject.registerClass(
             this.gridCols = GRID_COLS;
             this.gridRows = GRID_ROWS;
             this.pageSize = pageSize; 
-            this.extBoxWidth = (WINDOW_WIDTH - 175) / GRID_COLS; //subtract margin/spacing 170
-            this.extBoxHeight = this.extBoxWidth / 1.75; 
+            this.extBoxWidth = (WINDOW_WIDTH * 0.88) / GRID_COLS; //reduce margin/spacing
+            this.extBoxHeight = this.extBoxWidth / 1.38; 
     
             this.backgroundGroup._updateBackgrounds();
             
         }
 
+        _updateScale() {
+            this.scaleFactor = this.themeContext.scale_factor;
+            this._setGlassGridParams();
+            this.headerBox._setHeaderBoxParams();
+        }
+
         _focusActorChanged() {
             let focusedActor = global.stage.get_key_focus();
 
-            if (this.enablingDisablingAll || this.headerBox.dialogOpen)
-                return;
+            if (this.enablingDisablingAll || this.enablingDisabling || this.headerBox.dialogOpen || this.menuOpen)
+                return Clutter.EVENT_PROPAGATE;
 
-            if ((!focusedActor && !this.menuOpen) || !(this.contains(focusedActor) || this.headerBox.settingsBtn.menu.box.contains(focusedActor))) {
-                if (this.mainbox.visible) 
+            if ((!focusedActor ) || !(this.contains(focusedActor) || this.headerBox.settingsBtn.menu.box.contains(focusedActor))) {
+                if (this.visible) 
                     this.hide();
             }
+            else if (this.contains(focusedActor) && !this.headerBox.contains(focusedActor)) {
+                // log('grid contains '+focusedActor.name);
+                const i = parseInt(focusedActor.name.split('_')[1]);
+                const pageNum = Math.floor((i+1) / (this.gridCols*this.gridRows)); 
+                // log('grid col,row '+this.gridCols+' '+this.gridRows);
+                // log('i, pgnum, scrollval '+i+' '+pageNum+' '+scrollAdjust.value);
+                this._adjustment.value = pageNum * this._adjustment.page_increment;
+                // log('new scroll val '+this._adjustment.value);
+
+            }
+            return Clutter.EVENT_PROPAGATE;
         }
 
 
@@ -239,8 +256,8 @@ var GlassGrid = GObject.registerClass(
             // Create a grid layout for the extensions
             this.grid = new Clutter.GridLayout({
                 orientation: Clutter.Orientation.HORIZONTAL,
-                column_spacing: 10,
-                row_spacing: 10,
+                column_spacing: 15 * this.scaleFactor,
+                row_spacing: 15 * this.scaleFactor,
                 column_homogeneous: true,
                 row_homogeneous: true
             });
@@ -308,6 +325,7 @@ var GlassGrid = GObject.registerClass(
 
             this._destroyGridChildren();            
             this._sortExtList();
+            // const scale = this.scaleFactor;
 
             // Loop through the extensions and add them to the grid
             let i = 0;
@@ -321,7 +339,8 @@ var GlassGrid = GObject.registerClass(
                     height: this.extBoxHeight, //150,
                     width: this.extBoxWidth, //250,
                     reactive: true,
-                    track_hover: true,                    
+                    track_hover: true, 
+                    vertical: true,                   
                 });
                 
                 // Create a button for the extension name (opens extension settings)
@@ -329,8 +348,9 @@ var GlassGrid = GObject.registerClass(
                     text: extension.metadata.name,
                     style_class: 'extension-name-label',
                     x_align: Clutter.ActorAlign.CENTER,
-                    width: this.height*0.18, //150,
+                    width: this.height*0.20, //150,
                     y_align: Clutter.ActorAlign.CENTER,
+                    x_expand: true,
                 });
                 let nameTxt = nameLabel.get_clutter_text();
                 nameTxt.set_line_wrap(true);
@@ -342,8 +362,9 @@ var GlassGrid = GObject.registerClass(
                     y_align: Clutter.ActorAlign.CENTER,
                     reactive: true,
                     can_focus: true,
-                    height: this.height*0.14, //120,
-                    width: this.height*0.20, //150,
+                    height: this.height*0.16, //120,
+                    width: this.height*0.24, //150,
+                    name: 'name_'+i,
                 });
                 if (extension.hasUpdate) {
                     nameBtn.add_style_class_name('extension-name-button-update');
@@ -393,16 +414,17 @@ var GlassGrid = GObject.registerClass(
                     style_class: 'extension-button-box',
                     x_align: Clutter.ActorAlign.CENTER,
                     y_align: Clutter.ActorAlign.CENTER,
-                    vertical: true,
-                    height: this.height*0.14, //120,
-                    width: this.height*0.06, //50,
+                    // vertical: true,
+                    // height: this.height*0.06 , //120,
+                    // width: this.height*0.14 , //50,
                     reactive: true,
                     track_hover: true,
                 });
                 
                 let prefsIcon = new St.Icon({
-                    icon_name: 'preferences-system-symbolic',   
-                    icon_size: this.height*0.03, //30,
+                    icon_name: 'preferences-system-symbolic',  
+                    style_class: 'extension-pref-icon', 
+                    // icon_size: this.height*0.03, //30,
                 });
                 let prefsButton = new St.Button({
                     style_class: 'extension-pref-button',
@@ -410,6 +432,7 @@ var GlassGrid = GObject.registerClass(
                     y_align: Clutter.ActorAlign.CENTER,
                     can_focus: true,
                     reactive: true,
+                    name: 'prefs_'+i,
                 });
                 prefsButton.set_child(prefsIcon);
 
@@ -430,7 +453,12 @@ var GlassGrid = GObject.registerClass(
                 let reloadStyleBtn = new St.Button({
                     label: '↺',
                     style_class: 'reload-style-button',
+                    x_align: Clutter.ActorAlign.CENTER,
+                    y_align: Clutter.ActorAlign.CENTER,
+                    height: this.height*0.050, //40,
+                    width: this.height*0.0515, //80,
                     can_focus: true,
+                    name: 'reloadStyle_'+i,
                 });
                 reloadStyleBtn.connect('clicked', () => {
                     this._reloadStylesheet(extension);
@@ -449,13 +477,16 @@ var GlassGrid = GObject.registerClass(
                     y_align: Clutter.ActorAlign.CENTER,
                     can_focus: true,
                     reactive: true,
-                    height: this.height*0.03,
-                    width: this.height*0.05,
+                    height: this.height*0.04,
+                    width: this.height*0.055,
+                    name: 'state_'+i,
                 });
                 // console.debug('State button: ' + stateButton);
                 stateButton.connect('clicked', () => {
+                    this.enablingDisabling = true;
                     if (extension.state == ExtensionState.ERROR){
                         stateSwitch.state = false;
+                        this.enablingDisabling = false;
                         return;
                     }
 
@@ -476,6 +507,7 @@ var GlassGrid = GObject.registerClass(
                             console.error('Error disabling extension: ' + uuid + ' ' + error);
                         }
                     }
+                    this.enablingDisabling = false;
                 });
 
                 btnBox.add_child(stateButton);
@@ -506,27 +538,29 @@ var GlassGrid = GObject.registerClass(
 
             this._fillGrid();
 
-            this.scroll.hscroll.adjustment.value = 0;
+            this._adjustment.value = 0;
 
             this.visible = true;
 
             global.stage.connectObject('notify::key-focus',
                 this._focusActorChanged.bind(this), this);
 
-            global.stage.set_key_focus(this._nameBtn1);
+            global.stage.set_key_focus(this.headerBox.titleLabel);
 
             let activeTheme = this._settings.get_string('bg-theme');
             if (activeTheme == "Dynamic Blur")
                 Meta.add_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+
+            log('scale factor '+this.scaleFactor);
         }
 
 
         // Hide the window. Grid children get destroyed in show()
         hide() {
-            
-            this.visible = false;
-
             global.stage.disconnectObject(this);
+
+            this.visible = false;
+            
             Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
         }
 
@@ -579,10 +613,14 @@ var GlassGrid = GObject.registerClass(
         vfunc_key_press_event(event) {
             let scrollAdjust = this._adjustment;
             let oldValue, newValue;
-
-            // console.debug('key pressed: '+event.keyval);
+            const focusedActor = global.stage.get_key_focus();
+            // console.log('key pressed: '+event.keyval);
+            // console.log('fcousactor: '+focusedActor);
 
             if (event.keyval == Clutter.KEY_Escape) {
+                // if (this.headerBox.settingsBtn.menu.box.contains(focusedActor))
+                //     this.headerBox.settingsBtn.menu.close(true);
+                // else
                 this.hide();
                 return Clutter.EVENT_STOP;
             }
@@ -590,91 +628,7 @@ var GlassGrid = GObject.registerClass(
                 ExtensionManager.openExtensionPrefs('custom-osd@neuromorph', '', {});
                 return Clutter.EVENT_STOP;
             }
-            else if (event.keyval != Clutter.KEY_Left && event.keyval != Clutter.KEY_Right && event.keyval != Clutter.KEY_Down && event.keyval != Clutter.KEY_Up)
-                return Clutter.EVENT_PROPAGATE;
-
-            // rightSteps: left to right steps of key press. Go from left 1 to right pageSize.
-            // leftSteps: right to left steps of key press. Go from right 1 to left pageSize.
-            switch (event.keyval) {
-                case Clutter.KEY_Right:
-                    if (this.rightStepsFull) { // Go to next page
-                        oldValue = scrollAdjust.value;
-                        scrollAdjust.value += scrollAdjust.page_increment;
-                        newValue = scrollAdjust.value;
-                        if (oldValue == newValue) break; // If already at end of scroll, do nothing
-                        this.rightSteps = this.pageSize - 2 * Math.floor((newValue - oldValue)/scrollAdjust.step_increment) + 1; // Calculate rightSteps on next page
-                        if (this.rightSteps < this.pageSize)
-                            this.rightStepsFull = false;
-                        this.leftSteps = this.pageSize - this.rightSteps + 1; // Calculate leftSteps on next page
-                        if (this.leftSteps == this.pageSize)
-                            this.leftStepsFull = true;
-                        else
-                            this.leftStepsFull = false;
-                        // console.debug('rightStep FULL ' + 'rightSteps: ' + this.rightSteps + ' leftSteps: ' + this.leftSteps);
-                    }
-                    else { // Go to next extension
-                        this.rightSteps += 1;
-                        if (this.rightSteps == this.pageSize) {
-                            this.rightStepsFull = true;
-                        }
-                        this.leftSteps -= 1;
-                        if (this.leftSteps < this.pageSize)
-                            this.leftStepsFull = false;
-                        // console.debug('rightStep NotFull ' + 'rightSteps: ' + this.rightSteps + ' leftSteps: ' + this.leftSteps);
-                    }
-                    break;
-                
-                case Clutter.KEY_Left:
-                    if (this.leftStepsFull) { // Go to previous page 
-                        oldValue = scrollAdjust.value;
-                        if (oldValue == 0) break; // If already at beginning of scroll, do nothing
-                        scrollAdjust.value -= scrollAdjust.page_increment;
-                        newValue = scrollAdjust.value;
-                        this.leftSteps = this.pageSize - 2 * Math.floor((oldValue - newValue)/scrollAdjust.step_increment) + 1; // Calculate leftSteps on previous page
-                        this.rightSteps = this.pageSize - this.leftSteps + 1; // Calculate rightSteps on previous page
-                        if (this.leftSteps < this.pageSize)
-                            this.leftStepsFull = false;
-                        if (this.rightSteps == this.pageSize)
-                            this.rightStepsFull = true;
-                        else
-                            this.rightStepsFull = false;
-                        // console.debug('leftStep FULL ' + 'rightSteps: ' + this.rightSteps + ' leftSteps: ' + this.leftSteps);
-                    }
-                    else { // Go to previous extension
-                        this.leftSteps += 1;
-                        if (this.leftSteps == this.pageSize) {
-                            this.leftStepsFull = true;
-                        }
-                        this.rightSteps -= 1;
-                        if (this.rightSteps < this.pageSize)
-                            this.rightStepsFull = false;
-                        // console.debug('leftStep NotFull ' + 'rightSteps: ' + this.rightSteps + ' leftSteps: ' + this.leftSteps);
-                    }
-                    break;
-
-                case Clutter.KEY_Down: // when in last column, last element, down will move to left, so handle it
-                    let lastIdx = this.extList.length - 1; 
-                    let r =  lastIdx % 4 + 1;
-                    let [col, row] = this._getGridXY(lastIdx); 
-                    let extBox = this.grid.get_child_at(col, row);
-                    let extNameBtn = extBox.get_child_at_index(0); 
-                    let extSwitchBtn = extBox.get_child_at_index(1).get_child_at_index(2); 
-                    let activeBtn = global.stage.get_key_focus();
-                    if ([1,2,3].includes(r)) {
-                        if (activeBtn == extNameBtn) {
-                            this.rightSteps -= 1; 
-                            this.leftSteps += 1;
-                        }
-                        else if (activeBtn == extSwitchBtn) {
-                            this.rightSteps -= 2; 
-                            this.leftSteps += 2; 
-                        }
-                    }
-                    break;
-
-                default:
-                    break;
-            }
+            
 
             return Clutter.EVENT_PROPAGATE;
         }                
@@ -786,7 +740,7 @@ class GlassGridExtension {
         );
     
         // Connect monitors-changed with setting Glass Grid position/size params
-        this._monitorsChangedId = Main.layoutManager.connect('monitors-changed', () => this.extGrid.setGlassGridParams());
+        this._monitorsChangedId = Main.layoutManager.connect('monitors-changed', () => this.extGrid._updateScale());
     }
     
     disable() {

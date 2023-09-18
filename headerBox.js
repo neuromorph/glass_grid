@@ -125,6 +125,28 @@ var HeaderBox = GObject.registerClass(
         this.extGrid.backgroundGroup._updateBackgrounds();
     }
 
+    _setHeaderBoxParams() {
+        this.aboutBtn.width = this.extGrid.height*0.052;
+        this.aboutBtn.height = this.extGrid.height*0.052;
+
+        this.egoBtn.height = this.extGrid.height*0.053; //40,
+        this.egoBtn.width = this.extGrid.height*0.065; //80,
+
+        // this.settingsIcon.icon_size = this.extGrid.height*0.029;
+        // this.settingsBtn.style = ` margin-right: ${this.extGrid.height*0.40}px;`;
+
+        this.titleLabel.width = this.extGrid.height*0.36;
+        // this.titleLabel.style = ` margin-right: ${this.extGrid.height*0.35}px;`;
+
+        // this.extAppIcon.icon_size = this.extGrid.height*0.028;
+
+        this.allStateBtn.height = this.extGrid.height*0.045;
+
+        this.modeBtn.height = this.extGrid.height*0.052; //40,
+        this.modeBtn.width = this.extGrid.height*0.052;
+
+    }
+
     // Create header box with buttons
     _createHeaderBox() {
 
@@ -135,66 +157,47 @@ var HeaderBox = GObject.registerClass(
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,
         });
-        let aboutBtn = new St.Button({
+        this.aboutBtn = new St.Button({
             child: aboutLabel,
             style_class: 'extension-about-button',
             x_align: Clutter.ActorAlign.START,
             y_align: Clutter.ActorAlign.CENTER,
             track_hover: true,
             reactive: true,
-            height: this.extGrid.height*0.052, //40,
-            width: this.extGrid.height*0.052, //80,
+            // height: this.extGrid.height*0.052, //40,
+            // width: this.extGrid.height*0.052, //80,
+            can_focus: true,
         });
-        aboutBtn.connect('clicked', () => {
+        this.aboutBtn.connect('clicked', () => {
             this.dialogOpen = true;
             this.aboutDialog.open(global.get_current_time(), true);
         });          
-        this.add_child(aboutBtn);
+        this.add_child(this.aboutBtn);
 
-        //  ẹg̣ọ
-        let egoLabel = new St.Label({
-            text: 'ẹg̣ọ',
-            style_class: 'extension-ego-label',
-            x_align: Clutter.ActorAlign.CENTER,
-            y_align: Clutter.ActorAlign.CENTER,
-        });
-        let egoBtn = new St.Button({
-            child: egoLabel,
-            style_class: 'extension-ego-button',
-            x_align: Clutter.ActorAlign.START,
-            y_align: Clutter.ActorAlign.CENTER,
-            track_hover: true,
-            reactive: true,
-            height: this.extGrid.height*0.052, //40,
-            width: this.extGrid.height*0.065, //80,
-        });
-        egoBtn.connect('clicked', () => {
-            this.extGrid.hide();
-            Util.spawn(['gio', 'open', 'https://extensions.gnome.org/']);
-        });          
-        this.add_child(egoBtn);
 
         ////// Settings button
         this.extGrid.menuOpen = false;
-        let settingsIcon = new St.Icon({
+        this.settingsIcon = new St.Icon({
             icon_name: 'preferences-system-symbolic',
-            icon_size: this.extGrid.height*0.029, //40,
+            style_class: 'settings-icon',
+            // icon_size: this.extGrid.height*0.029, //40,
         });
+        // this.settingsIcon.add_style_class_name('settings-icon');
         this.settingsBtn = new PanelMenu.Button(0.0, 'extgridSettingsBtn', false);
         this.settingsBtn.can_focus = true;
         this.settingsBtn.add_style_class_name('settings-button');
-        this.settingsBtn.style = ` margin-right: ${this.extGrid.height*0.40}px;`;
-        this.settingsBtn.add_child(settingsIcon);
+        // this.settingsBtn.style = ` margin-right: ${this.extGrid.height*0.40}px;`;
+        this.settingsBtn.add_child(this.settingsIcon);
         this.settingsBtn.menu.sensitive = true;
         this.settingsBtn.menu.connect('open-state-changed', (actor, open) => {
             if (open) {
                 this.extGrid.menuOpen = true;
                 this.extGrid.menuOpening = true;
-                global.stage.set_key_focus(this.settingsBtn.menu.firstMenuItem);
+                // global.stage.set_key_focus(this.settingsBtn.menu.firstMenuItem);
                 setTimeout(() => {this.extGrid.menuOpening = false;}, 200);
             }
             else {
-                global.stage.set_key_focus(this.extGrid._nameBtn1);
+                global.stage.set_key_focus(this.settingsBtn);
                 this.extGrid.menuOpen = false;
             }
             return Clutter.EVENT_PROPAGATE;
@@ -246,6 +249,12 @@ var HeaderBox = GObject.registerClass(
                 // log('btn key event '+ event.get_key_symbol());
                 if (event.get_key_symbol() == Clutter.KEY_Escape) {
                     this.settingsBtn.menu.close(true);
+                    return Clutter.EVENT_STOP;
+                }
+                if (actor == this.settingsBtn.menu.firstMenuItem && event.get_key_symbol() == Clutter.KEY_Up){
+                    global.stage.set_key_focus(this.settingsBtn);
+                    this.settingsBtn.menu.close(true);
+                    return Clutter.EVENT_STOP;
                 }
                 return Clutter.EVENT_PROPAGATE;
             });
@@ -253,27 +262,92 @@ var HeaderBox = GObject.registerClass(
 
         ////////////////////////////////
 
-        let titleLabel = new St.Label({
+        // 🌑︎ 🌓︎ Theme Mode ✱ ✸
+        let modeLabel = new St.Label({
+            // text: '🌓︎',
+            style_class: 'extension-mode-label',
+            x_align: Clutter.ActorAlign.CENTER,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        const mode = this._settings.get_string('theme-mode');
+        if(mode == 'Dark')
+            modeLabel.text = '🌑︎';
+        else
+            modeLabel.text = '🌓︎';
+        this.modeBtn = new St.Button({
+            child: modeLabel,
+            style_class: 'extension-mode-button',
+            x_align: Clutter.ActorAlign.END,
+            y_align: Clutter.ActorAlign.CENTER,
+            track_hover: true,
+            reactive: true,
+            // height: this.extGrid.height*0.052, //40,
+            // width: this.extGrid.height*0.052, //80,
+            can_focus: true,
+        });
+        this.modeBtn.connect('clicked', () => {
+            if (modeLabel.text == '🌓︎') {
+                modeLabel.text = '🌑︎';
+                this._settings.set_string('theme-mode','Dark');
+            }
+            else {
+                modeLabel.text = '🌓︎';
+                this._settings.set_string('theme-mode','Light');
+            }
+            this.extGrid.backgroundGroup._updateBackgrounds();
+        });          
+        this.add_child(this.modeBtn);
+
+        // Title Glass Grid
+        this.titleLabel = new St.Label({
             text: '⋮⋮⋮ Glass Grid',
             style_class: 'extension-title-label',
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,
-            width: this.extGrid.height*0.4, //300,
+            // width: this.extGrid.height*0.4, //300,
+            x_expand: true,
             track_hover: true,
             reactive: true,
+            can_focus: true,
         });
-        titleLabel.style = ` margin-right: ${this.extGrid.height*0.35}px;`;
-        this.add_child(titleLabel);
+        // this.titleLabel.style = ` margin-right: ${this.extGrid.height*0.35}px;`;
+        this.add_child(this.titleLabel);
 
-        let extAppIcon = new St.Icon({
+        //  ẹg̣ọ
+        let egoLabel = new St.Label({
+            text: 'ẹg̣ọ',
+            style_class: 'extension-ego-label',
+            x_align: Clutter.ActorAlign.CENTER,
+            y_align: Clutter.ActorAlign.START,
+        });
+        this.egoBtn = new St.Button({
+            child: egoLabel,
+            style_class: 'extension-ego-button',
+            x_align: Clutter.ActorAlign.START,
+            y_align: Clutter.ActorAlign.CENTER,
+            track_hover: true,
+            reactive: true,
+            // height: this.extGrid.height*0.053, //40,
+            // width: this.extGrid.height*0.065, //80,
+            can_focus: true,
+        });
+        this.egoBtn.connect('clicked', () => {
+            this.extGrid.hide();
+            Util.spawn(['gio', 'open', 'https://extensions.gnome.org/']);
+        });          
+        this.add_child(this.egoBtn);
+
+        this.extAppIcon = new St.Icon({
             icon_name: 'extensions-symbolic',
-            icon_size: this.extGrid.height*0.028, //40,
+            style_class: 'ext-app-icon',
+            // icon_size: this.extGrid.height*0.028, //40,
         });
         this.extAppButton = new St.Button({
-            child: extAppIcon,
+            child: this.extAppIcon,
             style_class: 'ext-app-button',
             x_align: Clutter.ActorAlign.END,
             reactive: true,
+            can_focus: true,
         });
         this.extAppButton.connect('clicked', () => {
             this.extGrid.hide();
@@ -289,9 +363,10 @@ var HeaderBox = GObject.registerClass(
             style_class: 'all-state-button',
             x_align: Clutter.ActorAlign.END,
             y_align: Clutter.ActorAlign.CENTER,
-            height: this.extGrid.height*0.045, // 40,
+            // height: this.extGrid.height*0.045, // 40,
             // width: 100,
             reactive: true,
+            can_focus: true,
         });
         this.allStateBtn.connect('clicked', () => {
             allExtSwch.toggle();
@@ -305,40 +380,7 @@ var HeaderBox = GObject.registerClass(
         });
         this.add_child(this.allStateBtn);
 
-        // 🌑︎ 🌓︎ Theme Mode ✱ ✸
-        let modeLabel = new St.Label({
-            // text: '🌓︎',
-            style_class: 'extension-mode-label',
-            x_align: Clutter.ActorAlign.CENTER,
-            y_align: Clutter.ActorAlign.CENTER,
-        });
-        const mode = this._settings.get_string('theme-mode');
-        if(mode == 'Dark')
-            modeLabel.text = '🌑︎';
-        else
-            modeLabel.text = '🌓︎';
-        let modeBtn = new St.Button({
-            child: modeLabel,
-            style_class: 'extension-mode-button',
-            x_align: Clutter.ActorAlign.END,
-            y_align: Clutter.ActorAlign.CENTER,
-            track_hover: true,
-            reactive: true,
-            height: this.extGrid.height*0.052, //40,
-            width: this.extGrid.height*0.052, //80,
-        });
-        modeBtn.connect('clicked', () => {
-            if (modeLabel.text == '🌓︎') {
-                modeLabel.text = '🌑︎';
-                this._settings.set_string('theme-mode','Dark');
-            }
-            else {
-                modeLabel.text = '🌓︎';
-                this._settings.set_string('theme-mode','Light');
-            }
-            this.extGrid.backgroundGroup._updateBackgrounds();
-        });          
-        this.add_child(modeBtn);
+        this._setHeaderBoxParams();
 
     }
 
@@ -357,7 +399,7 @@ var HeaderBox = GObject.registerClass(
         });
         let closedId = this.aboutDialog.connect('closed', () => {
             // console.debug('The dialog was dismissed');
-            global.stage.set_key_focus(this.extGrid._nameBtn1);
+            global.stage.set_key_focus(this.aboutBtn);
             this.dialogOpen = false;
         });
 
@@ -508,7 +550,7 @@ var HeaderBox = GObject.registerClass(
             }
         }
 
-        global.stage.set_key_focus(this.extGrid._nameBtn1);
+        global.stage.set_key_focus(this.allStateBtn);
         this.extGrid.enablingDisablingAll = false; 
     }
 
