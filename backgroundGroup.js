@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
+ * author: neuromorph
  */
 
 /* exported BackgroundGroup, MAINBOX_STYLE, MAINBOX_MODE */
@@ -239,7 +240,23 @@ var BackgroundGroup = GObject.registerClass(
             const boxChildren = extbox.get_children();
             boxChildren.forEach(child => connectRp(child));
             boxChildren[1].get_children().forEach(child => connectRp(child));
-        })
-        
+        })       
     }
+    
+    destroy() {
+        for (let i = 0; i < this._bgManagers.length; i++)
+            this._bgManagers[i].destroy();
+
+        this._bgManagers = [];
+        this.get_children().forEach(child => {
+            child.remove_effect_by_name('extgrid-blur');
+            child.remove_effect_by_name('extgrid-dynamic');
+        });
+        this.destroy_all_children();
+
+        Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+
+        super.destroy();
+    }
+    
 }); 

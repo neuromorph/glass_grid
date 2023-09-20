@@ -4,14 +4,7 @@
 */
 
 .extension-grid-wrapper {
-  /* background-image: url(media/darkmode.svg);
-  background-repeat: no-repeat;
-  background-size: cover; */
-  /* background-color: rgba(255, 255, 255, 0.6);  */
-  /* border-color: rgba(255, 255, 255, 0.6);
-  border-width: 6px;
-  border-radius: 10px !important; */
-  /* overflow: clip; */
+  overflow: clip;
 }
 
 .mainbox-color-gradient {
@@ -57,7 +50,7 @@
 
 .mainbox-gradient-dark {
   /* -st-background-image-shadow: 0px 0px 4px 4px rgba(0, 0, 0, 0.15); */
-  background-color: rgba(50, 50, 50, 0.4);
+  background-color: rgba(50, 50, 50, 0.5);
 }
 .mainbox-gradient-light {
   /* -st-background-image-shadow: 0px 5px 0px rgba(255, 255, 255, 0.15); */
@@ -116,8 +109,13 @@
 
 .settings-icon {
   /* size: 1rem; */
-  width: 1.7em;
-  height: 1.7em;
+  width: 1.65em;
+  height: 1.65em;
+}
+
+.hotkey-entry {
+  width: 5.8em;
+  height: 1.0em;
 }
 
 .extension-title-label {
@@ -130,7 +128,7 @@
   text-shadow: 0px 1px 2px 0px rgba(50, 50, 50, 0.1);
   margin-left: 10em;
   margin-right: 10em;
-  border-radius: 0.3em;
+  border-radius: 0.5em;
 }
 .extension-title-label:hover, .extension-title-label:focus {
   color: rgba(255, 255, 255, 1);
@@ -138,38 +136,41 @@
 }
 
 .ext-app-icon {
-  width: 1.7em;
-  height: 1.7em;
+  width: 1.6em;
+  height: 1.6em;
 }
 .ext-app-button {
   border-radius: 0.85em; 
   border-width: 2px;
   /* border-color: #7e7c68; */
   padding: 2px 6px;
-  margin-left: 6px;
+  margin-left: 5px;
   margin-right: 4px;
   color: rgba(255, 255, 255, 0.9);
 } 
 
 .all-state-button {
-  /* border-radius: 10px; 
-  border-width: 2px;
+  border-radius: 10px; 
+  /* border-width: 2px;
   border-color: #7e7c68; */
-  padding: 8px 8px;
+  padding: 4px 4px;
   color: white;
 } 
 .all-state-button:hover, .all-state-button:focus {
-  padding: 6px 8px;
+  /*padding: 6px 5px;*/
+   box-shadow: 0px 0px 1px 0px rgba(255, 255, 255, 0.2);
 }
-.all-state-switch:hover {
-  border: 5px solid #000;
+.all-state-switch {
+  width: 2.4em;
+  height: 1.4em;
 }
 
-.settings-button-container {
-  border-radius: 0.85em; 
+
+.settings-button {
+  border-radius: 0.75em; 
   border-width: 2px;
   /* border-color: #7e7c68; */
-  padding: 2px 3px !important;
+  padding: 3px 3px !important;
   color: rgba(255, 255, 255, 0.9);
   margin-left: 6px;
   margin-right: 6px;
@@ -309,7 +310,7 @@
   border-width: 2px;
   /* border-color: #7e7c68; */
   padding: 2px 5px;
-  margin-left: 0px;
+  margin-left: 2px;
   margin-right: 6px;
   color: #8d8c8c;
   opacity: 0.5;
@@ -318,17 +319,17 @@
   border-color: #8d8c8c;
 }
 
-.reload-style-button {
-  border-radius: 0.6em; 
-  border-width: 2px;
-  /* border-color: #7e7c68; */
-  /* padding: -2px -2px; */
-  /* margin-top: 7px;
-  margin-bottom: 7px;
-  margin-left: 0px;
-  margin-right: 0px; */
+.reload-style-label {
+  padding: 0px 0px; 
   font-size: large;
   font-weight: normal;
+}
+.reload-style-button {
+  border-radius: 0.85em; 
+  border-width: 2px;
+  /* border-color: #7e7c68; */
+  padding: 0px 0px; 
+  margin-top: 3px;
 }
 .reload-style-button:hover, .reload-style-button:focus
  {
@@ -369,10 +370,35 @@
 
 .grid-viewport {
   /* padding: 0.2em 0.25em 0.2em 0.25em; */
-  margin: 0.8em 1em 0em 1em;
+  margin: 1em 1em 0em 1em;
   /* border-width: 1px;
   border-color: red;  */
 }
+
+
+.page-switcher {
+  color: rgba(0, 0, 0, 1);
+  background-color: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+
+  margin-top: 0.4em;
+  spacing: 0.3em;
+  padding: 0.4em 0.8em;
+}
+
+.pg-switcher-indicator {
+  background-color: rgba(0, 0, 0, 0.65);
+  padding: 0.2em 0.2em;
+  margin: 0.3em;
+  border-radius: 1em;
+}
+.pg-switcher-indicator-active  {
+  background-color: rgba(0, 0, 0, 1);
+  padding: 0.2em 0.8em;
+  margin: 0.3em;
+}
+
 
 
 

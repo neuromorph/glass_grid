@@ -13,26 +13,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * SPDX-License-Identifier: GPL-2.0-or-later
+ * SPDX-License-Identifier: GPL-2.0-or-later 
+ * author: neuromorph
  */
 
 /* exported init */
 
 const { Clutter, Gio, GObject, St, Pango, Atk, Meta, Shell, GLib } = imports.gi;
 const Main = imports.ui.main;
-const ExtensionManager = Main.extensionManager;
 const PopupMenu = imports.ui.popupMenu;
 const Layout = imports.ui.layout;
 const SwipeTracker = imports.ui.swipeTracker;
 const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const ExtensionState = ExtensionUtils.ExtensionState;
 
 const {gettext: _, pgettext} = ExtensionUtils;
+const ExtensionManager = Main.extensionManager;
+const ExtensionState = ExtensionUtils.ExtensionState;
+
+const Me = ExtensionUtils.getCurrentExtension();
 const BackgroundGroup = Me.imports.backgroundGroup;
 const HeaderBox = Me.imports.headerBox;
-
-
+const SwitcherPopup = Me.imports.pageSwitcherPopup;
 
 // Class for the overlay window
 var GlassGrid = GObject.registerClass(
@@ -85,12 +86,15 @@ var GlassGrid = GObject.registerClass(
             // Create Scroll Grid
             this._createScrollView();
             this._createGridBox();
+            
+            // Page switcher popup
+            this.switcherPopup = new SwitcherPopup.PageSwitcherPopup(this);
+            this.insert_child_above(this.switcherPopup, null);
  
         }
 
         _setGlassGridParams() {
-
-            const scale = this.scaleFactor; log('scale '+scale);
+            const scale = this.scaleFactor; 
             const pMonitor = Main.layoutManager.primaryMonitor;  
             // const pMonitor = Main.layoutManager.monitors[0];
             const SCREEN_WIDTH = pMonitor.width;
@@ -105,8 +109,8 @@ var GlassGrid = GObject.registerClass(
             this.y = pMonitor.y + SCREEN_HEIGHT/2 - WINDOW_HEIGHT/2; 
             this.width = WINDOW_WIDTH;
             this.height = WINDOW_HEIGHT;
-            console.log('pmontor x y '+pMonitor.x+' '+pMonitor.y);
-            console.log('grid x y width height'+this.x+' '+this.y+' '+this.width+' '+this.height);
+            // console.log('pmontor x y '+pMonitor.x+' '+pMonitor.y);
+            // console.log('grid x y width height'+this.x+' '+this.y+' '+this.width+' '+this.height);
 
             this.mainbox.width = WINDOW_WIDTH;
             this.mainbox.height = WINDOW_HEIGHT;
@@ -117,14 +121,14 @@ var GlassGrid = GObject.registerClass(
             this.extBoxWidth = (WINDOW_WIDTH * 0.88) / GRID_COLS; //reduce margin/spacing
             this.extBoxHeight = this.extBoxWidth / 1.38; 
     
-            this.backgroundGroup._updateBackgrounds();
-            
+            this.backgroundGroup._updateBackgrounds();       
         }
 
         _updateScale() {
             this.scaleFactor = this.themeContext.scale_factor;
             this._setGlassGridParams();
-            this.headerBox._setHeaderBoxParams();
+            this.headerBox.setHeaderBoxParams();
+            this.switcherPopup.setSwitcherPopupParams();
         }
 
         _focusActorChanged() {
@@ -143,7 +147,13 @@ var GlassGrid = GObject.registerClass(
                 const pageNum = Math.floor((i+1) / (this.gridCols*this.gridRows)); 
                 // log('grid col,row '+this.gridCols+' '+this.gridRows);
                 // log('i, pgnum, scrollval '+i+' '+pageNum+' '+scrollAdjust.value);
-                this._adjustment.value = pageNum * this._adjustment.page_increment;
+                const value = pageNum * this._adjustment.page_increment;
+                const duration = 300;
+                this._adjustment.ease(value, {
+                    mode: Clutter.AnimationMode.EASE_OUT_CUBIC,
+                    duration,
+                    onComplete: () => this.switcherPopup.display(),
+                });
                 // log('new scroll val '+this._adjustment.value);
 
             }
@@ -156,7 +166,7 @@ var GlassGrid = GObject.registerClass(
             // Create a scrollable container for the grid
             this.scroll = new St.ScrollView({
                 style_class: 'extension-window-scroll',
-                hscrollbar_policy: St.PolicyType.AUTOMATIC,
+                hscrollbar_policy: St.PolicyType.EXTERNAL,
                 vscrollbar_policy: St.PolicyType.NEVER,
                 overlay_scrollbars: false,
                 enable_mouse_scrolling: true,
@@ -208,6 +218,8 @@ var GlassGrid = GObject.registerClass(
             }
             // console.debug('scroll  direction '+ event.get_scroll_direction() + ' '+ this._adjustment.value);
 
+            this.switcherPopup.display();
+            
             return Clutter.EVENT_STOP;
         }
 
@@ -232,6 +244,8 @@ var GlassGrid = GObject.registerClass(
             const adjustment = this._adjustment;
             adjustment.value = progress * adjustment.page_size;
             // console.debug('swipe update '+ adjustment.value);
+            
+            this.switcherPopup.display();
 
             return Clutter.EVENT_PROPAGATE;
         }
@@ -422,7 +436,7 @@ var GlassGrid = GObject.registerClass(
                 });
                 
                 let prefsIcon = new St.Icon({
-                    icon_name: 'preferences-system-symbolic',  
+                    icon_name: 'emblem-system-symbolic',  
                     style_class: 'extension-pref-icon', 
                     // icon_size: this.height*0.03, //30,
                 });
@@ -450,8 +464,14 @@ var GlassGrid = GObject.registerClass(
                 btnBox.add_child(prefsButton);
                 
                 // Reload stylesheet
+                let reloadLabel = new St.Label({
+                    text: '↺',
+                    style_class: 'reload-style-label',
+                    x_align: Clutter.ActorAlign.CENTER,
+                    y_align: Clutter.ActorAlign.CENTER,
+                });
                 let reloadStyleBtn = new St.Button({
-                    label: '↺',
+                    child: reloadLabel,
                     style_class: 'reload-style-button',
                     x_align: Clutter.ActorAlign.CENTER,
                     y_align: Clutter.ActorAlign.CENTER,
@@ -529,16 +549,12 @@ var GlassGrid = GObject.registerClass(
             if (extGridIdx != 0) {        
                 extArr.splice(0, 0, extArr.splice(extGridIdx, 1)[0]); 
             }
-            
-            // Initialize keyboard navigation steps
-            this.leftSteps = this.pageSize;
-            this.rightSteps = 1;
-            this.leftStepsFull = true; 
-            this.rightStepsFull = false;
 
             this._fillGrid();
 
             this._adjustment.value = 0;
+            
+            this.switcherPopup.display();
 
             this.visible = true;
 
@@ -551,7 +567,7 @@ var GlassGrid = GObject.registerClass(
             if (activeTheme == "Dynamic Blur")
                 Meta.add_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
 
-            log('scale factor '+this.scaleFactor);
+            // log('scale factor '+this.scaleFactor);
         }
 
 
@@ -611,24 +627,21 @@ var GlassGrid = GObject.registerClass(
 
         // Handle key press events for keyboard navigation
         vfunc_key_press_event(event) {
-            let scrollAdjust = this._adjustment;
-            let oldValue, newValue;
-            const focusedActor = global.stage.get_key_focus();
+
             // console.log('key pressed: '+event.keyval);
-            // console.log('fcousactor: '+focusedActor);
 
             if (event.keyval == Clutter.KEY_Escape) {
-                // if (this.headerBox.settingsBtn.menu.box.contains(focusedActor))
-                //     this.headerBox.settingsBtn.menu.close(true);
-                // else
+                if (this.menuOpen) {
+                    this.headerBox.settingsBtn.menu.close(true);
+                    return Clutter.EVENT_STOP;
+                }
                 this.hide();
                 return Clutter.EVENT_STOP;
             }
             else if (event.keyval == Clutter.KEY_c) {
                 ExtensionManager.openExtensionPrefs('custom-osd@neuromorph', '', {});
                 return Clutter.EVENT_STOP;
-            }
-            
+            }          
 
             return Clutter.EVENT_PROPAGATE;
         }                
@@ -755,18 +768,11 @@ class GlassGridExtension {
         ExtensionManager.disconnectObject(this);
         Main.wm.removeKeybinding('hotkey');
 
-        const headerBox = this.extGrid.headerBox;
-
-        if (headerBox.aboutDialog)
-            headerBox.aboutDialog.destroy();
-        
-        if (headerBox.panelIndicator) {
-            headerBox.panelIndicator.disconnect(headerBox.panelIndicatorId);
-            headerBox.panelIndicator.destroy();
-            headerBox.panelIndicator = null;
-        }
-
+        this.extGrid.backgroundGroup.destroy();
+        this.extGrid.headerBox.destroy();      
+        this.extGrid.switcherPopup.destroy();
         this.extGrid._destroyGridChildren();
+
         this.extGrid._settings = null;
         this.extGrid.destroy();
         this.extGrid = null;
@@ -774,8 +780,6 @@ class GlassGridExtension {
         Main.layoutManager.disconnect(this._monitorsChangedId);
     }
 }
-
-
 
 function init() {
     ExtensionUtils.initTranslations();

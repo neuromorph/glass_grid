@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
+ * author: neuromorph
  */
 
 /* exported HeaderBox */
@@ -29,66 +30,6 @@ const Util = imports.misc.util;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const BackgroundGroup = Me.imports.backgroundGroup;
-
-
-// Class for Popup menu item with Entry for the hotkey
-const PopupEntryMenuItem = GObject.registerClass(
-    class PopupEntryMenuItem extends PopupMenu.PopupBaseMenuItem {
-        _init(text, headerBox, params) {
-            super._init(params);
-
-            this._settings = headerBox._settings;
-
-            this._label = new St.Label({
-                text: text,
-                y_align: Clutter.ActorAlign.CENTER,
-                x_align: Clutter.ActorAlign.START,
-                x_expand: true,
-            });
-            this.add_child(this._label);
-
-            this._entry = new St.Entry({
-                can_focus: true,
-                track_hover: true,
-                reactive: true,
-                x_align: Clutter.ActorAlign.END,
-                y_align: Clutter.ActorAlign.CENTER,
-                x_expand: true,
-                y_expand: false,
-                width: 100,
-                height: 30,
-                text: this._settings.get_strv('hotkey')[0],
-                hint_text: 'Enter hotkey',
-            });
-            this.add_child(this._entry);
-
-            this._entry.clutter_text.connect('text-changed', () => {
-                this._settings.set_strv('hotkey', [this._entry.text]);
-            });
-
-            this._entry.connect('key-press-event', (entry, event) => {
-                // log('entry key '+event.get_key_symbol());
-                if (event.get_key_symbol() == Clutter.KEY_Escape) {
-                    headerBox.settingsBtn.menu.close(true);
-                    return Clutter.EVENT_STOP;
-                }
-                return Clutter.EVENT_PROPAGATE;
-            });
-        }
-
-        activate(event) {
-            this._entry.grab_key_focus();           
-        }
-
-        set entryText(text) {
-            this._entry.text = text;
-        }
-
-        get entryText() {
-            return this._entry.text;
-        }
-    }
-);
 
 
 var HeaderBox = GObject.registerClass(
@@ -125,7 +66,7 @@ var HeaderBox = GObject.registerClass(
         this.extGrid.backgroundGroup._updateBackgrounds();
     }
 
-    _setHeaderBoxParams() {
+    setHeaderBoxParams() {
         this.aboutBtn.width = this.extGrid.height*0.052;
         this.aboutBtn.height = this.extGrid.height*0.052;
 
@@ -134,17 +75,21 @@ var HeaderBox = GObject.registerClass(
 
         // this.settingsIcon.icon_size = this.extGrid.height*0.029;
         // this.settingsBtn.style = ` margin-right: ${this.extGrid.height*0.40}px;`;
+        
+        // this.hotkeyMenuItem._entry.height =  this.extGrid.height*0.038;
+        // this.hotkeyMenuItem._entry.width =  this.extGrid.height*0.125;
+        
+        this.indicatorMenuItem._switch.height = this.extGrid.height*0.028;
+        this.indicatorMenuItem._switch.width = this.extGrid.height*0.052;
 
         this.titleLabel.width = this.extGrid.height*0.36;
         // this.titleLabel.style = ` margin-right: ${this.extGrid.height*0.35}px;`;
 
         // this.extAppIcon.icon_size = this.extGrid.height*0.028;
-
-        this.allStateBtn.height = this.extGrid.height*0.045;
+        // this.allStateBtn.height = this.extGrid.height*0.04;
 
         this.modeBtn.height = this.extGrid.height*0.052; //40,
         this.modeBtn.width = this.extGrid.height*0.052;
-
     }
 
     // Create header box with buttons
@@ -164,8 +109,6 @@ var HeaderBox = GObject.registerClass(
             y_align: Clutter.ActorAlign.CENTER,
             track_hover: true,
             reactive: true,
-            // height: this.extGrid.height*0.052, //40,
-            // width: this.extGrid.height*0.052, //80,
             can_focus: true,
         });
         this.aboutBtn.connect('clicked', () => {
@@ -178,15 +121,12 @@ var HeaderBox = GObject.registerClass(
         ////// Settings button
         this.extGrid.menuOpen = false;
         this.settingsIcon = new St.Icon({
-            icon_name: 'preferences-system-symbolic',
+            icon_name: 'emblem-system-symbolic',
             style_class: 'settings-icon',
-            // icon_size: this.extGrid.height*0.029, //40,
         });
-        // this.settingsIcon.add_style_class_name('settings-icon');
         this.settingsBtn = new PanelMenu.Button(0.0, 'extgridSettingsBtn', false);
         this.settingsBtn.can_focus = true;
         this.settingsBtn.add_style_class_name('settings-button');
-        // this.settingsBtn.style = ` margin-right: ${this.extGrid.height*0.40}px;`;
         this.settingsBtn.add_child(this.settingsIcon);
         this.settingsBtn.menu.sensitive = true;
         this.settingsBtn.menu.connect('open-state-changed', (actor, open) => {
@@ -223,15 +163,13 @@ var HeaderBox = GObject.registerClass(
         let hotkeyMenuItem = new PopupEntryMenuItem("Hotkey", this, { can_focus: true });
         this.settingsBtn.menu.addMenuItem(hotkeyMenuItem);
 
-        let indicatorMenuItem = new PopupMenu.PopupSwitchMenuItem("Panel Indicator", this._settings.get_boolean('show-indicator'), { can_focus: true }); 
-        indicatorMenuItem.connect('toggled', (actor, state) => {
+        this.indicatorMenuItem = new PopupMenu.PopupSwitchMenuItem("Panel Indicator", this._settings.get_boolean('show-indicator'), { can_focus: true }); 
+        this.indicatorMenuItem.connect('toggled', (actor, state) => {
             this._addRemovePanelIndicator(state)
             return Clutter.EVENT_PROPAGATE;
         });
-        indicatorMenuItem._switch.y_align = Clutter.ActorAlign.CENTER;
-        indicatorMenuItem._switch.height = this.extGrid.height*0.028;
-        indicatorMenuItem._switch.width = this.extGrid.height*0.052;
-        this.settingsBtn.menu.addMenuItem(indicatorMenuItem);
+        this.indicatorMenuItem._switch.y_align = Clutter.ActorAlign.CENTER;
+        this.settingsBtn.menu.addMenuItem(this.indicatorMenuItem);
 
         // Panel Menu button (settings button) already has a parent so we need to remove it and add it to the header box
         let container = this.settingsBtn.container;
@@ -281,8 +219,6 @@ var HeaderBox = GObject.registerClass(
             y_align: Clutter.ActorAlign.CENTER,
             track_hover: true,
             reactive: true,
-            // height: this.extGrid.height*0.052, //40,
-            // width: this.extGrid.height*0.052, //80,
             can_focus: true,
         });
         this.modeBtn.connect('clicked', () => {
@@ -304,13 +240,11 @@ var HeaderBox = GObject.registerClass(
             style_class: 'extension-title-label',
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,
-            // width: this.extGrid.height*0.4, //300,
             x_expand: true,
             track_hover: true,
             reactive: true,
             can_focus: true,
         });
-        // this.titleLabel.style = ` margin-right: ${this.extGrid.height*0.35}px;`;
         this.add_child(this.titleLabel);
 
         //  ẹg̣ọ
@@ -323,12 +257,10 @@ var HeaderBox = GObject.registerClass(
         this.egoBtn = new St.Button({
             child: egoLabel,
             style_class: 'extension-ego-button',
-            x_align: Clutter.ActorAlign.START,
+            x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,
             track_hover: true,
             reactive: true,
-            // height: this.extGrid.height*0.053, //40,
-            // width: this.extGrid.height*0.065, //80,
             can_focus: true,
         });
         this.egoBtn.connect('clicked', () => {
@@ -338,9 +270,8 @@ var HeaderBox = GObject.registerClass(
         this.add_child(this.egoBtn);
 
         this.extAppIcon = new St.Icon({
-            icon_name: 'extensions-symbolic',
+            icon_name: 'application-x-addon-symbolic',
             style_class: 'ext-app-icon',
-            // icon_size: this.extGrid.height*0.028, //40,
         });
         this.extAppButton = new St.Button({
             child: this.extAppIcon,
@@ -363,8 +294,6 @@ var HeaderBox = GObject.registerClass(
             style_class: 'all-state-button',
             x_align: Clutter.ActorAlign.END,
             y_align: Clutter.ActorAlign.CENTER,
-            // height: this.extGrid.height*0.045, // 40,
-            // width: 100,
             reactive: true,
             can_focus: true,
         });
@@ -380,7 +309,7 @@ var HeaderBox = GObject.registerClass(
         });
         this.add_child(this.allStateBtn);
 
-        this._setHeaderBoxParams();
+        this.setHeaderBoxParams();
 
     }
 
@@ -431,25 +360,36 @@ var HeaderBox = GObject.registerClass(
             title: `Tool Guide`,
         });
         listLayout.x_expand = true;
-        this.aboutDialog.contentLayout.add_child(listLayout);
+        this.aboutDialog.contentLayout.add_child(listLayout);       
 
+        const topBar = new Dialog.ListSectionItem({
+            title: '= Top Bar =',        
+        });
+        listLayout.list.add_child(topBar);
+        
+        const setting = new Dialog.ListSectionItem({
+            icon_actor: new St.Icon({icon_name: 'emblem-system-symbolic', 
+                                     icon_size: 12}),
+            description: `   Open settings menu. Esc to close.`,
+        });
+        listLayout.list.add_child(setting);
+       
+        const mode = new Dialog.ListSectionItem({
+            icon_actor: new St.Label({text: '🌓︎'}),
+            description: '   Theme mode dark / light.',
+        });
+        listLayout.list.add_child(mode);
+         
         const ego = new Dialog.ListSectionItem({
-            description: 'ẹg̣ọ          Extensions web: extensions.gnome.org',
+            icon_actor: new St.Label({text: 'ẹg̣ọ'}),
+            description: 'Extensions web: extensions.gnome.org',
         });
         listLayout.list.add_child(ego);
 
-        const setting = new Dialog.ListSectionItem({
-            icon_actor: new St.Icon({icon_name: 'preferences-system-symbolic', 
-                                     icon_size: 12}),
-            description: `             Top: Open settings menu. Esc to close
-             Grid: Open extension preferences `,
-        });
-        listLayout.list.add_child(setting);
-
         const extApp = new Dialog.ListSectionItem({
-            icon_actor: new St.Icon({icon_name: 'extensions-symbolic', 
+            icon_actor: new St.Icon({icon_name: 'application-x-addon-symbolic', 
                                      icon_size: 12}),
-            description: '             Open Extensions app',
+            description: '   Open Extensions app.',
         });
         listLayout.list.add_child(extApp);
 
@@ -457,18 +397,44 @@ var HeaderBox = GObject.registerClass(
         const switchIcon = Gio.FileIcon.new(Gio.File.new_for_path(switchIconPath));
         const allSwitch = new Dialog.ListSectionItem({
             icon_actor: new St.Icon({gicon: switchIcon, 
-                                     width: 14,
+                                     width: 13,
                                      height: 2, 
                                      }),
-            description: `            Top: Enable/Disable all extensions except this
-            Grid: Enable/Disable selected extension`,
+            description: `   Enable/Disable all extensions except Glass Grid.`,
         });
         listLayout.list.add_child(allSwitch);
+        
+        const seperator = new Dialog.ListSectionItem({
+            title: '      ',        
+        });
+        listLayout.list.add_child(seperator);
+        
+        const grid = new Dialog.ListSectionItem({
+            title: '⋮⋮⋮ Grid',        
+        });
+        listLayout.list.add_child(grid);
+        
+        const pref = new Dialog.ListSectionItem({
+            icon_actor: new St.Icon({icon_name: 'emblem-system-symbolic', 
+                                     icon_size: 12}),
+            description: `   Open extension preferences.`,
+        });
+        listLayout.list.add_child(pref);
 
         const styleReload = new Dialog.ListSectionItem({
-            description: '↺             Reload stylesheet for the extension',
+            icon_actor: new St.Label({text: '↺'}),
+            description: '   Reload stylesheet for the extension.',
         });
         listLayout.list.add_child(styleReload);
+        
+        const extSwtch = new Dialog.ListSectionItem({
+            icon_actor: new St.Icon({gicon: switchIcon, 
+                                     width: 13,
+                                     height: 2, 
+                                     }),
+            description: `   Enable/Disable selected extension.`,
+        });
+        listLayout.list.add_child(extSwtch);
 
 
         // Adding buttons
@@ -490,7 +456,7 @@ var HeaderBox = GObject.registerClass(
             this.panelIndicator = new PanelMenu.Button(0.0, 'extgridPanelIndicator', true);
 
             let icon = new St.Icon({
-                icon_name: 'extensions-symbolic',
+                icon_name: 'application-x-addon-symbolic',
                 style_class: 'system-status-icon'
             });
             this.panelIndicator.add_child(icon);
@@ -553,5 +519,77 @@ var HeaderBox = GObject.registerClass(
         global.stage.set_key_focus(this.allStateBtn);
         this.extGrid.enablingDisablingAll = false; 
     }
+    
+    destroy() {
+        if (this.aboutDialog)
+            this.aboutDialog.destroy();
+        
+        if (this.panelIndicator) {
+            this.panelIndicator.disconnect(this.panelIndicatorId);
+            this.panelIndicator.destroy();
+            this.panelIndicator = null;
+        }
+
+        super.destroy();
+    }
 
 });
+
+
+// Class for Popup menu item with Entry for the hotkey
+const PopupEntryMenuItem = GObject.registerClass(
+    class PopupEntryMenuItem extends PopupMenu.PopupBaseMenuItem {
+        _init(text, headerBox, params) {
+            super._init(params);
+
+            this._settings = headerBox._settings;
+
+            this._label = new St.Label({
+                text: text,
+                y_align: Clutter.ActorAlign.CENTER,
+                x_align: Clutter.ActorAlign.START,
+                x_expand: true,
+            });
+            this.add_child(this._label);
+
+            this._entry = new St.Entry({
+                can_focus: true,
+                track_hover: true,
+                reactive: true,
+                x_align: Clutter.ActorAlign.END,
+                y_align: Clutter.ActorAlign.CENTER,
+                x_expand: true,
+                y_expand: false,
+                style_class: 'hotkey-entry',
+                text: this._settings.get_strv('hotkey')[0],
+                hint_text: 'Enter hotkey',
+            });
+            this.add_child(this._entry);
+
+            this._entry.clutter_text.connect('text-changed', () => {
+                this._settings.set_strv('hotkey', [this._entry.text]);
+            });
+
+            this._entry.connect('key-press-event', (entry, event) => {
+                // log('entry key '+event.get_key_symbol());
+                if (event.get_key_symbol() == Clutter.KEY_Escape) {
+                    headerBox.settingsBtn.menu.close(true);
+                    return Clutter.EVENT_STOP;
+                }
+                return Clutter.EVENT_PROPAGATE;
+            });
+        }
+
+        activate(event) {
+            this._entry.grab_key_focus();           
+        }
+
+        set entryText(text) {
+            this._entry.text = text;
+        }
+
+        get entryText() {
+            return this._entry.text;
+        }
+    }
+);
