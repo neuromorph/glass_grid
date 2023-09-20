@@ -22,30 +22,15 @@ import Clutter from 'gi://Clutter';
 import St from 'gi://St';
 import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
-
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import * as Dialog from 'resource:///org/gnome/shell/ui/dialog.js';
 import * as ModalDialog from 'resource:///org/gnome/shell/ui/modalDialog.js';
-
 import * as Util from 'resource:///org/gnome/shell/misc/util.js';
-// import * as ExtensionUtils from 'resource:///org/gnome/shell/misc/extensionUtils.js';
 
 import * as BackgroundGroup from './backgroundGroup.js';
-
-// const { Clutter, GObject, Gio, St } = imports.gi;
-// const Main = imports.ui.main;
 const ExtensionManager = Main.extensionManager;
-// const PanelMenu = imports.ui.panelMenu;
-// const PopupMenu = imports.ui.popupMenu;
-// const Dialog = imports.ui.dialog;
-// const ModalDialog = imports.ui.modalDialog;
-// const Util = imports.misc.util;
-// const ExtensionUtils = imports.misc.extensionUtils;
-// const Me = ExtensionUtils.getCurrentExtension();
-// const BackgroundGroup = Me.imports.backgroundGroup;
-
 
 
 export const HeaderBox = GObject.registerClass(
@@ -82,6 +67,34 @@ export const HeaderBox = GObject.registerClass(
         this.extGrid.backgroundGroup._updateBackgrounds();
     }
 
+    setHeaderBoxParams() {
+        this.aboutBtn.width = this.extGrid.height*0.052;
+        this.aboutBtn.height = this.extGrid.height*0.052;
+        
+        this.egoBtn.height = this.extGrid.height*0.053; //40,
+        this.egoBtn.width = this.extGrid.height*0.065; //80,
+        
+        // this.settingsIcon.icon_size = this.extGrid.height*0.029;
+        // this.settingsBtn.style = ` margin-right: ${this.extGrid.height*0.40}px;`;
+
+        // this.hotkeyMenuItem._entry.height =  this.extGrid.height*0.038;
+        // this.hotkeyMenuItem._entry.width =  this.extGrid.height*0.125;
+
+        this.indicatorMenuItem._switch.height = this.extGrid.height*0.028;
+        this.indicatorMenuItem._switch.width = this.extGrid.height*0.052;
+        
+        this.titleLabel.width = this.extGrid.height*0.36;
+        // this.titleLabel.style = ` margin-right: ${this.extGrid.height*0.35}px;`;
+        
+        // this.extAppIcon.icon_size = this.extGrid.height*0.028;
+        
+        this.allStateBtn.height = this.extGrid.height*0.045;
+        
+        this.modeBtn.height = this.extGrid.height*0.052; //40,
+        this.modeBtn.width = this.extGrid.height*0.052;        
+    }
+        
+
     // Create header box with buttons
     _createHeaderBox() {
 
@@ -92,66 +105,46 @@ export const HeaderBox = GObject.registerClass(
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,
         });
-        let aboutBtn = new St.Button({
+        this.aboutBtn = new St.Button({
             child: aboutLabel,
             style_class: 'extension-about-button',
             x_align: Clutter.ActorAlign.START,
             y_align: Clutter.ActorAlign.CENTER,
             track_hover: true,
             reactive: true,
-            height: this.extGrid.height*0.052, //40,
-            width: this.extGrid.height*0.052, //80,
+            // height: this.extGrid.height*0.052, //40,
+            // width: this.extGrid.height*0.052, //80,
+            can_focus: true,
         });
-        aboutBtn.connect('clicked', () => {
+        this.aboutBtn.connect('clicked', () => {
             this.dialogOpen = true;
             this.aboutDialog.open(global.get_current_time(), true);
         });          
-        this.add_child(aboutBtn);
+        this.add_child(this.aboutBtn);
 
-        //  ẹg̣ọ
-        let egoLabel = new St.Label({
-            text: 'ẹg̣ọ',
-            style_class: 'extension-ego-label',
-            x_align: Clutter.ActorAlign.CENTER,
-            y_align: Clutter.ActorAlign.CENTER,
-        });
-        let egoBtn = new St.Button({
-            child: egoLabel,
-            style_class: 'extension-ego-button',
-            x_align: Clutter.ActorAlign.START,
-            y_align: Clutter.ActorAlign.CENTER,
-            track_hover: true,
-            reactive: true,
-            height: this.extGrid.height*0.052, //40,
-            width: this.extGrid.height*0.065, //80,
-        });
-        egoBtn.connect('clicked', () => {
-            this.extGrid.hide();
-            Util.spawn(['gio', 'open', 'https://extensions.gnome.org/']);
-        });          
-        this.add_child(egoBtn);
 
         ////// Settings button
         this.extGrid.menuOpen = false;
-        let settingsIcon = new St.Icon({
-            icon_name: 'preferences-system-symbolic',
-            icon_size: this.extGrid.height*0.029, //40,
+        this.settingsIcon = new St.Icon({
+            icon_name: 'emblem-system-symbolic',
+            style_class: 'settings-icon',
+            // icon_size: this.extGrid.height*0.029, //40,
         });
         this.settingsBtn = new PanelMenu.Button(0.0, 'extgridSettingsBtn', false);
         this.settingsBtn.can_focus = true;
         this.settingsBtn.add_style_class_name('settings-button');
-        this.settingsBtn.style = ` margin-right: ${this.extGrid.height*0.40}px;`;
-        this.settingsBtn.add_child(settingsIcon);
+        // this.settingsBtn.style = ` margin-right: ${this.extGrid.height*0.40}px;`;
+        this.settingsBtn.add_child(this.settingsIcon);
         this.settingsBtn.menu.sensitive = true;
         this.settingsBtn.menu.connect('open-state-changed', (actor, open) => {
             if (open) {
                 this.extGrid.menuOpen = true;
                 this.extGrid.menuOpening = true;
-                global.stage.set_key_focus(this.settingsBtn.menu.firstMenuItem);
+                // global.stage.set_key_focus(this.settingsBtn.menu.firstMenuItem);
                 setTimeout(() => {this.extGrid.menuOpening = false;}, 200);
             }
             else {
-                global.stage.set_key_focus(this.extGrid._nameBtn1);
+                global.stage.set_key_focus(this.settingsBtn);
                 this.extGrid.menuOpen = false;
             }
             return Clutter.EVENT_PROPAGATE;
@@ -177,15 +170,15 @@ export const HeaderBox = GObject.registerClass(
         let hotkeyMenuItem = new PopupEntryMenuItem("Hotkey", this, { can_focus: true });
         this.settingsBtn.menu.addMenuItem(hotkeyMenuItem);
 
-        let indicatorMenuItem = new PopupMenu.PopupSwitchMenuItem("Panel Indicator", this._settings.get_boolean('show-indicator'), { can_focus: true }); 
-        indicatorMenuItem.connect('toggled', (actor, state) => {
+        this.indicatorMenuItem = new PopupMenu.PopupSwitchMenuItem("Panel Indicator", this._settings.get_boolean('show-indicator'), { can_focus: true }); 
+        this.indicatorMenuItem.connect('toggled', (actor, state) => {
             this._addRemovePanelIndicator(state)
             return Clutter.EVENT_PROPAGATE;
         });
-        indicatorMenuItem._switch.y_align = Clutter.ActorAlign.CENTER;
-        indicatorMenuItem._switch.height = this.extGrid.height*0.028;
-        indicatorMenuItem._switch.width = this.extGrid.height*0.052;
-        this.settingsBtn.menu.addMenuItem(indicatorMenuItem);
+        this.indicatorMenuItem._switch.y_align = Clutter.ActorAlign.CENTER;
+        // this.indicatorMenuItem._switch.height = this.extGrid.height*0.028;
+        // this.indicatorMenuItem._switch.width = this.extGrid.height*0.052;
+        this.settingsBtn.menu.addMenuItem(this.indicatorMenuItem);
 
         // Panel Menu button (settings button) already has a parent so we need to remove it and add it to the header box
         let container = this.settingsBtn.container;
@@ -203,6 +196,12 @@ export const HeaderBox = GObject.registerClass(
                 // log('btn key event '+ event.get_key_symbol());
                 if (event.get_key_symbol() == Clutter.KEY_Escape) {
                     this.settingsBtn.menu.close(true);
+                    return Clutter.EVENT_STOP;
+                }
+                if (actor == this.settingsBtn.menu.firstMenuItem && event.get_key_symbol() == Clutter.KEY_Up){
+                    global.stage.set_key_focus(this.settingsBtn);
+                    this.settingsBtn.menu.close(true);
+                    return Clutter.EVENT_STOP;
                 }
                 return Clutter.EVENT_PROPAGATE;
             });
@@ -210,27 +209,93 @@ export const HeaderBox = GObject.registerClass(
 
         ////////////////////////////////
 
-        let titleLabel = new St.Label({
+        // 🌑︎ 🌓︎ Theme Mode ✱ ✸
+        let modeLabel = new St.Label({
+            // text: '🌓︎',
+            style_class: 'extension-mode-label',
+            x_align: Clutter.ActorAlign.CENTER,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        const mode = this._settings.get_string('theme-mode');
+        if(mode == 'Dark')
+            modeLabel.text = '🌑︎';
+        else
+            modeLabel.text = '🌓︎';
+        this.modeBtn = new St.Button({
+            child: modeLabel,
+            style_class: 'extension-mode-button',
+            x_align: Clutter.ActorAlign.END,
+            y_align: Clutter.ActorAlign.CENTER,
+            track_hover: true,
+            reactive: true,
+            // height: this.extGrid.height*0.052, //40,
+            // width: this.extGrid.height*0.052, //80,
+            can_focus: true,
+        });
+        this.modeBtn.connect('clicked', () => {
+            if (modeLabel.text == '🌓︎') {
+                modeLabel.text = '🌑︎';
+                this._settings.set_string('theme-mode','Dark');
+            }
+            else {
+                modeLabel.text = '🌓︎';
+                this._settings.set_string('theme-mode','Light');
+            }
+            this.extGrid.backgroundGroup._updateBackgrounds();
+        });          
+        this.add_child(this.modeBtn);
+
+        // Title Glass Grid
+        this.titleLabel = new St.Label({
             text: '⋮⋮⋮ Glass Grid',
             style_class: 'extension-title-label',
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,
-            width: this.extGrid.height*0.4, //300,
+            // width: this.extGrid.height*0.4, //300,
+            x_expand: true,
             track_hover: true,
             reactive: true,
+            can_focus: true,
         });
-        titleLabel.style = ` margin-right: ${this.extGrid.height*0.35}px;`;
-        this.add_child(titleLabel);
+        // titleLabel.style = ` margin-right: ${this.extGrid.height*0.35}px;`;
+        this.add_child(this.titleLabel);
 
-        let extAppIcon = new St.Icon({
-            icon_name: 'extensions-symbolic',
-            icon_size: this.extGrid.height*0.028, //40,
+        //  ẹg̣ọ
+        let egoLabel = new St.Label({
+            text: 'ẹg̣ọ',
+            style_class: 'extension-ego-label',
+            x_align: Clutter.ActorAlign.CENTER,
+            y_align: Clutter.ActorAlign.START,
+        });
+        this.egoBtn = new St.Button({
+            child: egoLabel,
+            style_class: 'extension-ego-button',
+            x_align: Clutter.ActorAlign.CENTER,
+            y_align: Clutter.ActorAlign.CENTER,
+            track_hover: true,
+            reactive: true,
+            // height: this.extGrid.height*0.052, //40,
+            // width: this.extGrid.height*0.065, //80,
+            can_focus: true,
+        });
+        this.egoBtn.connect('clicked', () => {
+            this.extGrid.hide();
+            Util.spawn(['gio', 'open', 'https://extensions.gnome.org/']);
+        });          
+        this.add_child(this.egoBtn);
+
+        // Extensions App
+        this.extAppIcon = new St.Icon({
+            icon_name: 'application-x-addon-symbolic',
+            style_class: 'ext-app-icon',
+            // icon_size: this.extGrid.height*0.028, //40,
         });
         this.extAppButton = new St.Button({
-            child: extAppIcon,
+            child: this.extAppIcon,
             style_class: 'ext-app-button',
             x_align: Clutter.ActorAlign.END,
             reactive: true,
+            can_focus: true,
         });
         this.extAppButton.connect('clicked', () => {
             this.extGrid.hide();
@@ -246,9 +311,10 @@ export const HeaderBox = GObject.registerClass(
             style_class: 'all-state-button',
             x_align: Clutter.ActorAlign.END,
             y_align: Clutter.ActorAlign.CENTER,
-            height: this.extGrid.height*0.045, // 40,
+            // height: this.extGrid.height*0.045, // 40,
             // width: 100,
             reactive: true,
+            can_focus: true,
         });
         this.allStateBtn.connect('clicked', () => {
             allExtSwch.toggle();
@@ -262,41 +328,7 @@ export const HeaderBox = GObject.registerClass(
         });
         this.add_child(this.allStateBtn);
 
-        // 🌑︎ 🌓︎ Theme Mode ✱ ✸
-        let modeLabel = new St.Label({
-            // text: '🌓︎',
-            style_class: 'extension-mode-label',
-            x_align: Clutter.ActorAlign.CENTER,
-            y_align: Clutter.ActorAlign.CENTER,
-        });
-        const mode = this._settings.get_string('theme-mode');
-        if(mode == 'Dark')
-            modeLabel.text = '🌑︎';
-        else
-            modeLabel.text = '🌓︎';
-        let modeBtn = new St.Button({
-            child: modeLabel,
-            style_class: 'extension-mode-button',
-            x_align: Clutter.ActorAlign.END,
-            y_align: Clutter.ActorAlign.CENTER,
-            track_hover: true,
-            reactive: true,
-            height: this.extGrid.height*0.052, //40,
-            width: this.extGrid.height*0.052, //80,
-        });
-        modeBtn.connect('clicked', () => {
-            if (modeLabel.text == '🌓︎') {
-                modeLabel.text = '🌑︎';
-                this._settings.set_string('theme-mode','Dark');
-            }
-            else {
-                modeLabel.text = '🌓︎';
-                this._settings.set_string('theme-mode','Light');
-            }
-            this.extGrid.backgroundGroup._updateBackgrounds();
-        });          
-        this.add_child(modeBtn);
-
+        this.setHeaderBoxParams();
     }
 
     _createAboutDialog() {
@@ -314,7 +346,7 @@ export const HeaderBox = GObject.registerClass(
         });
         let closedId = this.aboutDialog.connect('closed', () => {
             // console.debug('The dialog was dismissed');
-            global.stage.set_key_focus(this.extGrid._nameBtn1);
+            global.stage.set_key_focus(this.aboutBtn);
             this.dialogOpen = false;
         });
 
@@ -348,23 +380,34 @@ export const HeaderBox = GObject.registerClass(
         listLayout.x_expand = true;
         this.aboutDialog.contentLayout.add_child(listLayout);
 
+        const topBar = new Dialog.ListSectionItem({
+            title: '= Top Bar =',        
+        });
+        listLayout.list.add_child(topBar);
+        
+        const setting = new Dialog.ListSectionItem({
+            icon_actor: new St.Icon({icon_name: 'emblem-system-symbolic', 
+                                     icon_size: 12}),
+            description: `   Open settings menu. Esc to close.`,
+        });
+        listLayout.list.add_child(setting);
+       
+        const mode = new Dialog.ListSectionItem({
+            icon_actor: new St.Label({text: '🌓︎'}),
+            description: '   Theme mode dark / light.',
+        });
+        listLayout.list.add_child(mode);
+         
         const ego = new Dialog.ListSectionItem({
-            description: 'ẹg̣ọ          Extensions web: extensions.gnome.org',
+            icon_actor: new St.Label({text: 'ẹg̣ọ'}),
+            description: 'Extensions web: extensions.gnome.org',
         });
         listLayout.list.add_child(ego);
 
-        const setting = new Dialog.ListSectionItem({
-            icon_actor: new St.Icon({icon_name: 'preferences-system-symbolic', 
-                                     icon_size: 12}),
-            description: `             Top: Open settings menu. Esc to close
-             Grid: Open extension preferences `,
-        });
-        listLayout.list.add_child(setting);
-
         const extApp = new Dialog.ListSectionItem({
-            icon_actor: new St.Icon({icon_name: 'extensions-symbolic', 
+            icon_actor: new St.Icon({icon_name: 'application-x-addon-symbolic', 
                                      icon_size: 12}),
-            description: '             Open Extensions app',
+            description: '   Open Extensions app.',
         });
         listLayout.list.add_child(extApp);
 
@@ -372,18 +415,44 @@ export const HeaderBox = GObject.registerClass(
         const switchIcon = Gio.FileIcon.new(Gio.File.new_for_path(switchIconPath));
         const allSwitch = new Dialog.ListSectionItem({
             icon_actor: new St.Icon({gicon: switchIcon, 
-                                     width: 14,
+                                     width: 13,
                                      height: 2, 
                                      }),
-            description: `            Top: Enable/Disable all extensions except this
-            Grid: Enable/Disable selected extension`,
+            description: `   Enable/Disable all extensions except Glass Grid.`,
         });
         listLayout.list.add_child(allSwitch);
+        
+        const seperator = new Dialog.ListSectionItem({
+            title: '      ',        
+        });
+        listLayout.list.add_child(seperator);
+        
+        const grid = new Dialog.ListSectionItem({
+            title: '⋮⋮⋮ Grid',        
+        });
+        listLayout.list.add_child(grid);
+        
+        const pref = new Dialog.ListSectionItem({
+            icon_actor: new St.Icon({icon_name: 'emblem-system-symbolic', 
+                                     icon_size: 12}),
+            description: `   Open extension preferences.`,
+        });
+        listLayout.list.add_child(pref);
 
         const styleReload = new Dialog.ListSectionItem({
-            description: '↺             Reload stylesheet for the extension',
+            icon_actor: new St.Label({text: '↺'}),
+            description: '   Reload stylesheet for the extension.',
         });
         listLayout.list.add_child(styleReload);
+        
+        const extSwtch = new Dialog.ListSectionItem({
+            icon_actor: new St.Icon({gicon: switchIcon, 
+                                     width: 13,
+                                     height: 2, 
+                                     }),
+            description: `   Enable/Disable selected extension.`,
+        });
+        listLayout.list.add_child(extSwtch);
 
 
         // Adding buttons
@@ -405,7 +474,7 @@ export const HeaderBox = GObject.registerClass(
             this.panelIndicator = new PanelMenu.Button(0.0, 'extgridPanelIndicator', true);
 
             let icon = new St.Icon({
-                icon_name: 'extensions-symbolic',
+                icon_name: 'application-x-addon-symbolic',
                 style_class: 'system-status-icon'
             });
             this.panelIndicator.add_child(icon);
@@ -465,7 +534,7 @@ export const HeaderBox = GObject.registerClass(
             }
         }
 
-        global.stage.set_key_focus(this.extGrid._nameBtn1);
+        global.stage.set_key_focus(this.allStateBtn);
         this.extGrid.enablingDisablingAll = false; 
     }
 
@@ -509,8 +578,8 @@ const PopupEntryMenuItem = GObject.registerClass(
                 y_align: Clutter.ActorAlign.CENTER,
                 x_expand: true,
                 y_expand: false,
-                width: 100,
-                height: 30,
+                // width: 100,
+                // height: 30,
                 text: this._settings.get_strv('hotkey')[0],
                 hint_text: 'Enter hotkey',
             });

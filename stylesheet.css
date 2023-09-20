@@ -4,14 +4,7 @@
 */
 
 .extension-grid-wrapper {
-  /* background-image: url(media/darkmode.svg);
-  background-repeat: no-repeat;
-  background-size: cover; */
-  /* background-color: rgba(255, 255, 255, 0.6);  */
-  /* border-color: rgba(255, 255, 255, 0.6);
-  border-width: 6px;
-  border-radius: 10px !important; */
-  /* overflow: clip; */
+  overflow: clip; 
 }
 
 .mainbox-color-gradient {
@@ -22,7 +15,7 @@
   border-color: rgba(255, 255, 255, 0.5);
   border-width: 3px;
   border-radius: 15px;
-  padding: 30px 30px;
+  padding: 1.92em 1.92em;
   
 }
 
@@ -33,7 +26,7 @@
   border-color: rgba(255, 255, 255, 0.5); 
   border-width: 3px;
   border-radius: 15px;
-  padding: 30px 30px;
+  padding: 1.92em 1.92em;
   /* -st-background-image-shadow: 0px 0px 4px 0px rgba(50, 50, 50, 0.3); */
 }
 
@@ -41,7 +34,7 @@
   border-color: rgba(255, 255, 255, 0.5); 
   border-width: 3px;
   border-radius: 15px;
-  padding: 30px 30px;
+  padding: 1.92em 1.92em;
   /* background-color: rgba(60, 60, 60, 0.3); */
   /* -st-background-image-shadow: 0px 0px 4px 0px rgba(50, 50, 50, 0.3); */
 }
@@ -50,7 +43,7 @@
   border-color: rgba(225, 225, 225, 0.95); 
   border-width:4px;
   border-radius: 12px;
-  padding: 30px 30px;
+  padding: 1.92em 1.92em;
   /* background-color: rgba(255, 255, 255, 0.5); */
   /* -st-background-image-shadow: 0px 0px 4px 0px rgba(50, 50, 50, 0.3); */
 }
@@ -77,103 +70,127 @@
 .extension-window-header {
   border-color: rgba(255, 255, 255, 0.45);
   border-width: 1px; 
-  border-radius: 25px;
+  border-radius: 1.35em;
   background-color: rgba(255, 255, 255, 0.16);
-  padding: 8px 12px 8px 12px;
+  padding: 0.5em 0.7em 0.5em 0.7em;
 }
 
 .extension-about-label {
-  font-weight: 900;
-  font-size: 24px;
+  font-weight: normal;
+  font-size: large;
   font-family: 'Open Sans', sans-serif;
   padding: 0px 0px 0px 0px;
 }
 
 .extension-about-button {
-  border-radius: 10px; 
+  border-radius: 0.85em; 
   border-width: 2px;
   /* border-color: #7e7c68; */
   padding: 0px 2px 2px 2px;
   color: rgba(255, 255, 255, 0.9);
-  margin-right: 8px;
+  /* margin-right: 8px; */
 }
 
 .extension-ego-label {
-  font-weight: 500;
-  font-size: 23px;
+  font-weight: normal;
+  font-size: large;
   font-family: 'Open Sans', sans-serif;
   padding: 0px 0px 0px 0px;
 }
 
 .extension-ego-button {
-  border-radius: 10px; 
+  border-radius: 0.85em; 
   border-width: 2px;
   /* border-color: #7e7c68; */
-  padding: 0px 2px 5px 2px;
+  padding: 2px 2px 2px 2px;
   color: rgba(255, 255, 255, 0.9);
-  margin-right: 8px;
+  /* margin-right: 8px; */
+}
+
+.settings-icon {
+  /* size: 1rem; */
+  width: 1.65em;
+  height: 1.65em;
+}
+
+.hotkey-entry {
+  width: 5.8em;
+  height: 1.0em;
 }
 
 .extension-title-label {
   color: rgba(255, 255, 255, 0.95);
   font-weight: 525;
-  font-size: 24px;
+  font-size: large;
   font-family: serif;
-  padding: 0px 0px;
+  padding: 4px 0px 4px 16px;
   letter-spacing: 5px;
   text-shadow: 0px 1px 2px 0px rgba(50, 50, 50, 0.1);
+  margin-left: 10em;
+  margin-right: 10em;
+  border-radius: 0.5em;
 }
-.extension-title-label:hover {
+.extension-title-label:hover, .extension-title-label:focus {
   color: rgba(255, 255, 255, 1);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
+.ext-app-icon {
+  width: 1.6em;
+  height: 1.6em;
+}
 .ext-app-button {
-  border-radius: 10px; 
+  border-radius: 0.85em; 
   border-width: 2px;
   /* border-color: #7e7c68; */
-  padding: 2px 8px;
-  margin-right: 6px;
+  padding: 2px 6px;
+  margin-left: 5px;
+  margin-right: 4px;
   color: rgba(255, 255, 255, 0.9);
 } 
 
 .all-state-button {
-  /* border-radius: 10px; 
-  border-width: 2px;
+  border-radius: 10px; 
+  /* border-width: 2px;
   border-color: #7e7c68; */
-  padding: 8px 8px;
+  padding: 4px 4px;
   color: white;
 } 
-.all-state-button:hover {
-  padding: 6px 8px;
+.all-state-button:hover, .all-state-button:focus {
+  /*padding: 6px 5px;*/
+   box-shadow: 0px 0px 1px 0px rgba(255, 255, 255, 0.2);
 }
-.all-state-switch:hover {
-  border: 5px solid #000;
+.all-state-switch {
+  width: 2.4em;
+  height: 1.4em;
 }
 
-.settings-button-container {
-  border-radius: 10px; 
+
+.settings-button {
+  border-radius: 0.75em; 
   border-width: 2px;
   /* border-color: #7e7c68; */
-  padding: 2px 3px !important;
+  padding: 3px 3px !important;
   color: rgba(255, 255, 255, 0.9);
-  margin-left: 4px;
+  margin-left: 6px;
+  margin-right: 6px;
 }
 
 .extension-mode-label {
   font-weight: 800;
-  font-size: 21px;
+  font-size: large;
   font-family: 'Open Sans', sans-serif;
   padding: 0px 0px 0px 0px;
 }
 
 .extension-mode-button {
-  border-radius: 10px; 
+  border-radius: 0.85em; 
   border-width: 2px;
   /* border-color: #7e7c68; */
-  padding: 0px 2px 2px 2px;
+  padding: 2px 2px 2px 2px;
   color: rgba(255, 255, 255, 0.9);
-  /* margin-right: 6px; */
-  margin-left: 6px;
+  margin-top: 0.1em;
+  /* margin-left: 6px; */
 }
 
 .extension-mode-button:hover, .extension-mode-button:focus,
@@ -191,11 +208,12 @@
 
 .extension-box {
   color: white;
-  border-radius: 10px; 
+  border-radius: 0.85em; 
   /* border-width: 2px;
   border-color: #7e7c68; */
   /* padding: 2px 0px 2px 0px; */
   background-color: transparent;
+  /* margin: 0.1em 0.45em 0.1em 0.45em; */
 }
 .extension-box:hover, .extension-box:focus {
   padding: 0px 0px 0px 0px;
@@ -203,7 +221,7 @@
 }
 
 .extension-button-box {
-  border-radius: 10px; 
+  border-radius: 0.85em; 
   /* border-width: 2px;
   border-color: #7e7c68; */
 }
@@ -217,24 +235,24 @@
 }
 
 .extension-name-button {
-  border-radius: 15px; 
+  border-radius: 0.85em; 
   border-width: 1px;
   border-color: rgba(255, 255, 255, 0.6);
   background-image: url(media/label.svg);
   background-repeat: no-repeat;
   background-size: cover;
   /* -st-background-image-shadow: 0px 0px 2px rgba(255, 255, 255, 0.2); */
-  margin-left: 10px;
-  margin-right: 5px;
+  /* margin-left: 10px;
+  margin-right: 5px; */
   color: rgba(255, 255, 255, 1.0);
   padding: 5px 5px;
-  font-size: 20px;
+  font-size: 1.5em;
 }
 
 .extension-name-label {
-  font-weight: 550;
+  font-weight: normal;
   /* font-size: 1.45em; */
-  font-family: 'Open Sans', sans-serif;
+  /* font-family: 'Open Sans', sans-serif; */
   white-space: normal;
   text-align: center;
   padding: 5px 5px;
@@ -250,8 +268,8 @@
   color: rgb(143, 2, 199);
 }
 .extension-name-button-update-msg {
-  font-weight: 250;
-  font-size: 15px;
+  font-weight: lighter;
+  font-size: small;
 }
 
 .extension-name-button-error {
@@ -264,17 +282,21 @@
   color: rgb(194, 0, 0);
 }
 .extension-name-button-error-msg {
-  font-weight: 200;
-  font-size: 15px;
+  font-weight: lighter;
+  font-size: small;
 }
 
+.extension-pref-icon {
+  width: 1.7em;
+  height: 1.7em;
+}
 .extension-pref-button {
-  border-radius: 10px; 
+  border-radius: 0.85em; 
   border-width: 2px;
   /* border-color: #7e7c68; */
   padding: 2px 5px;
-  margin-top: 2px;
-  margin-bottom: 6px;
+  margin-left: 2px;
+  margin-right: 6px;
 }
 
 .extension-pref-button:hover, .extension-pref-button:focus
@@ -284,12 +306,12 @@
 }
 
 .extension-pref-button-disabled {
-  border-radius: 10px; 
+  border-radius: 0.85em; 
   border-width: 2px;
   /* border-color: #7e7c68; */
   padding: 2px 5px;
-  margin-top: 0px;
-  margin-bottom: 6px;
+  margin-left: 2px;
+  margin-right: 6px;
   color: #8d8c8c;
   opacity: 0.5;
 }
@@ -297,15 +319,18 @@
   border-color: #8d8c8c;
 }
 
+.reload-style-label {
+  padding: 0px 0px; 
+  font-size: large;
+  font-weight: normal;
+}
 .reload-style-button {
-  border-radius: 10px; 
+  font-size: large;
+  border-radius: 0.6em;  
   border-width: 2px;
   /* border-color: #7e7c68; */
-  padding: -2px -2px;
-  margin-top: 0px;
-  margin-bottom: 8px;
-  font-size: 22px;
-  font-weight: 500;
+  padding: 0px 0px; 
+  margin-top: 3px;
 }
 .reload-style-button:hover, .reload-style-button:focus
  {
@@ -315,10 +340,11 @@
 
 
 .extension-state-button {
-  border-radius: 10px; 
+  border-radius: 0.85em; 
   border-width: 2px;
   /* border-color: #7e7c68; */
   padding: 1px 3px;
+  margin-left: 8px;
 }
 .extension-state-button:hover, .extension-state-button:focus
  {
@@ -337,15 +363,39 @@
 }
 
 .extension-window-scroll {
-  margin: 2px 30px 0px 30px;
+  /* margin: 2px 30px 0px 30px; */
   /* padding-bottom: 25px; */
   /* border-width: 1px;
   border-color: black;  */
 }
 
 .grid-viewport {
-  padding: 5px 4px 10px 10px;
+  /* padding: 0.2em 0.25em 0.2em 0.25em; */
+  margin: 1em 1em 0em 1em;
+  /* border-width: 1px;
+  border-color: red;  */
 }
 
+.page-switcher {
+  color: rgba(0, 0, 0, 1);
+  background-color: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
 
+  margin-top: 0.4em;
+  spacing: 0.3em;
+  padding: 0.4em 0.8em;
+}
+
+.pg-switcher-indicator {
+  background-color: rgba(0, 0, 0, 0.65);
+  padding: 0.2em 0.2em;
+  margin: 0.3em;
+  border-radius: 1em;
+}
+.pg-switcher-indicator-active  {
+  background-color: rgba(0, 0, 0, 1);
+  padding: 0.2em 0.8em;
+  margin: 0.3em;
+}
 
