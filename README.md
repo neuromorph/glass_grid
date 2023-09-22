@@ -3,7 +3,7 @@
 
 A GNOME Shell extension to manage installed extensions. It pops up an overlay panel with glass effect and a grid of installed extensions. It can be quickly launched or dismissed using a panel indicator toggle or a hotkey toggle. Currently supports functions like: enable / disable individual extensions, open their preferences, reload their stylesheets (without having to disable/enable the extensions), shows when there is an update available or when there is an error in an extension. You can also enable / disable all extensions at once (as sometimes needed for debugging). Additionally, provides buttons to open e.g.o (extensions website) and Extensions app. Comes with many themes that can be set from the overlay panel itself.  
 
-![Screenshot](media/Screen_small.png)  
+![Screenshot](media/blur1.png)  
 
 
 ## Installation
