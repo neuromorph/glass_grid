@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
+  * author: neuromorph
  */
 
 /* exported BackgroundGroup, MAINBOX_STYLE, MAINBOX_MODE */
@@ -30,7 +31,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as Background from 'resource:///org/gnome/shell/ui/background.js';
 
 const BLUR_BRIGHTNESS = 0.8; //0.65
-const BLUR_SIGMA = 45; //45
+const BLUR_SIGMA = 50; //45
 const BACKGROUND_CORNER_RADIUS_PIXELS = 15;
 
 export const MAINBOX_STYLE = {
@@ -79,14 +80,14 @@ export const BackgroundGroup = GObject.registerClass(
                 widget.y = 0;
                 widget.width = this.extGrid.width ;
                 widget.height = this.extGrid.height ;
-                widget.opacity = 250;
+                widget.opacity = 252;
             }
             else{ // mode == 'blur'
-                widget.x = 2 * this.extGrid.scaleFactor;
-                widget.y = 3 * this.extGrid.scaleFactor;
-                widget.width = this.extGrid.width - 4 * this.extGrid.scaleFactor;
-                widget.height = this.extGrid.height - 6 * this.extGrid.scaleFactor;
-                widget.opacity = 250;
+                widget.x = 4 * this.extGrid.scaleFactor;
+                widget.y = 4 * this.extGrid.scaleFactor;
+                widget.width = this.extGrid.width - 8 * this.extGrid.scaleFactor;
+                widget.height = this.extGrid.height - 8 * this.extGrid.scaleFactor;
+                widget.opacity = 253;
                 widget.effect = new Shell.BlurEffect({name: 'extgrid-blur'});
             }
 
@@ -102,9 +103,9 @@ export const BackgroundGroup = GObject.registerClass(
             this._bgManagers.push(bgManager);
         }
         else if (mode == 'dynamic') {
-            widget.x = 5 * this.extGrid.scaleFactor;
+            widget.x = 4 * this.extGrid.scaleFactor;
             widget.y = 4 * this.extGrid.scaleFactor;
-            widget.width = this.extGrid.width - 10 * this.extGrid.scaleFactor;
+            widget.width = this.extGrid.width - 8 * this.extGrid.scaleFactor;
             widget.height = this.extGrid.height - 8 * this.extGrid.scaleFactor;
             widget.opacity = 255;
             widget.effect = new Shell.BlurEffect({name: 'extgrid-dynamic'});
@@ -130,9 +131,9 @@ export const BackgroundGroup = GObject.registerClass(
     }
 
     _updateBorderRadius() {
-        // const {scaleFactor} = St.ThemeContext.get_for_stage(global.stage); //log('scale factor: '+ scaleFactor);
-        // const cornerRadius = scaleFactor * BACKGROUND_CORNER_RADIUS_PIXELS; //log('corner radis '+cornerRadius);  
-        const cornerRadius = BACKGROUND_CORNER_RADIUS_PIXELS;
+        const {scaleFactor} = St.ThemeContext.get_for_stage(global.stage); 
+        const cornerRadius = scaleFactor * BACKGROUND_CORNER_RADIUS_PIXELS;  
+        // const cornerRadius = BACKGROUND_CORNER_RADIUS_PIXELS;
         const backgroundContent = this._bgManagers[0].backgroundActor.content;
         backgroundContent.rounded_clip_radius = cornerRadius;
 
@@ -204,6 +205,8 @@ export const BackgroundGroup = GObject.registerClass(
             case "Background Blur":
                 this._createBackground('blur');
                 this._updateBackgroundEffects('blur');
+                this._updateBorderRadius();
+                this._updateRoundedClipBounds();
                 break;
 
             case "Dynamic Blur":

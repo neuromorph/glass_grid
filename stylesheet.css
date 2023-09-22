@@ -4,7 +4,8 @@
 */
 
 .extension-grid-wrapper {
-  overflow: clip; 
+  border-radius: 20px;
+  overflow: hidden;
 }
 
 .mainbox-color-gradient {
@@ -12,9 +13,9 @@
   background-image: url(media/tablet.svg);
   background-repeat: no-repeat;
   background-size: cover;
-  border-color: rgba(255, 255, 255, 0.5);
-  border-width: 3px;
-  border-radius: 15px;
+  border-color: rgba(255, 255, 255, 0.45);
+  border-width: 2px;
+  border-radius: 20px;
   padding: 1.92em 1.92em;
   
 }
@@ -23,15 +24,15 @@
   background-image: url(media/darkmode.svg);
   background-repeat: no-repeat;
   background-size: cover;
-  border-color: rgba(255, 255, 255, 0.5); 
-  border-width: 3px;
-  border-radius: 15px;
+  border-color: rgba(255, 255, 255, 0.45); 
+  border-width: 2px;
+  border-radius: 20px;
   padding: 1.92em 1.92em;
   /* -st-background-image-shadow: 0px 0px 4px 0px rgba(50, 50, 50, 0.3); */
 }
 
 .mainbox-bg-crop {
-  border-color: rgba(255, 255, 255, 0.5); 
+  border-color: rgba(255, 255, 255, 0.45); 
   border-width: 3px;
   border-radius: 15px;
   padding: 1.92em 1.92em;
@@ -40,9 +41,9 @@
 }
 
 .mainbox-bg-blur, .mainbox-dynamic-blur {
-  border-color: rgba(225, 225, 225, 0.95); 
+  border-color: rgba(225, 225, 225, 0.85); 
   border-width:4px;
-  border-radius: 12px;
+  border-radius: 15px;
   padding: 1.92em 1.92em;
   /* background-color: rgba(255, 255, 255, 0.5); */
   /* -st-background-image-shadow: 0px 0px 4px 0px rgba(50, 50, 50, 0.3); */
@@ -50,7 +51,7 @@
 
 .mainbox-gradient-dark {
   /* -st-background-image-shadow: 0px 0px 4px 4px rgba(0, 0, 0, 0.15); */
-  background-color: rgba(50, 50, 50, 0.4);
+  background-color: rgba(50, 50, 50, 0.5);
 }
 .mainbox-gradient-light {
   /* -st-background-image-shadow: 0px 5px 0px rgba(255, 255, 255, 0.15); */
@@ -237,7 +238,7 @@
 .extension-name-button {
   border-radius: 0.85em; 
   border-width: 1px;
-  border-color: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.4);
   background-image: url(media/label.svg);
   background-repeat: no-repeat;
   background-size: cover;
@@ -246,11 +247,11 @@
   margin-right: 5px; */
   color: rgba(255, 255, 255, 1.0);
   padding: 5px 5px;
-  font-size: 1.5em;
+  font-size: 1.45em;
 }
 
 .extension-name-label {
-  font-weight: normal;
+  font-weight: light;
   /* font-size: 1.45em; */
   /* font-family: 'Open Sans', sans-serif; */
   white-space: normal;
@@ -265,7 +266,7 @@
   /* color: rgb(192, 32, 255); */
 }
 .extension-name-button-update:hover, .extension-name-button-update:focus {
-  color: rgb(143, 2, 199);
+  color: rgb(143, 2, 169);
 }
 .extension-name-button-update-msg {
   font-weight: lighter;
@@ -325,8 +326,7 @@
   font-weight: normal;
 }
 .reload-style-button {
-  font-size: large;
-  border-radius: 0.6em;  
+  border-radius: 0.85em;  
   border-width: 2px;
   /* border-color: #7e7c68; */
   padding: 0px 0px; 
@@ -388,14 +388,14 @@
 }
 
 .pg-switcher-indicator {
-  background-color: rgba(0, 0, 0, 0.65);
+  background-color: rgba(0, 0, 0, 0.7);
   padding: 0.2em 0.2em;
   margin: 0.3em;
   border-radius: 1em;
 }
 .pg-switcher-indicator-active  {
-  background-color: rgba(0, 0, 0, 1);
-  padding: 0.2em 0.8em;
+  background-color: rgba(0, 0, 0, 0.9);
+  padding: 0.2em 0.9em;
   margin: 0.3em;
 }
 

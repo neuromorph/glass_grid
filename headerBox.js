@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
+  * author: neuromorph
  */
 
 /* exported HeaderBox */
@@ -86,9 +87,8 @@ export const HeaderBox = GObject.registerClass(
         this.titleLabel.width = this.extGrid.height*0.36;
         // this.titleLabel.style = ` margin-right: ${this.extGrid.height*0.35}px;`;
         
-        // this.extAppIcon.icon_size = this.extGrid.height*0.028;
-        
-        this.allStateBtn.height = this.extGrid.height*0.045;
+        // this.extAppIcon.icon_size = this.extGrid.height*0.028;       
+        // this.allStateBtn.height = this.extGrid.height*0.045;
         
         this.modeBtn.height = this.extGrid.height*0.052; //40,
         this.modeBtn.width = this.extGrid.height*0.052;        
@@ -112,8 +112,6 @@ export const HeaderBox = GObject.registerClass(
             y_align: Clutter.ActorAlign.CENTER,
             track_hover: true,
             reactive: true,
-            // height: this.extGrid.height*0.052, //40,
-            // width: this.extGrid.height*0.052, //80,
             can_focus: true,
         });
         this.aboutBtn.connect('clicked', () => {
@@ -128,19 +126,18 @@ export const HeaderBox = GObject.registerClass(
         this.settingsIcon = new St.Icon({
             icon_name: 'emblem-system-symbolic',
             style_class: 'settings-icon',
-            // icon_size: this.extGrid.height*0.029, //40,
         });
         this.settingsBtn = new PanelMenu.Button(0.0, 'extgridSettingsBtn', false);
         this.settingsBtn.can_focus = true;
         this.settingsBtn.add_style_class_name('settings-button');
-        // this.settingsBtn.style = ` margin-right: ${this.extGrid.height*0.40}px;`;
+
         this.settingsBtn.add_child(this.settingsIcon);
         this.settingsBtn.menu.sensitive = true;
         this.settingsBtn.menu.connect('open-state-changed', (actor, open) => {
             if (open) {
                 this.extGrid.menuOpen = true;
                 this.extGrid.menuOpening = true;
-                // global.stage.set_key_focus(this.settingsBtn.menu.firstMenuItem);
+                global.stage.set_key_focus(this.settingsBtn.menu.firstMenuItem);
                 setTimeout(() => {this.extGrid.menuOpening = false;}, 200);
             }
             else {
@@ -176,8 +173,6 @@ export const HeaderBox = GObject.registerClass(
             return Clutter.EVENT_PROPAGATE;
         });
         this.indicatorMenuItem._switch.y_align = Clutter.ActorAlign.CENTER;
-        // this.indicatorMenuItem._switch.height = this.extGrid.height*0.028;
-        // this.indicatorMenuItem._switch.width = this.extGrid.height*0.052;
         this.settingsBtn.menu.addMenuItem(this.indicatorMenuItem);
 
         // Panel Menu button (settings button) already has a parent so we need to remove it and add it to the header box
@@ -209,7 +204,7 @@ export const HeaderBox = GObject.registerClass(
 
         ////////////////////////////////
 
-        // 🌑︎ 🌓︎ Theme Mode ✱ ✸
+        // 🌑︎ 🌓︎ Theme Mode ✱ ✸ 🌕︎
         let modeLabel = new St.Label({
             // text: '🌓︎',
             style_class: 'extension-mode-label',
@@ -218,6 +213,8 @@ export const HeaderBox = GObject.registerClass(
         });
         const mode = this._settings.get_string('theme-mode');
         if(mode == 'Dark')
+            modeLabel.text = '🌕︎';
+        else if (mode == 'Light')
             modeLabel.text = '🌑︎';
         else
             modeLabel.text = '🌓︎';
@@ -228,21 +225,23 @@ export const HeaderBox = GObject.registerClass(
             y_align: Clutter.ActorAlign.CENTER,
             track_hover: true,
             reactive: true,
-            // height: this.extGrid.height*0.052, //40,
-            // width: this.extGrid.height*0.052, //80,
             can_focus: true,
         });
         this.modeBtn.connect('clicked', () => {
             if (modeLabel.text == '🌓︎') {
                 modeLabel.text = '🌑︎';
+                this._settings.set_string('theme-mode','Light');
+            }
+            else if (modeLabel.text == '🌑︎') {
+                modeLabel.text = '🌕︎';
                 this._settings.set_string('theme-mode','Dark');
             }
             else {
                 modeLabel.text = '🌓︎';
-                this._settings.set_string('theme-mode','Light');
+                this._settings.set_string('theme-mode','Neutral');
             }
             this.extGrid.backgroundGroup._updateBackgrounds();
-        });          
+        });         
         this.add_child(this.modeBtn);
 
         // Title Glass Grid
@@ -251,13 +250,11 @@ export const HeaderBox = GObject.registerClass(
             style_class: 'extension-title-label',
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,
-            // width: this.extGrid.height*0.4, //300,
             x_expand: true,
             track_hover: true,
             reactive: true,
             can_focus: true,
         });
-        // titleLabel.style = ` margin-right: ${this.extGrid.height*0.35}px;`;
         this.add_child(this.titleLabel);
 
         //  ẹg̣ọ
@@ -274,8 +271,6 @@ export const HeaderBox = GObject.registerClass(
             y_align: Clutter.ActorAlign.CENTER,
             track_hover: true,
             reactive: true,
-            // height: this.extGrid.height*0.052, //40,
-            // width: this.extGrid.height*0.065, //80,
             can_focus: true,
         });
         this.egoBtn.connect('clicked', () => {
@@ -288,7 +283,6 @@ export const HeaderBox = GObject.registerClass(
         this.extAppIcon = new St.Icon({
             icon_name: 'application-x-addon-symbolic',
             style_class: 'ext-app-icon',
-            // icon_size: this.extGrid.height*0.028, //40,
         });
         this.extAppButton = new St.Button({
             child: this.extAppIcon,
@@ -311,8 +305,6 @@ export const HeaderBox = GObject.registerClass(
             style_class: 'all-state-button',
             x_align: Clutter.ActorAlign.END,
             y_align: Clutter.ActorAlign.CENTER,
-            // height: this.extGrid.height*0.045, // 40,
-            // width: 100,
             reactive: true,
             can_focus: true,
         });
@@ -578,8 +570,7 @@ const PopupEntryMenuItem = GObject.registerClass(
                 y_align: Clutter.ActorAlign.CENTER,
                 x_expand: true,
                 y_expand: false,
-                // width: 100,
-                // height: 30,
+                style_class: 'hotkey-entry',
                 text: this._settings.get_strv('hotkey')[0],
                 hint_text: 'Enter hotkey',
             });

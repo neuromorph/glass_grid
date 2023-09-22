@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
+ * author: neuromorph
  */
 
 /* exported init */
@@ -97,6 +98,7 @@ var GlassGrid = GObject.registerClass(
             this._createScrollView();
             this._createGridBox();
  
+            // Page switcher popup
             this.switcherPopup = new SwitcherPopup.PageSwitcherPopup(this);
             this.insert_child_above(this.switcherPopup, null);
         }
@@ -225,6 +227,8 @@ var GlassGrid = GObject.registerClass(
                     break;
             }
             // console.debug('scroll  direction '+ event.get_scroll_direction() + ' '+ this._adjustment.value);
+            
+            this.switcherPopup.display();
 
             return Clutter.EVENT_STOP;
         }
@@ -469,8 +473,14 @@ var GlassGrid = GObject.registerClass(
                 btnBox.add_child(prefsButton);
                 
                 // Reload stylesheet
+                let reloadLabel = new St.Label({
+                    text: '↺',
+                    style_class: 'reload-style-label',
+                    x_align: Clutter.ActorAlign.CENTER,
+                    y_align: Clutter.ActorAlign.CENTER,
+                });
                 let reloadStyleBtn = new St.Button({
-                    label: '↺',
+                    child: reloadLabel,
                     style_class: 'reload-style-button',
                     x_align: Clutter.ActorAlign.CENTER,
                     y_align: Clutter.ActorAlign.CENTER,

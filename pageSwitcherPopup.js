@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
+ * author: neuromorph
  */
 
 /* exported PageSwitcherPopup */
@@ -24,7 +25,7 @@ import GObject from 'gi://GObject';
 import St from 'gi://St';
 
 const ANIMATION_TIME = 100;
-const DISPLAY_TIMEOUT = 600;
+const DISPLAY_TIMEOUT = 800;
 
 
 export const PageSwitcherPopup = GObject.registerClass(
