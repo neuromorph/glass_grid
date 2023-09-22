@@ -24,7 +24,7 @@ const Main = imports.ui.main;
 const Background = imports.ui.background;
 
 const BLUR_BRIGHTNESS = 0.8; //0.65
-const BLUR_SIGMA = 45; //45
+const BLUR_SIGMA = 50; //45
 const BACKGROUND_CORNER_RADIUS_PIXELS = 15;
 
 var MAINBOX_STYLE = {
@@ -73,14 +73,14 @@ var BackgroundGroup = GObject.registerClass(
                 widget.y = 0;
                 widget.width = this.extGrid.width ;
                 widget.height = this.extGrid.height ;
-                widget.opacity = 250;
+                widget.opacity = 252;
             }
-            else{ // mode == 'blur'
-                widget.x = 2 * this.extGrid.scaleFactor;
-                widget.y = 3 * this.extGrid.scaleFactor;
-                widget.width = this.extGrid.width - 4 * this.extGrid.scaleFactor;
-                widget.height = this.extGrid.height - 6 * this.extGrid.scaleFactor;
-                widget.opacity = 250;
+            else if (mode == 'blur') {
+                widget.x = 4 * this.extGrid.scaleFactor; //2
+                widget.y = 4 * this.extGrid.scaleFactor; //3
+                widget.width = this.extGrid.width - 8 * this.extGrid.scaleFactor; //4
+                widget.height = this.extGrid.height - 8 * this.extGrid.scaleFactor; //6
+                widget.opacity = 253;
                 widget.effect = new Shell.BlurEffect({name: 'extgrid-blur'});
             }
 
@@ -96,12 +96,12 @@ var BackgroundGroup = GObject.registerClass(
             this._bgManagers.push(bgManager);
         }
         else if (mode == 'dynamic') {
-            widget.x = 5 * this.extGrid.scaleFactor;
-            widget.y = 4 * this.extGrid.scaleFactor;
-            widget.width = this.extGrid.width - 10 * this.extGrid.scaleFactor;
-            widget.height = this.extGrid.height - 8 * this.extGrid.scaleFactor;
-            widget.opacity = 255;
-            widget.effect = new Shell.BlurEffect({name: 'extgrid-dynamic'});
+                widget.x = 4 * this.extGrid.scaleFactor; //5
+                widget.y = 4 * this.extGrid.scaleFactor; //4
+                widget.width = this.extGrid.width - 8 * this.extGrid.scaleFactor; //10
+                widget.height = this.extGrid.height - 8 * this.extGrid.scaleFactor; //8
+                widget.opacity = 255;
+                widget.effect = new Shell.BlurEffect({name: 'extgrid-dynamic'});
         }
 
         this.add_child(widget);
@@ -124,9 +124,9 @@ var BackgroundGroup = GObject.registerClass(
     }
 
     _updateBorderRadius() {
-        // const {scaleFactor} = St.ThemeContext.get_for_stage(global.stage); //log('scale factor: '+ scaleFactor);
-        // const cornerRadius = scaleFactor * BACKGROUND_CORNER_RADIUS_PIXELS; //log('corner radis '+cornerRadius);  
-        const cornerRadius = BACKGROUND_CORNER_RADIUS_PIXELS;
+        const {scaleFactor} = St.ThemeContext.get_for_stage(global.stage); 
+        const cornerRadius = scaleFactor * BACKGROUND_CORNER_RADIUS_PIXELS;   
+        // const cornerRadius = BACKGROUND_CORNER_RADIUS_PIXELS;
         const backgroundContent = this._bgManagers[0].backgroundActor.content;
         backgroundContent.rounded_clip_radius = cornerRadius;
 
@@ -198,6 +198,8 @@ var BackgroundGroup = GObject.registerClass(
             case "Background Blur":
                 this._createBackground('blur');
                 this._updateBackgroundEffects('blur');
+                this._updateBorderRadius();
+                this._updateRoundedClipBounds();
                 break;
 
             case "Dynamic Blur":
@@ -207,7 +209,7 @@ var BackgroundGroup = GObject.registerClass(
 
             default:
                 break;
-        }
+        }        
     }
 
     _repaintWidget() {

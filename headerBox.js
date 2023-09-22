@@ -133,7 +133,7 @@ var HeaderBox = GObject.registerClass(
             if (open) {
                 this.extGrid.menuOpen = true;
                 this.extGrid.menuOpening = true;
-                // global.stage.set_key_focus(this.settingsBtn.menu.firstMenuItem);
+                global.stage.set_key_focus(this.settingsBtn.menu.firstMenuItem);
                 setTimeout(() => {this.extGrid.menuOpening = false;}, 200);
             }
             else {
@@ -200,7 +200,7 @@ var HeaderBox = GObject.registerClass(
 
         ////////////////////////////////
 
-        // 🌑︎ 🌓︎ Theme Mode ✱ ✸
+        // 🌑︎ 🌓︎ Theme Mode ✱ ✸ 🌕︎
         let modeLabel = new St.Label({
             // text: '🌓︎',
             style_class: 'extension-mode-label',
@@ -209,6 +209,8 @@ var HeaderBox = GObject.registerClass(
         });
         const mode = this._settings.get_string('theme-mode');
         if(mode == 'Dark')
+            modeLabel.text = '🌕︎';
+        else if (mode == 'Light')
             modeLabel.text = '🌑︎';
         else
             modeLabel.text = '🌓︎';
@@ -224,11 +226,15 @@ var HeaderBox = GObject.registerClass(
         this.modeBtn.connect('clicked', () => {
             if (modeLabel.text == '🌓︎') {
                 modeLabel.text = '🌑︎';
+                this._settings.set_string('theme-mode','Light');
+            }
+            else if (modeLabel.text == '🌑︎') {
+                modeLabel.text = '🌕︎';
                 this._settings.set_string('theme-mode','Dark');
             }
             else {
                 modeLabel.text = '🌓︎';
-                this._settings.set_string('theme-mode','Light');
+                this._settings.set_string('theme-mode','Neutral');
             }
             this.extGrid.backgroundGroup._updateBackgrounds();
         });          

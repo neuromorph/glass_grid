@@ -8,12 +8,12 @@ A GNOME Shell extension to manage installed extensions. It pops up an overlay pa
 
 ## Installation
 
-### Recommended (Coming Soon)
+### Recommended
 
-[<img alt="" height="100" src="https://raw.githubusercontent.com/andyholmes/gnome-shell-extensions-badge/master/get-it-on-ego.svg?sanitize=true">](https://extensions.gnome.org/)
+[<img alt="" height="100" src="https://raw.githubusercontent.com/andyholmes/gnome-shell-extensions-badge/master/get-it-on-ego.svg?sanitize=true">](https://extensions.gnome.org/extension/6269/extensions-glass-grid/)
 
 It's recommended to install the extension from
-[extensions website](https://extensions.gnome.org/extension/), or from
+[extensions website](https://extensions.gnome.org/extension/6269/extensions-glass-grid/), or from
 the _Extension Manager_ app.
 
 
@@ -58,7 +58,7 @@ Note: This is since as a Gnome shell extension, the UI overlay is essentially tr
 
 ## Settings
 Use the Settings menu from the extension for :
-- Select Background theme (5 options) and Mode (dark/light)
+- Select Background theme (5 options) and Mode (dark/light/neutral)
 - Add / Remove Panel indicator to toggle Glass Grid
 - Set hotkey to toggle Glass Grid
 
