@@ -70,7 +70,7 @@ Use the Settings menu from the extension for :
 
 
 ## Screenshots
-![Screenshot](media/bg.png)  
+![Screenshot](media/bg_small.png)  
 ![Screenshot](media/Screenshot_small.png) 
 
 
