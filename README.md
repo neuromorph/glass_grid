@@ -3,17 +3,17 @@
 
 A GNOME Shell extension to manage installed extensions. It pops up an overlay panel with glass effect and a grid of installed extensions. It can be quickly launched or dismissed using a panel indicator toggle or a hotkey toggle. Currently supports functions like: enable / disable individual extensions, open their preferences, reload their stylesheets (without having to disable/enable the extensions), shows when there is an update available or when there is an error in an extension. You can also enable / disable all extensions at once (as sometimes needed for debugging). Additionally, provides buttons to open e.g.o (extensions website) and Extensions app. Comes with many themes that can be set from the overlay panel itself.  
 
-![Screenshot](media/Screen_small.png)  
+![Screenshot](media/blur1.png)  
 
 
 ## Installation
 
-### Recommended (Coming Soon)
+### Recommended
 
-[<img alt="" height="100" src="https://raw.githubusercontent.com/andyholmes/gnome-shell-extensions-badge/master/get-it-on-ego.svg?sanitize=true">](https://extensions.gnome.org/)
+[<img alt="" height="100" src="https://raw.githubusercontent.com/andyholmes/gnome-shell-extensions-badge/master/get-it-on-ego.svg?sanitize=true">](https://extensions.gnome.org/extension/6269/extensions-glass-grid/)
 
 It's recommended to install the extension from
-[extensions website](https://extensions.gnome.org/extension/), or from
+[extensions website](https://extensions.gnome.org/extension/6269/extensions-glass-grid/), or from
 the _Extension Manager_ app.
 
 
@@ -58,7 +58,7 @@ Note: This is since as a Gnome shell extension, the UI overlay is essentially tr
 
 ## Settings
 Use the Settings menu from the extension for :
-- Select Background theme (5 options) and Mode (dark/light)
+- Select Background theme (5 options) and Mode (dark/light/neutral)
 - Add / Remove Panel indicator to toggle Glass Grid
 - Set hotkey to toggle Glass Grid
 
@@ -70,7 +70,7 @@ Use the Settings menu from the extension for :
 
 
 ## Screenshots
-![Screenshot](media/bg.png)  
+![Screenshot](media/bg_small.png)  
 ![Screenshot](media/Screenshot_small.png) 
 
 
