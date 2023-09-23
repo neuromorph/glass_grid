@@ -137,7 +137,7 @@ var GlassGrid = GObject.registerClass(
             if (this.enablingDisablingAll || this.enablingDisabling || this.headerBox.dialogOpen || this.menuOpen)
                 return Clutter.EVENT_PROPAGATE;
 
-            if ((!focusedActor ) || !(this.contains(focusedActor) || this.headerBox.settingsBtn.menu.box.contains(focusedActor))) {
+            if ((!focusedActor) || !(this.contains(focusedActor) || this.headerBox.settingsBtn.menu.box.contains(focusedActor))) {
                 if (this.visible) 
                     this.hide();
             }

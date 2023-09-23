@@ -76,9 +76,9 @@ class PageSwitcherPopup extends Clutter.Actor {
             if (i === currentPage) {
                 indicator.add_style_class_name('pg-switcher-indicator-active');
             }
-            else {
-                indicator.remove_style_class_name('pg-switcher-indicator-active');
-            }
+            // else {
+            //     indicator.remove_style_class_name('pg-switcher-indicator-active');
+            // }
 
             this._list.add_actor(indicator);
         }
