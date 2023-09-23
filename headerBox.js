@@ -138,7 +138,7 @@ export const HeaderBox = GObject.registerClass(
                 this.extGrid.menuOpen = true;
                 this.extGrid.menuOpening = true;
                 global.stage.set_key_focus(this.settingsBtn.menu.firstMenuItem);
-                setTimeout(() => {this.extGrid.menuOpening = false;}, 200);
+                this.menuTimeoutId = setTimeout(() => {this.extGrid.menuOpening = false;}, 200);
             }
             else {
                 global.stage.set_key_focus(this.settingsBtn);
@@ -539,6 +539,8 @@ export const HeaderBox = GObject.registerClass(
             this.panelIndicator.destroy();
             this.panelIndicator = null;
         }
+
+        clearTimeout(this.menuTimeoutId);
 
         super.destroy();
     }
