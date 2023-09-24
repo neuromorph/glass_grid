@@ -301,13 +301,15 @@
 }
 
 .extension-name-button-update {
+  
+  /* color: rgb(192, 32, 255); */
+  background-color: rgba(10, 250, 250, 0.15);
+}
+.extension-name-button-update:hover, .extension-name-button-update:focus {
+  color: rgb(0, 255, 255);
   background-image: url(media/label_update.svg);
   background-repeat: no-repeat;
   background-size: cover;
-  /* color: rgb(192, 32, 255); */
-}
-.extension-name-button-update:hover, .extension-name-button-update:focus {
-  color: rgb(143, 2, 169);
 }
 .extension-name-button-update-msg {
   font-weight: lighter;
@@ -315,13 +317,15 @@
 }
 
 .extension-name-button-error {
+  
+  /* color: rgb(216, 86, 0);  */
+  background-color: rgba(253, 82, 82, 0.15);
+}
+.extension-name-button-error:hover, .extension-name-button-error:focus {
+  color: rgb(201, 0, 0);
   background-image: url(media/label_error.svg);
   background-repeat: no-repeat;
   background-size: cover;
-  /* color: rgb(216, 86, 0);  */
-}
-.extension-name-button-error:hover, .extension-name-button-error:focus {
-  color: rgb(194, 0, 0);
 }
 .extension-name-button-error-msg {
   font-weight: lighter;

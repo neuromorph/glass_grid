@@ -144,7 +144,7 @@ var GlassGrid = GObject.registerClass(
             else if (this.contains(focusedActor) && !this.headerBox.contains(focusedActor)) {
                 // log('grid contains '+focusedActor.name);
                 const i = parseInt(focusedActor.name.split('_')[1]);
-                const pageNum = Math.floor((i+1) / (this.gridCols*this.gridRows)); 
+                const pageNum = Math.floor((i) / (this.gridCols*this.gridRows)); 
                 // log('grid col,row '+this.gridCols+' '+this.gridRows);
                 // log('i, pgnum, scrollval '+i+' '+pageNum+' '+scrollAdjust.value);
                 const value = pageNum * this._adjustment.page_increment;
@@ -396,21 +396,25 @@ var GlassGrid = GObject.registerClass(
                         if (nameLabel.text == extension.metadata.name) {
                             nameLabel.text = extension.error;
                             nameBtn.add_style_class_name('extension-name-button-error-msg');
+                            nameLabel.style = ` font-size: ${fontSize*0.75}em !important; `;
 
                         }
                         else {
                             nameLabel.text = extension.metadata.name;
                             nameBtn.remove_style_class_name('extension-name-button-error-msg');
+                            nameLabel.style = ` font-size: ${fontSize}em !important; `;
                         }
                     }
                     else if (extension.hasUpdate) {
                         if (nameLabel.text == extension.metadata.name) {
                             nameLabel.text = "Update Available. It'll apply on next login. ";
                             nameBtn.add_style_class_name('extension-name-button-update-msg');
+                            nameLabel.style = ` font-size: ${fontSize*0.75}em !important; `;
                         }
                         else {
                             nameLabel.text = extension.metadata.name;
                             nameBtn.remove_style_class_name('extension-name-button-update-msg');
+                            nameLabel.style = ` font-size: ${fontSize}em !important; `;
                         }
                     }
                     else {
