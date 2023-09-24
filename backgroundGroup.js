@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
-  * author: neuromorph
+ * author: neuromorph
  */
 
 /* exported BackgroundGroup, MAINBOX_STYLE, MAINBOX_MODE */
@@ -82,7 +82,7 @@ export const BackgroundGroup = GObject.registerClass(
                 widget.height = this.extGrid.height ;
                 widget.opacity = 252;
             }
-            else{ // mode == 'blur'
+            else if (mode == 'blur') {
                 widget.x = 4 * this.extGrid.scaleFactor;
                 widget.y = 4 * this.extGrid.scaleFactor;
                 widget.width = this.extGrid.width - 8 * this.extGrid.scaleFactor;
@@ -132,7 +132,7 @@ export const BackgroundGroup = GObject.registerClass(
 
     _updateBorderRadius() {
         const {scaleFactor} = St.ThemeContext.get_for_stage(global.stage); 
-        const cornerRadius = scaleFactor * BACKGROUND_CORNER_RADIUS_PIXELS;  
+        const cornerRadius = scaleFactor * BACKGROUND_CORNER_RADIUS_PIXELS;
         // const cornerRadius = BACKGROUND_CORNER_RADIUS_PIXELS;
         const backgroundContent = this._bgManagers[0].backgroundActor.content;
         backgroundContent.rounded_clip_radius = cornerRadius;

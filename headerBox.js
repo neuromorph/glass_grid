@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
-  * author: neuromorph
+ * author: neuromorph
  */
 
 /* exported HeaderBox */
@@ -164,15 +164,50 @@ export const HeaderBox = GObject.registerClass(
         });       
         this.settingsBtn.menu.addMenuItem(themeMenuItem);
 
-        let hotkeyMenuItem = new PopupEntryMenuItem("Hotkey", this, { can_focus: true });
+        let fontMenuItem = new PopupMenu.PopupMenuItem("Font Size", { can_focus: false });
+        let fontUpBtn = new St.Button({
+            label: '+',
+            style_class: 'font-up-button',
+            x_align: Clutter.ActorAlign.END,
+            y_align: Clutter.ActorAlign.CENTER,
+            reactive: true,
+            can_focus: true,
+        });
+        fontUpBtn.connect('clicked', () => {
+            let fontSize = this._settings.get_double('font-size');
+            fontSize += 0.05;
+            this._settings.set_double('font-size', fontSize);
+            this.extGrid._fillGrid();
+        });
+        let fontDownBtn = new St.Button({
+            label: '-',
+            style_class: 'font-down-button',
+            x_align: Clutter.ActorAlign.END,
+            y_align: Clutter.ActorAlign.CENTER,
+            reactive: true,
+            can_focus: true,
+        });
+        fontDownBtn.connect('clicked', () => {
+            let fontSize = this._settings.get_double('font-size');
+            fontSize -= 0.05;
+            this._settings.set_double('font-size', fontSize);
+            this.extGrid._fillGrid();
+        });
+        fontMenuItem.add_child(fontDownBtn);
+        fontMenuItem.add_child(fontUpBtn);
+        this.settingsBtn.menu.addMenuItem(fontMenuItem);
+
+        let hotkeyMenuItem = new PopupEntryMenuItem("Hotkey", this, { can_focus: false });
         this.settingsBtn.menu.addMenuItem(hotkeyMenuItem);
 
-        this.indicatorMenuItem = new PopupMenu.PopupSwitchMenuItem("Panel Indicator", this._settings.get_boolean('show-indicator'), { can_focus: true }); 
+        this.indicatorMenuItem = new PopupMenu.PopupSwitchMenuItem("Panel Indicator", this._settings.get_boolean('show-indicator'), { can_focus: false }); 
         this.indicatorMenuItem.connect('toggled', (actor, state) => {
             this._addRemovePanelIndicator(state)
             return Clutter.EVENT_PROPAGATE;
         });
+        this.indicatorMenuItem._switch.can_focus = true;
         this.indicatorMenuItem._switch.y_align = Clutter.ActorAlign.CENTER;
+        this.indicatorMenuItem._switch.add_style_class_name('indicator-switch');
         this.settingsBtn.menu.addMenuItem(this.indicatorMenuItem);
 
         // Panel Menu button (settings button) already has a parent so we need to remove it and add it to the header box

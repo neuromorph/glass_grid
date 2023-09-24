@@ -41,7 +41,7 @@
 }
 
 .mainbox-bg-blur, .mainbox-dynamic-blur {
-  border-color: rgba(225, 225, 225, 0.85); 
+  border-color: rgba(230, 230, 230, 0.85); 
   border-width:4px;
   border-radius: 15px;
   padding: 1.92em 1.92em;
@@ -51,7 +51,7 @@
 
 .mainbox-gradient-dark {
   /* -st-background-image-shadow: 0px 0px 4px 4px rgba(0, 0, 0, 0.15); */
-  background-color: rgba(50, 50, 50, 0.5);
+  background-color: rgba(50, 50, 50, 0.2);
 }
 .mainbox-gradient-light {
   /* -st-background-image-shadow: 0px 5px 0px rgba(255, 255, 255, 0.15); */
@@ -66,6 +66,9 @@
 
 .bg-widget {
   /* box-shadow: 0px 0px 4px 2px rgba(0,0,0,0.3); */
+  /* border-color: rgba(0, 0, 255, 0.9); 
+  border-width: 3px;
+  border-radius: 25px; */
 }
 
 .extension-window-header {
@@ -74,6 +77,7 @@
   border-radius: 1.35em;
   background-color: rgba(255, 255, 255, 0.16);
   padding: 0.5em 0.7em 0.5em 0.7em;
+  margin-top: 0.25em;
 }
 
 .extension-about-label {
@@ -116,9 +120,15 @@
 
 .hotkey-entry {
   width: 5.8em;
-  height: 1.0em;
+  /* height: 1.0em; */
 }
 
+.indicator-switch {
+  padding: 2px 2px;
+  border-radius: 0.5em; 
+  border-width: 1px;
+}
+  
 .extension-title-label {
   color: rgba(255, 255, 255, 0.95);
   font-weight: 525;
@@ -133,7 +143,7 @@
 }
 .extension-title-label:hover, .extension-title-label:focus {
   color: rgba(255, 255, 255, 1);
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.04);
 }
 
 .ext-app-icon {
@@ -177,6 +187,25 @@
   margin-right: 6px;
 }
 
+.font-down-button {
+  font-weight: 800;
+  font-size: large;
+  border-radius: 0.5em; 
+  /* border-width: 1px;
+  border-color: white; */
+  padding: 0px 8px;
+  margin-left: 15px;
+}
+.font-up-button {
+  font-weight: 800;
+  font-size: large;
+  border-radius: 0.5em; 
+  /* border-width: 1px;
+  border-color: white; */
+  padding: 0px 5px;
+  margin-left: 5px;
+}
+
 .extension-mode-label {
   font-weight: 800;
   font-size: large;
@@ -194,6 +223,9 @@
   /* margin-left: 6px; */
 }
 
+.indicator-switch:hover, .indicator-switch:focus,
+.font-up-button:hover, .font-up-button:focus,
+.font-down-button:hover, .font-down-button:focus,
 .extension-mode-button:hover, .extension-mode-button:focus,
 .extension-about-button:hover, .extension-about-button:focus,
 .extension-ego-button:hover, .extension-ego-button:focus,
@@ -229,25 +261,34 @@
 
 .extension-name-button:hover, .extension-name-button:focus
  {
-  border-color: rgba(255, 255, 255, 0.9);
-  background-color: rgba(255, 255, 255, 0.6);
+  border-width: 1px;
+  border-color: rgba(255, 255, 255, 0.8);
+  /* background-color: rgba(255, 255, 255, 0.6); */
   font-weight: normal;
-  color: rgba(30, 30, 30, 1.0);
+  background-image: url(media/label.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: none;
+  /* color: rgba(30, 30, 30, 1.0); */
+  margin: 0px 0px;
 }
 
 .extension-name-button {
   border-radius: 0.85em; 
   border-width: 1px;
   border-color: rgba(255, 255, 255, 0.4);
-  background-image: url(media/label.svg);
+  background-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0px 2px 10px -2px rgba(0,0,0,0.05);
+  /* background-image: url(media/label.svg);
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: cover; */
   /* -st-background-image-shadow: 0px 0px 2px rgba(255, 255, 255, 0.2); */
   /* margin-left: 10px;
   margin-right: 5px; */
   color: rgba(255, 255, 255, 1.0);
   padding: 5px 5px;
-  font-size: 1.45em;
+  /* font-size: 1.45em; */
+  margin: 1px 1px 0px 1px;
 }
 
 .extension-name-label {
@@ -260,13 +301,14 @@
 }
 
 .extension-name-button-update {
+  /* color: rgb(192, 32, 255); */
+  background-color: rgba(10, 250, 250, 0.15);
+}
+.extension-name-button-update:hover, .extension-name-button-update:focus {
+  color: rgb(0, 255, 255);
   background-image: url(media/label_update.svg);
   background-repeat: no-repeat;
   background-size: cover;
-  /* color: rgb(192, 32, 255); */
-}
-.extension-name-button-update:hover, .extension-name-button-update:focus {
-  color: rgb(143, 2, 169);
 }
 .extension-name-button-update-msg {
   font-weight: lighter;
@@ -274,13 +316,15 @@
 }
 
 .extension-name-button-error {
+
+  /*color: rgb(216, 86, 0);  */
+  background-color: rgba(253, 82, 82, 0.15);
+}
+.extension-name-button-error:hover, .extension-name-button-error:focus {
+  color: rgb(201, 0, 0);
   background-image: url(media/label_error.svg);
   background-repeat: no-repeat;
   background-size: cover;
-  /* color: rgb(216, 86, 0);  */
-}
-.extension-name-button-error:hover, .extension-name-button-error:focus {
-  color: rgb(194, 0, 0);
 }
 .extension-name-button-error-msg {
   font-weight: lighter;
@@ -326,7 +370,7 @@
   font-weight: normal;
 }
 .reload-style-button {
-  border-radius: 0.85em;  
+  border-radius: 0.85em;
   border-width: 2px;
   /* border-color: #7e7c68; */
   padding: 0px 0px; 
