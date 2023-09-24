@@ -35,5 +35,10 @@
       <summary>Background Theme Mode</summary>
       <description>Background theme mode for the Glass Grid as Light or Dark.</description>
     </key>
+    <key type="d" name="font-size">
+      <default>1.4</default>
+      <summary>Font Size</summary>
+      <description>Font Size for extensions name labels.</description>
+    </key>
   </schema>
 </schemalist>

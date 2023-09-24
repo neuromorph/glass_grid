@@ -366,6 +366,8 @@ var GlassGrid = GObject.registerClass(
                     y_align: Clutter.ActorAlign.CENTER,
                     x_expand: true,
                 });
+                let fontSize = this._settings.get_double('font-size');
+                nameLabel.style = ` font-size: ${fontSize}em !important; `;
                 let nameTxt = nameLabel.get_clutter_text();
                 nameTxt.set_line_wrap(true);
                 nameTxt.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
