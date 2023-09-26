@@ -107,16 +107,11 @@
   border-radius: 0.85em; 
   border-width: 2px;
   /* border-color: #7e7c68; */
-  padding: 2px 2px 2px 2px;
+  padding: 2px 2px 2px 2px;  /* Gnome 45 mod */
   color: rgba(255, 255, 255, 0.9);
   /* margin-right: 8px; */
 }
 
-.settings-icon {
-  /* size: 1rem; */
-  width: 1.65em;
-  height: 1.65em;
-}
 
 .hotkey-entry {
   width: 5.8em;
@@ -155,8 +150,8 @@
   border-width: 2px;
   /* border-color: #7e7c68; */
   padding: 2px 6px;
-  margin-left: 5px;
-  margin-right: 4px;
+  margin-left: 6px;
+  margin-right: 6px;
   color: rgba(255, 255, 255, 0.9);
 } 
 
@@ -176,7 +171,12 @@
   height: 1.4em;
 }
 
-
+.settings-icon {
+  /* size: 1rem; */
+  width: 1.65em;
+  height: 1.65em;
+  margin: 0px 4px;
+}
 .settings-button {
   border-radius: 0.75em; 
   border-width: 2px;
@@ -193,8 +193,8 @@
   border-radius: 0.5em; 
   /* border-width: 1px;
   border-color: white; */
-  padding: 0px 8px;
-  margin-left: 15px;
+  padding: 0em 0.55em;
+  margin-left: 1.75em;
 }
 .font-up-button {
   font-weight: 800;
@@ -202,8 +202,8 @@
   border-radius: 0.5em; 
   /* border-width: 1px;
   border-color: white; */
-  padding: 0px 5px;
-  margin-left: 5px;
+  padding: 0em 0.45em;
+  margin-left: 0.35em;
 }
 
 .extension-mode-label {
@@ -250,7 +250,6 @@
 }
 .extension-box:hover, .extension-box:focus {
   padding: 0px 0px 0px 0px;
-  transform: scale(1.2);
 }
 
 .extension-button-box {
@@ -274,9 +273,9 @@
 }
 
 .extension-name-button {
-  border-radius: 0.85em; 
+  border-radius: 1.2em; 
   border-width: 1px;
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.35);
   background-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0px 2px 10px -2px rgba(0,0,0,0.05);
   /* background-image: url(media/label.svg);
@@ -346,8 +345,8 @@
 
 .extension-pref-button:hover, .extension-pref-button:focus
  {
-  border-color: white;
   color: white;
+  box-shadow: 0px 0px 1px 2px rgba(255, 255, 255, 0.3);
 }
 
 .extension-pref-button-disabled {
@@ -361,7 +360,7 @@
   opacity: 0.5;
 }
 .extension-pref-button-disabled:hover, .extension-pref-button-disabled:focus {
-  border-color: #8d8c8c;
+  box-shadow: 0px 0px 1px 0px rgba(125, 125, 125, 0.3);
 }
 
 .reload-style-label {
@@ -378,8 +377,8 @@
 }
 .reload-style-button:hover, .reload-style-button:focus
  {
-  border-color: white;
   color: white;
+  box-shadow: 0px 0px 1px -2px rgba(255, 255, 255, 0.3);
 }
 
 
@@ -392,8 +391,8 @@
 }
 .extension-state-button:hover, .extension-state-button:focus
  {
-  border-color: white;
   color: white;
+  box-shadow: 0px 0px 1px 1px rgba(255, 255, 255, 0.3);
 }
 
 .extension-state-switch
