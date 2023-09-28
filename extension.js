@@ -333,11 +333,6 @@ var GlassGrid = GObject.registerClass(
                 let extension = ExtensionManager.lookup(uuid);
                 this.extList.push([uuid, extension]);
             }
-            // this.extList.sort(function(a, b) {
-            //     let nameA = a[1].metadata.name.toUpperCase();
-            //     let nameB = b[1].metadata.name.toUpperCase();
-            //     return (nameA < nameB)? -1 : (nameA > nameB)? 1 : 0;
-            // });
 
             this.extList.sort(this._compareUuids);
         }

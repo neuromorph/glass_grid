@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
+ * author: neuromorph
  */
 
 /* exported PageSwitcherPopup */
@@ -31,14 +32,8 @@ class PageSwitcherPopup extends Clutter.Actor {
             offscreen_redirect: Clutter.OffscreenRedirect.ALWAYS,
             x_expand: true,
             y_expand: true,
-            // x_align: Clutter.ActorAlign.CENTER,
-            //y_align: Clutter.ActorAlign.CENTER,
-            //x: extGrid.width/2,
             y: extGrid.height*0.92,
         });
-
-        // const constraint = new Layout.MonitorConstraint({primary: true});
-        // this.add_constraint(constraint);
 
         this.extGrid = extGrid;
         this._timeoutId = 0;
@@ -48,11 +43,6 @@ class PageSwitcherPopup extends Clutter.Actor {
         });
         this.add_child(this._list);
 
-        //this._redisplay();
-
-        //this.hide();
-
-        // this.connect('destroy', this.destroy.bind(this));
     }
     
     setSwitcherPopupParams() {
@@ -76,9 +66,6 @@ class PageSwitcherPopup extends Clutter.Actor {
             if (i === currentPage) {
                 indicator.add_style_class_name('pg-switcher-indicator-active');
             }
-            // else {
-            //     indicator.remove_style_class_name('pg-switcher-indicator-active');
-            // }
 
             this._list.add_actor(indicator);
         }
