@@ -173,7 +173,7 @@ var HeaderBox = GObject.registerClass(
             let fontSize = this._settings.get_double('font-size');
             fontSize += 0.05;
             this._settings.set_double('font-size', fontSize);
-            this.extGrid._fillGrid();
+            this.extGrid._setFontUpDown(fontSize);
         });
         let fontDownBtn = new St.Button({
             label: '-',
@@ -187,7 +187,7 @@ var HeaderBox = GObject.registerClass(
             let fontSize = this._settings.get_double('font-size');
             fontSize -= 0.05;
             this._settings.set_double('font-size', fontSize);
-            this.extGrid._fillGrid();
+            this.extGrid._setFontUpDown(fontSize);
         });
         fontMenuItem.add_child(fontDownBtn);
         fontMenuItem.add_child(fontUpBtn);

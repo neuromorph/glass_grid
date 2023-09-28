@@ -67,8 +67,9 @@
 .bg-widget {
   /* box-shadow: 0px 0px 4px 2px rgba(0,0,0,0.3); */
   /* border-color: rgba(0, 0, 255, 0.9); 
-  border-width: 3px;
-  border-radius: 25px; */
+  border-radius: 25px; 
+  border-width: 3px; */
+  
 }
 
 .extension-window-header {
@@ -112,11 +113,6 @@
   /* margin-right: 8px; */
 }
 
-.settings-icon {
-  /* size: 1rem; */
-  width: 1.65em;
-  height: 1.65em;
-}
 
 .hotkey-entry {
   width: 5.8em;
@@ -156,8 +152,8 @@
   border-width: 2px;
   /* border-color: #7e7c68; */
   padding: 2px 6px;
-  margin-left: 5px;
-  margin-right: 4px;
+  margin-left: 6px;
+  margin-right: 6px;
   color: rgba(255, 255, 255, 0.9);
 } 
 
@@ -177,7 +173,12 @@
   height: 1.4em;
 }
 
-
+.settings-icon {
+  /* size: 1rem; */
+  width: 1.65em;
+  height: 1.65em;
+  margin: 0px 4px;
+}
 .settings-button {
   border-radius: 0.75em; 
   border-width: 2px;
@@ -194,8 +195,8 @@
   border-radius: 0.5em; 
   /* border-width: 1px;
   border-color: white; */
-  padding: 0px 8px;
-  margin-left: 15px;
+  padding: 0em 0.55em;
+  margin-left: 1.75em;
 }
 .font-up-button {
   font-weight: 800;
@@ -203,8 +204,8 @@
   border-radius: 0.5em; 
   /* border-width: 1px;
   border-color: white; */
-  padding: 0px 5px;
-  margin-left: 5px;
+  padding: 0em 0.45em;
+  margin-left: 0.35em;
 }
 .extension-mode-label {
   font-weight: 800;
@@ -229,7 +230,7 @@
 .extension-mode-button:hover, .extension-mode-button:focus,
 .extension-about-button:hover, .extension-about-button:focus,
 .extension-ego-button:hover, .extension-ego-button:focus,
-.ext-app-button:hover, .ext-app-button:focus, 
+.ext-app-button:hover, .ext-app-button:focus,
 .settings-button:hover, .settings-button:focus,
 .settings-button-container:hover, .settings-button-container:focus {
   /* border-color: white; */
@@ -238,6 +239,7 @@
   border-color: #fff #0000 #fff #0000; */
   box-shadow: 0px 0px 1px 0px rgba(255, 255, 255, 0.2);
 }
+
 
 .extension-box {
   color: white;
@@ -250,7 +252,6 @@
 }
 .extension-box:hover, .extension-box:focus {
   padding: 0px 0px 0px 0px;
-  transform: scale(1.2);
 }
 
 .extension-button-box {
@@ -288,7 +289,7 @@
   color: rgba(255, 255, 255, 1.0);
   padding: 5px 5px;
   /* font-size: 1.45em; */
-  margin: 1px 1px 0px 1px;
+  margin: 2px 1px 0px 1px;
 }
 
 .extension-name-label {
@@ -347,8 +348,9 @@
 
 .extension-pref-button:hover, .extension-pref-button:focus
  {
-  border-color: white;
+  /*border-color: white;*/
   color: white;
+  box-shadow: 0px 0px 1px 2px rgba(255, 255, 255, 0.3);
 }
 
 .extension-pref-button-disabled {
@@ -362,7 +364,8 @@
   opacity: 0.5;
 }
 .extension-pref-button-disabled:hover, .extension-pref-button-disabled:focus {
-  border-color: #8d8c8c;
+  /*border-color: #8d8c8c;*/
+  box-shadow: 0px 0px 1px 0px rgba(125, 125, 125, 0.3);
 }
 
 .reload-style-label {
@@ -379,8 +382,9 @@
 }
 .reload-style-button:hover, .reload-style-button:focus
  {
-  border-color: white;
+  /*border-color: white;*/
   color: white;
+  box-shadow: 0px 0px 1px -2px rgba(255, 255, 255, 0.3);
 }
 
 
@@ -393,8 +397,9 @@
 }
 .extension-state-button:hover, .extension-state-button:focus
  {
-  border-color: white;
+  /*border-color: white;*/
   color: white;
+  box-shadow: 0px 0px 1px 1px rgba(255, 255, 255, 0.3);
 }
 
 .extension-state-switch
@@ -410,8 +415,8 @@
 .extension-window-scroll {
   /* margin: 2px 30px 0px 30px; */
   /* padding-bottom: 25px; */
-  /* border-width: 1px;
-  border-color: black;  */
+   /* border-width: 1px; */
+  /*border-color: black;  */
 }
 
 .grid-viewport {
@@ -441,7 +446,7 @@
 }
 .pg-switcher-indicator-active  {
   background-color: rgba(0, 0, 0, 0.9);
-  padding: 0.2em 0.9em;
+  padding: 0.2em 1.0em;
   margin: 0.3em;
 }
 
