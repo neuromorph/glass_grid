@@ -181,11 +181,18 @@ var BackgroundGroup = GObject.registerClass(
         });
 
 
-        if (activeTheme == "Dynamic Blur") {
+        if (activeTheme == "Dynamic Blur" || activeTheme == "Background Crop") {
             Meta.add_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
         }
         else {
             Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+        }
+
+        if (activeTheme == "Background Crop") {
+            this.extGrid._addRemoveNameEffect(true);
+        }
+        else {
+            this.extGrid._addRemoveNameEffect(false);
         }
 
         switch (activeTheme) {

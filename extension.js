@@ -92,6 +92,7 @@ var GlassGrid = GObject.registerClass(
             this.switcherPopup = new SwitcherPopup.PageSwitcherPopup(this);
             this.insert_child_above(this.switcherPopup, null);
  
+            this.backgroundGroup._updateBackgrounds(); 
         }
 
         _setGlassGridParams() {
@@ -120,17 +121,16 @@ var GlassGrid = GObject.registerClass(
             this.gridRows = GRID_ROWS;
             this.pageSize = pageSize; 
             this.extBoxWidth = (WINDOW_WIDTH * 0.88) / GRID_COLS; //reduce margin/spacing
-            this.extBoxHeight = this.extBoxWidth / 1.38; 
-    
-            this.backgroundGroup._updateBackgrounds();       
+            this.extBoxHeight = this.extBoxWidth / 1.38;                      
         }
 
         _updateScale() {
             this.scaleFactor = this.themeContext.scale_factor;
             this._setGlassGridParams();
             this.headerBox.setHeaderBoxParams();
-            this.switcherPopup.setSwitcherPopupParams();
             this._fillGrid();
+            this.switcherPopup.setSwitcherPopupParams();
+            this.backgroundGroup._updateBackgrounds(); 
         }
 
         _focusActorChanged() {
@@ -402,15 +402,14 @@ var GlassGrid = GObject.registerClass(
                     height: this.height*0.16, //120,
                     width: this.height*0.24, //150,
                     name: 'name_'+i,
-                });
-                if (extension.hasUpdate) {
+                }); 
+                if (extension.hasUpdate) { 
                     nameBtn.add_style_class_name('extension-name-button-update');
                 }
                 if (extension.state == ExtensionState.ERROR) {
                     nameBtn.add_style_class_name('extension-name-button-error');
                 }
-                // console.debug('Name button: ' + nameBtn);
-                
+                // console.log('Name: ' + extension.metadata.name);        
                 nameBtn.set_child(nameLabel);
                 nameBtn.connect('clicked', () => {
                     let fontSize = this._settings.get_double('font-size');
@@ -568,6 +567,12 @@ var GlassGrid = GObject.registerClass(
                 i++;
             }
 
+            const activeTheme = this._settings.get_string('bg-theme');
+            if (activeTheme == "Background Crop")
+                this._addRemoveNameEffect(true);
+            else
+                this._addRemoveNameEffect(false);
+
         }
 
         // Reload the grid and show the window
@@ -592,7 +597,7 @@ var GlassGrid = GObject.registerClass(
             global.stage.set_key_focus(this.headerBox.titleLabel);
 
             let activeTheme = this._settings.get_string('bg-theme');
-            if (activeTheme == "Dynamic Blur")
+            if (activeTheme == "Dynamic Blur" || activeTheme == "Background Crop")
                 Meta.add_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
 
             // log('scale factor '+this.scaleFactor);
@@ -620,7 +625,7 @@ var GlassGrid = GObject.registerClass(
             if (idx == -1) {
                 // log('Installed extn: '+extension.metadata.name);
                 this.instTimeoutId = setTimeout(() => { this._fillGrid(); }, 200);
-                return;
+                return Clutter.EVENT_PROPAGATE;
             }
              
             let [col, row] = this._getGridXY(idx); 
@@ -629,8 +634,12 @@ var GlassGrid = GObject.registerClass(
             let extSwitchBtn = extBox.get_child_at_index(1).get_child_at_index(2); 
             let extSwitch = extSwitchBtn.child;
 
-            switch (extension.state) {
-                case ExtensionState.ERROR: 
+            if (extension.hasUpdate) {
+                extNameBtn.add_style_class_name('extension-name-button-update');
+            }
+
+            switch (extension.state) { 
+                case ExtensionState.ERROR:
                     extSwitch.state = false;                                  
                     extNameBtn.add_style_class_name('extension-name-button-error');
                     break;
@@ -649,10 +658,50 @@ var GlassGrid = GObject.registerClass(
                     break;
 
                 default:
-                    if (extension.hasUpdate) {
-                        extNameBtn.add_style_class_name('extension-name-button-update');
-                    }
                     break;
+            }
+            return Clutter.EVENT_PROPAGATE;
+        }
+
+        _addRemoveNameEffect(add) {
+            for (let idx in this.extList) {
+                let [col, row] = this._getGridXY(idx); 
+                let extBox = this.grid.get_child_at(col, row);
+                let nameBtn = extBox.get_child_at_index(0);
+                
+                if (add) {
+                    nameBtn.effect = new Shell.BlurEffect({name: 'extgrid-bgcrop-'+idx});
+                    const effect = nameBtn.get_effect('extgrid-bgcrop-'+idx);
+                    if (effect) {
+                        effect.set({
+                            brightness: 0.90,
+                            sigma: 23,
+                            mode: Shell.BlurMode.BACKGROUND, 
+                        });
+                    }
+                    nameBtn.add_style_class_name('extension-name-button-bgcrop');
+                }
+                else {
+                    nameBtn.remove_effect_by_name('extgrid-bgcrop-'+idx);
+                    nameBtn.remove_style_class_name('extension-name-button-bgcrop');
+                }                
+            }
+
+            if (add) {
+                this.headerBox.effect = new Shell.BlurEffect({name: 'extgridh-bgcrop'});
+                const heffect = this.headerBox.get_effect('extgridh-bgcrop');
+                if (heffect) {
+                    heffect.set({
+                        brightness: 0.90,
+                        sigma: 23,
+                        mode: Shell.BlurMode.BACKGROUND, 
+                    });
+                }
+                this.headerBox.add_style_class_name('extension-window-header-bgcrop');
+            }
+            else {
+                this.headerBox.remove_effect_by_name('extgridh-bgcrop');
+                this.headerBox.remove_style_class_name('extension-window-header-bgcrop');
             }
         }
 
@@ -823,6 +872,7 @@ class GlassGridExtension {
         ExtensionManager.disconnectObject(this);
         Main.wm.removeKeybinding('hotkey');
 
+        this.extGrid._addRemoveNameEffect(false); // Remove all effects from name buttons
         this.extGrid.backgroundGroup.destroy();
         this.extGrid.headerBox.destroy();      
         this.extGrid.switcherPopup.destroy();

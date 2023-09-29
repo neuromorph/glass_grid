@@ -75,10 +75,13 @@
 .extension-window-header {
   border-color: rgba(255, 255, 255, 0.45);
   border-width: 1px; 
-  border-radius: 1.35em;
+  border-radius: 1.25em;
   background-color: rgba(255, 255, 255, 0.16);
   padding: 0.5em 0.7em 0.5em 0.7em;
   margin-top: 0.25em;
+}
+.extension-window-header-bgcrop {
+  border-radius: 0.4em;
 }
 
 .extension-about-label {
@@ -263,7 +266,7 @@
 .extension-name-button:hover, .extension-name-button:focus
  {
   border-width: 1px;
-  border-color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.7);
   /* background-color: rgba(255, 255, 255, 0.35); */
   font-weight: normal;
   background-image: url(media/label.svg);
@@ -275,7 +278,7 @@
 }
 
 .extension-name-button {
-  border-radius: 1.2em; 
+  border-radius: 0.95em; 
   border-width: 1px;
   border-color: rgba(255, 255, 255, 0.35);
   background-color: rgba(255, 255, 255, 0.15);
@@ -290,6 +293,10 @@
   padding: 5px 5px;
   /* font-size: 1.45em; */
   margin: 2px 1px 0px 1px;
+}
+
+.extension-name-button-bgcrop {
+  border-radius: 0.4em;
 }
 
 .extension-name-label {
