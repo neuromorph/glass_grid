@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" opacity="0.97">
+  <!-- Background Gradient -->
+  <defs>
+    <linearGradient id="glass-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <!-- <stop offset="0%" style="stop-color:#ff73b3;stop-opacity:1" />
+      <stop offset="25%" style="stop-color:#d681e5;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#7cbee8;stop-opacity:1" />
+      <stop offset="75%" style="stop-color:#22d3c2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f8b169;stop-opacity:1" /> -->
+      <stop offset="0%" style="stop-color:#e562a2;stop-opacity:1" />
+      <stop offset="25%" style="stop-color:#c570d4;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#9c5edb;stop-opacity:1" />
+      <stop offset="75%" style="stop-color:#31b9b9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#b7a058;stop-opacity:1" />
+    </linearGradient>
+
+    <radialGradient id="SvgjsLinearGradient1000">
+        <stop stop-color="hsl(190, 70%, 40%)" offset="0"></stop>
+        <stop stop-color="hsl(190, 70%, 75%)" offset="1"></stop>
+    </radialGradient>
+    <radialGradient id="SvgjsLinearGradient1002">
+        <stop stop-color="hsl(189, 77%, 72%)" offset="0"></stop>
+        <stop stop-color="hsl(189, 77%, 80%)" offset="1"></stop>
+    </radialGradient>
+    <radialGradient id="SvgjsLinearGradient1001">
+        <stop stop-color="hsl(270, 69%, 70%)" offset="0"></stop>
+        <stop stop-color="hsl(270, 69%, 80%)" offset="1"></stop>
+    </radialGradient>
+    <radialGradient id="SvgjsLinearGradient1003">
+        <stop stop-color="hsl(299, 72%, 65%)" offset="0"></stop>
+        <stop stop-color="hsl(299, 72%, 80%)" offset="1"></stop>
+    </radialGradient>
+
+    <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="shadow">
+      <feOffset dx="1" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/>
+      <feGaussianBlur stdDeviation="20" in="shadowOffsetOuter1" result="shadowBlurOuter1"/>
+      <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.2 0" in="shadowBlurOuter1" type="matrix" result="shadowMatrixOuter1"/>
+      <feMerge>
+        <feMergeNode in="shadowMatrixOuter1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="blurry-filter" x="-100%" y="-100%" width="400%" height="400%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="16 32" x="0%" y="0%" width="100%" height="100%" in="SourceGraphic" edgeMode="none" result="blur"></feGaussianBlur>
+    </filter>
+
+  </defs>
+
+  <g filter="url(#blurry-filter)">
+  <rect width="100%" height="100%" fill="url(#glass-gradient)" rx="20" /> 
+  <!-- <rect width="100%" height="100%" fill="#000" rx="20" opacity="0.05"/>    -->
+   </g>
+
+</svg>
+

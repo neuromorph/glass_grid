@@ -58,7 +58,7 @@
   background-color: rgba(255, 255, 255, 0.2);
 }
 .mainbox-crop-dark, .mainbox-blur-dark {
-  box-shadow: 0px 4px 30px -2px rgba(0,0,0,0.3);
+  box-shadow: 0px 2px 30px -1px rgba(0,0,0,0.25);
 }
 .mainbox-crop-light, .mainbox-blur-light {
   box-shadow: 0px 4px 25px -1px rgba(225,225,225,0.15);
@@ -266,7 +266,7 @@
 .extension-name-button:hover, .extension-name-button:focus
  {
   border-width: 1px;
-  border-color: rgba(255, 255, 255, 0.7);
+  border-color: rgba(255, 255, 255, 0.75);
   /* background-color: rgba(255, 255, 255, 0.35); */
   font-weight: normal;
   background-image: url(media/label.svg);
@@ -297,6 +297,7 @@
 
 .extension-name-button-bgcrop {
   border-radius: 0.4em;
+  box-shadow: 0px 2px 10px -2px rgba(0,0,0,0.02);
 }
 
 .extension-name-label {

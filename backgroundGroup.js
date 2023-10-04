@@ -23,7 +23,7 @@ const { Clutter, GObject, St, Meta, Shell, Graphene } = imports.gi;
 const Main = imports.ui.main;
 const Background = imports.ui.background;
 
-const BLUR_BRIGHTNESS = 0.8; //0.65
+const BLUR_BRIGHTNESS = 0.85; //0.65
 const BLUR_SIGMA = 50; //45
 const BACKGROUND_CORNER_RADIUS_PIXELS = 15;
 
