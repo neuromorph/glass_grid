@@ -26,12 +26,12 @@
       <description>State of the Enable/Disable All switch.</description>
     </key>
     <key type="s" name="bg-theme">
-      <default>"Color Gradient"</default>
+      <default>"Background Blur"</default>
       <summary>Background Theme</summary>
       <description>Background theme for Glass Grid.</description>
     </key>
     <key type="s" name="theme-mode">
-      <default>"Light"</default>
+      <default>"Neutral"</default>
       <summary>Background Theme Mode</summary>
       <description>Background theme mode for the Glass Grid as Light or Dark.</description>
     </key>

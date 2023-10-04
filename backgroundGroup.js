@@ -19,7 +19,6 @@
 
 /* exported BackgroundGroup, MAINBOX_STYLE, MAINBOX_MODE */
 
-// const { Clutter, GObject, St, Meta, Shell, Graphene } = imports.gi;
 import Clutter from 'gi://Clutter';
 import St from 'gi://St';
 import Graphene from 'gi://Graphene';
@@ -30,7 +29,7 @@ import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as Background from 'resource:///org/gnome/shell/ui/background.js';
 
-const BLUR_BRIGHTNESS = 0.8; //0.65
+const BLUR_BRIGHTNESS = 0.85; //0.65
 const BLUR_SIGMA = 50; //45
 const BACKGROUND_CORNER_RADIUS_PIXELS = 15;
 
@@ -188,12 +187,19 @@ export const BackgroundGroup = GObject.registerClass(
         });
 
 
-        if (activeTheme == "Dynamic Blur") {
+        if (activeTheme == "Dynamic Blur" || activeTheme == "Background Crop") {
             Meta.add_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
         }
         else {
             Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
         }
+
+        if (activeTheme == "Background Crop") {
+            this.extGrid._addRemoveNameEffect(true);
+        }
+        else {
+            this.extGrid._addRemoveNameEffect(false);
+        }            
 
         switch (activeTheme) {
             case "Background Crop":

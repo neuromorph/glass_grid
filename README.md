@@ -64,6 +64,7 @@ Use the Settings menu from the extension for :
 
 
 ## What's New (recent first)
+- Mainly performance improvement for smooth operation even with several pages full of extensions. Some UI refinements.
 - Update with more options for background theme including background blur and dynamic blur. Also, rewrite to improve input handling for mouse, keyboard, trackpad as well as touchscreen.
 - Initial version, already working, to be submitted to gnome.extensions.org
 

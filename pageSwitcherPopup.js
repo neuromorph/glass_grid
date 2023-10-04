@@ -35,14 +35,8 @@ class PageSwitcherPopup extends Clutter.Actor {
             offscreen_redirect: Clutter.OffscreenRedirect.ALWAYS,
             x_expand: true,
             y_expand: true,
-            // x_align: Clutter.ActorAlign.CENTER,
-            // y_align: Clutter.ActorAlign.END,
-            // x: extGrid.width/2,
             y: extGrid.height*0.92,
         });
-
-        // const constraint = new Layout.MonitorConstraint({primary: true});
-        // this.add_constraint(constraint);
 
         this.extGrid = extGrid;
         this._timeoutId = 0;
@@ -52,11 +46,6 @@ class PageSwitcherPopup extends Clutter.Actor {
         });
         this.add_child(this._list);
 
-        // this._redisplay();
-
-        // this.hide();
-
-        // this.connect('destroy', this.destroy.bind(this));
     }
 
     setSwitcherPopupParams() {

@@ -42,7 +42,7 @@
 
 .mainbox-bg-blur, .mainbox-dynamic-blur {
   border-color: rgba(230, 230, 230, 0.85); 
-  border-width:4px;
+  border-width: 4px;
   border-radius: 15px;
   padding: 1.92em 1.92em;
   /* background-color: rgba(255, 255, 255, 0.5); */
@@ -58,7 +58,7 @@
   background-color: rgba(255, 255, 255, 0.2);
 }
 .mainbox-crop-dark, .mainbox-blur-dark {
-  box-shadow: 0px 4px 30px -2px rgba(0,0,0,0.3);
+  box-shadow: 0px 2px 30px -1px rgba(0,0,0,0.25);
 }
 .mainbox-crop-light, .mainbox-blur-light {
   box-shadow: 0px 4px 25px -1px rgba(225,225,225,0.15);
@@ -74,10 +74,13 @@
 .extension-window-header {
   border-color: rgba(255, 255, 255, 0.45);
   border-width: 1px; 
-  border-radius: 1.35em;
+  border-radius: 1.25em;
   background-color: rgba(255, 255, 255, 0.16);
   padding: 0.5em 0.7em 0.5em 0.7em;
   margin-top: 0.25em;
+}
+.extension-window-header-bgcrop {
+  border-radius: 0.4em;
 }
 
 .extension-about-label {
@@ -261,7 +264,7 @@
 .extension-name-button:hover, .extension-name-button:focus
  {
   border-width: 1px;
-  border-color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.75);
   /* background-color: rgba(255, 255, 255, 0.6); */
   font-weight: normal;
   background-image: url(media/label.svg);
@@ -273,7 +276,7 @@
 }
 
 .extension-name-button {
-  border-radius: 1.2em; 
+  border-radius: 0.95em; 
   border-width: 1px;
   border-color: rgba(255, 255, 255, 0.35);
   background-color: rgba(255, 255, 255, 0.15);
@@ -287,7 +290,12 @@
   color: rgba(255, 255, 255, 1.0);
   padding: 5px 5px;
   /* font-size: 1.45em; */
-  margin: 1px 1px 0px 1px;
+  margin: 2px 1px 0px 1px;
+}
+
+.extension-name-button-bgcrop {
+  border-radius: 0.4em;
+  box-shadow: 0px 2px 10px -2px rgba(0,0,0,0.02);
 }
 
 .extension-name-label {
@@ -421,8 +429,8 @@
 
 .page-switcher {
   color: rgba(0, 0, 0, 1);
-  background-color: rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.45);
   border-radius: 999px;
 
   margin-top: 0.4em;
@@ -438,7 +446,7 @@
 }
 .pg-switcher-indicator-active  {
   background-color: rgba(0, 0, 0, 0.9);
-  padding: 0.2em 0.9em;
+  padding: 0.2em 1.0em;
   margin: 0.3em;
 }
 

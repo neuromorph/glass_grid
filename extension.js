@@ -55,7 +55,7 @@ var GlassGrid = GObject.registerClass(
                 style_class: 'extension-grid-wrapper'
             });
 
-            this._settings = Ext.getSettings(); //ExtensionUtils.getSettings();
+            this._settings = Ext.getSettings();
             this.metadata = Ext.metadata;
             this.path = Ext.path;
             this.extList = [];
@@ -97,10 +97,14 @@ var GlassGrid = GObject.registerClass(
             // Create Scroll Grid
             this._createScrollView();
             this._createGridBox();
+
+            this._fillGrid();
  
             // Page switcher popup
             this.switcherPopup = new SwitcherPopup.PageSwitcherPopup(this);
             this.insert_child_above(this.switcherPopup, null);
+
+            this.backgroundGroup._updateBackgrounds();
         }
 
         _setGlassGridParams() {
@@ -129,16 +133,16 @@ var GlassGrid = GObject.registerClass(
             this.gridRows = GRID_ROWS;
             this.pageSize = pageSize; 
             this.extBoxWidth = (WINDOW_WIDTH * 0.88) / GRID_COLS; //reduce margin/spacing
-            this.extBoxHeight = this.extBoxWidth / 1.38; 
-    
-            this.backgroundGroup._updateBackgrounds();            
+            this.extBoxHeight = this.extBoxWidth / 1.38;
         }
 
         _updateScale() {
             this.scaleFactor = this.themeContext.scale_factor;
             this._setGlassGridParams();
             this.headerBox.setHeaderBoxParams();
+            this._fillGrid();
             this.switcherPopup.setSwitcherPopupParams();
+            this.backgroundGroup._updateBackgrounds();
         }
             
 
@@ -194,8 +198,9 @@ var GlassGrid = GObject.registerClass(
             
             // SwipeTracker to handle touch swipe (also applies to touchpad swipe)
             this._swipeTracker = new SwipeTracker.SwipeTracker(this.scroll,
-                Clutter.Orientation.HORIZONTAL, true);
+                Clutter.Orientation.HORIZONTAL, true, {allowDrag: false, allowScroll: false});
             this._swipeTracker.orientation = Clutter.Orientation.HORIZONTAL;
+            this._swipeTracker._touchGesture.set_n_touch_points(1);
             this._swipeTracker.connect('begin', this._swipeBegin.bind(this));
             this._swipeTracker.connect('update', this._swipeUpdate.bind(this));
             this._swipeTracker.connect('end', this._swipeEnd.bind(this));
@@ -203,9 +208,9 @@ var GlassGrid = GObject.registerClass(
         }
 
         _onScroll(actor, event) {
-            if (this._swipeTracker.canHandleScrollEvent(event)) {
-                return Clutter.EVENT_PROPAGATE;
-            }
+            // if (this._swipeTracker.canHandleScrollEvent(event)) {
+            //     return Clutter.EVENT_PROPAGATE;
+            // }
 
             switch (event.get_scroll_direction()) {
                 case Clutter.ScrollDirection.SMOOTH:
@@ -234,8 +239,8 @@ var GlassGrid = GObject.registerClass(
         }
 
         _swipeBegin(tracker, monitor) {
-            if (monitor !== Main.layoutManager.primaryIndex)
-                return Clutter.EVENT_PROPAGATE;
+            // if (monitor !== Main.layoutManager.primaryIndex)
+            //     return Clutter.EVENT_PROPAGATE;
             // console.debug('swipe begin ');
             const adjustment = this._adjustment;
             adjustment.remove_transition('value');
@@ -308,6 +313,26 @@ var GlassGrid = GObject.registerClass(
             }
         }
 
+        _findIdx(el, arr, start, end) {
+            start = start || 0;
+            end = end || arr.length;
+            var pivot = parseInt(start + (end - start) / 2, 10);
+            if (end - start <= 1 || arr[pivot] === el) 
+                return pivot;
+
+            if ( this._compareUuids(arr[pivot], el) ) {
+                return this._findIdx(el, arr, pivot, end);
+            } else {
+                return this._findIdx(el, arr, start, pivot);
+            }
+        }
+
+        _compareUuids(a, b) {
+            let nameA = a[1].metadata.name.toUpperCase();
+            let nameB = b[1].metadata.name.toUpperCase();
+            return (nameA < nameB)? -1 : (nameA > nameB)? 1 : 0;
+        }
+
         _sortExtList() {
             // Get the list of installed extensions
             let extensions = ExtensionManager.getUuids();
@@ -319,11 +344,13 @@ var GlassGrid = GObject.registerClass(
                 let extension = ExtensionManager.lookup(uuid);
                 this.extList.push([uuid, extension]);
             }
-            this.extList.sort(function(a, b) {
-                let nameA = a[1].metadata.name.toUpperCase();
-                let nameB = b[1].metadata.name.toUpperCase();
-                return (nameA < nameB)? -1 : (nameA > nameB)? 1 : 0;
-            });
+            // this.extList.sort(function(a, b) {
+            //     let nameA = a[1].metadata.name.toUpperCase();
+            //     let nameB = b[1].metadata.name.toUpperCase();
+            //     return (nameA < nameB)? -1 : (nameA > nameB)? 1 : 0;
+            // });
+
+            this.extList.sort(this._compareUuids);
         }
 
         _destroyGridChildren() {
@@ -401,6 +428,7 @@ var GlassGrid = GObject.registerClass(
                 
                 nameBtn.set_child(nameLabel);
                 nameBtn.connect('clicked', () => {
+                    let fontSize = this._settings.get_double('font-size');
                     if (extension.state == ExtensionState.ERROR){
                         if (nameLabel.text == extension.metadata.name) {
                             nameLabel.text = extension.error;
@@ -433,8 +461,8 @@ var GlassGrid = GObject.registerClass(
                         }
                     }
                 });
-                if(i==0)
-                    this._nameBtn1 = nameBtn;
+                // if(i==0)
+                //     this._nameBtn1 = nameBtn;
 
                 extBox.add_child(nameBtn);
 
@@ -444,8 +472,8 @@ var GlassGrid = GObject.registerClass(
                     x_align: Clutter.ActorAlign.CENTER,
                     y_align: Clutter.ActorAlign.CENTER,
                     // vertical: true,
-                    // height: this.height*0.14, //120,
-                    // width: this.height*0.06, //50,
+                    // height: this.height*0.06, //120,
+                    // width: this.height*0.14, //50,
                     reactive: true,
                     track_hover: true,
                 });
@@ -555,6 +583,12 @@ var GlassGrid = GObject.registerClass(
                 i++;
             }
 
+            const activeTheme = this._settings.get_string('bg-theme');
+            if (activeTheme == "Background Crop")
+                this._addRemoveNameEffect(true);
+            else
+                this._addRemoveNameEffect(false);
+
         }
 
         // Reload the grid and show the window
@@ -565,7 +599,7 @@ var GlassGrid = GObject.registerClass(
                 extArr.splice(0, 0, extArr.splice(extGridIdx, 1)[0]); 
             }
 
-            this._fillGrid();
+            // this._fillGrid();
 
             this._adjustment.value = 0;
 
@@ -579,7 +613,7 @@ var GlassGrid = GObject.registerClass(
             global.stage.set_key_focus(this.headerBox.titleLabel);
 
             let activeTheme = this._settings.get_string('bg-theme');
-            if (activeTheme == "Dynamic Blur")
+            if (activeTheme == "Dynamic Blur" || activeTheme == "Background Crop")
                 Meta.add_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
 
             // log('scale factor '+this.scaleFactor);
@@ -604,14 +638,21 @@ var GlassGrid = GObject.registerClass(
 
         onExtStateChanged(extManager, extension){
             let idx = this.extList.findIndex(x => x[0] == extension.uuid);
-            if (idx == -1)
-                return;
+            if (idx == -1) {
+                // log('Installed extn: '+extension.metadata.name);
+                this.instTimeoutId = setTimeout(() => { this._fillGrid(); }, 200);
+                return Clutter.EVENT_PROPAGATE;
+            }
 
             let [col, row] = this._getGridXY(idx); 
             let extBox = this.grid.get_child_at(col, row);
             let extNameBtn = extBox.get_child_at_index(0); 
             let extSwitchBtn = extBox.get_child_at_index(1).get_child_at_index(2); 
             let extSwitch = extSwitchBtn.child;
+
+            if (extension.hasUpdate) {
+                extNameBtn.add_style_class_name('extension-name-button-update');
+            }
 
             switch (extension.state) {
                 case ExtensionState.ERROR: 
@@ -627,8 +668,66 @@ var GlassGrid = GObject.registerClass(
                     extSwitch.state = false;
                     break;
 
+                case ExtensionState.UNINSTALLED:
+                    // log('Uninstalled extn: '+extension.metadata.name);
+                    this.uninstTimeoutId = setTimeout(() => { this._fillGrid(); }, 200);
+                    break;
+
                 default:
                     break;
+            }
+            return Clutter.EVENT_PROPAGATE;
+        }
+
+        _addRemoveNameEffect(add) {
+            for (let idx in this.extList) {
+                let [col, row] = this._getGridXY(idx); 
+                let extBox = this.grid.get_child_at(col, row);
+                let nameBtn = extBox.get_child_at_index(0);
+                
+                if (add) {
+                    nameBtn.effect = new Shell.BlurEffect({name: 'extgrid-bgcrop-'+idx});
+                    const effect = nameBtn.get_effect('extgrid-bgcrop-'+idx);
+                    if (effect) {
+                        effect.set({
+                            brightness: 0.90,
+                            sigma: 23,
+                            mode: Shell.BlurMode.BACKGROUND, 
+                        });
+                    }
+                    nameBtn.add_style_class_name('extension-name-button-bgcrop');
+                }
+                else {
+                    nameBtn.remove_effect_by_name('extgrid-bgcrop-'+idx);
+                    nameBtn.remove_style_class_name('extension-name-button-bgcrop');
+                }                
+            }
+
+            if (add) {
+                this.headerBox.effect = new Shell.BlurEffect({name: 'extgridh-bgcrop'});
+                const heffect = this.headerBox.get_effect('extgridh-bgcrop');
+                if (heffect) {
+                    heffect.set({
+                        brightness: 0.90,
+                        sigma: 23,
+                        mode: Shell.BlurMode.BACKGROUND, 
+                    });
+                }
+                this.headerBox.add_style_class_name('extension-window-header-bgcrop');
+            }
+            else {
+                this.headerBox.remove_effect_by_name('extgridh-bgcrop');
+                this.headerBox.remove_style_class_name('extension-window-header-bgcrop');
+            }
+        }
+
+        _setFontUpDown(fontSize) {
+            for (let idx in this.extList) {
+                let [col, row] = this._getGridXY(idx); 
+                let extBox = this.grid.get_child_at(col, row);
+                let extNameBtn = extBox.get_child_at_index(0); 
+                let nameLabel = extNameBtn.get_child(); 
+                nameLabel.style = ` font-size: ${fontSize}em !important; `;
             }
         }
 
@@ -778,15 +877,21 @@ export default class GlassGridExtension extends Extension {
             this.extGrid.hide();
         }
 
+        clearTimeout(this.extGrid.instTimeoutId);
+        clearTimeout(this.extGrid.uninstTimeoutId);
+
         global.focus_manager.remove_group(this.extGrid);
         Main.layoutManager.removeChrome(this.extGrid);
         ExtensionManager.disconnectObject(this);
         Main.wm.removeKeybinding('hotkey');
 
+        this.extGrid._addRemoveNameEffect(false); // Remove all effects from name buttons
         this.extGrid.backgroundGroup.destroy();
         this.extGrid.headerBox.destroy();      
         this.extGrid.switcherPopup.destroy();
         this.extGrid._destroyGridChildren();
+        this.extGrid._swipeTracker.destroy();
+        this.extGrid.scroll.destroy();
 
         this.extGrid._settings = null;
         this.extGrid.destroy();
