@@ -386,6 +386,9 @@ var GlassGrid = GObject.registerClass(
             this._destroyGridChildren();            
             this._sortExtList();
 
+            const scale = this.scaleFactor;
+            const scale_ratio = scale / (2*scale -1);
+
             // Loop through the extensions and add them to the grid
             let i = 0;
             for (let idx in this.extList) {
@@ -412,7 +415,7 @@ var GlassGrid = GObject.registerClass(
                     x_expand: true,
                 });
                 let fontSize = this._settings.get_double('font-size');
-                nameLabel.style = ` font-size: ${fontSize}em !important; `;
+                nameLabel.style = ` font-size: ${fontSize*scale_ratio}em !important; `;
                 let nameTxt = nameLabel.get_clutter_text();
                 nameTxt.set_line_wrap(true);
                 nameTxt.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
@@ -442,25 +445,25 @@ var GlassGrid = GObject.registerClass(
                         if (nameLabel.text == extension.metadata.name) {
                             nameLabel.text = extension.error;
                             nameBtn.add_style_class_name('extension-name-button-error-msg');
-                            nameLabel.style = ` font-size: ${fontSize*0.75}em !important; `;
+                            nameLabel.style = ` font-size: ${fontSize*scale_ratio*0.75}em !important; `;
 
                         }
                         else {
                             nameLabel.text = extension.metadata.name;
                             nameBtn.remove_style_class_name('extension-name-button-error-msg');
-                            nameLabel.style = ` font-size: ${fontSize}em !important; `;
+                            nameLabel.style = ` font-size: ${fontSize*scale_ratio}em !important; `;
                         }
                     }
                     else if (extension.hasUpdate) {
                         if (nameLabel.text == extension.metadata.name) {
                             nameLabel.text = "Update Available. It'll apply on next login. ";
                             nameBtn.add_style_class_name('extension-name-button-update-msg');
-                            nameLabel.style = ` font-size: ${fontSize*0.75}em !important; `;
+                            nameLabel.style = ` font-size: ${fontSize*scale_ratio*0.75}em !important; `;
                         }
                         else {
                             nameLabel.text = extension.metadata.name;
                             nameBtn.remove_style_class_name('extension-name-button-update-msg');
-                            nameLabel.style = ` font-size: ${fontSize}em !important; `;
+                            nameLabel.style = ` font-size: ${fontSize*scale_ratio}em !important; `;
                         }
                     }
                     else {
@@ -516,8 +519,6 @@ var GlassGrid = GObject.registerClass(
 
                 btnBox.add_child(prefsButton);
                 
-                const scale = this.scaleFactor;
-                const scale_ratio = scale / (2*scale -1);
                 
                 // Reload stylesheet
                 let reloadLabel = new St.Label({
@@ -736,12 +737,14 @@ var GlassGrid = GObject.registerClass(
         }
 
         _setFontUpDown(fontSize) {
+            const scale = this.scaleFactor;
+            const scale_ratio = scale / (2*scale -1);
             for (let idx in this.extList) {
                 let [col, row] = this._getGridXY(idx); 
                 let extBox = this.grid.get_child_at(col, row);
                 let extNameBtn = extBox.get_child_at_index(0); 
                 let nameLabel = extNameBtn.get_child(); 
-                nameLabel.style = ` font-size: ${fontSize}em !important; `;
+                nameLabel.style = ` font-size: ${fontSize*scale_ratio}em !important; `;
             }
         }
 
