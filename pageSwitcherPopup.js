@@ -54,6 +54,11 @@ class PageSwitcherPopup extends Clutter.Actor {
     }
 
     _redisplay() {
+        const scale = this.extGrid.scaleFactor;
+        const scale_ratio = scale / (2*scale -1);
+        
+        this._list.style = ` margin-top: ${0.4*scale_ratio}em; padding: ${0.4*scale_ratio}em ${0.8*scale_ratio}em; spacing: ${0.3*scale_ratio}em; `;
+        
         const nExts = this.extGrid.extList.length;
         const nPages = Math.ceil(nExts / (this.extGrid.gridCols*this.extGrid.gridRows));
         const currentPage = Math.ceil(this.extGrid._adjustment.value / this.extGrid._adjustment.page_increment);
@@ -65,9 +70,11 @@ class PageSwitcherPopup extends Clutter.Actor {
             const indicator = new St.Bin({
                 style_class: 'pg-switcher-indicator',
             });
+            indicator.style = ` padding: ${0.2*scale_ratio}em ${0.2*scale_ratio}em; margin: ${0.3*scale_ratio}em; `;
 
             if (i === currentPage) { 
                 indicator.add_style_class_name('pg-switcher-indicator-active');
+                indicator.style = ` padding: ${0.2*scale_ratio}em ${1*scale_ratio}em; margin: ${0.3*scale_ratio}em; `;
             }
 
             this._list.add_actor(indicator);

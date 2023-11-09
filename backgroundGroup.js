@@ -61,7 +61,8 @@ export const BackgroundGroup = GObject.registerClass(
 
     _createBackground(mode) {
             
-        let pMonitor = Main.layoutManager.primaryMonitor;
+        const pMonitor = Main.layoutManager.primaryMonitor;
+        const scale = 2 * this.extGrid.scaleFactor - 1;
         
         let widget = new St.Widget({
             style_class: 'bg-widget',
@@ -82,10 +83,10 @@ export const BackgroundGroup = GObject.registerClass(
                 widget.opacity = 252;
             }
             else if (mode == 'blur') {
-                widget.x = 4 * this.extGrid.scaleFactor;
-                widget.y = 4 * this.extGrid.scaleFactor;
-                widget.width = this.extGrid.width - 8 * this.extGrid.scaleFactor;
-                widget.height = this.extGrid.height - 8 * this.extGrid.scaleFactor;
+                widget.x = 4 * scale;
+                widget.y = 4 * scale;
+                widget.width = this.extGrid.width - 8 * scale;
+                widget.height = this.extGrid.height - 8 * scale;
                 widget.opacity = 253;
                 widget.effect = new Shell.BlurEffect({name: 'extgrid-blur'});
             }
@@ -102,10 +103,10 @@ export const BackgroundGroup = GObject.registerClass(
             this._bgManagers.push(bgManager);
         }
         else if (mode == 'dynamic') {
-            widget.x = 4 * this.extGrid.scaleFactor;
-            widget.y = 4 * this.extGrid.scaleFactor;
-            widget.width = this.extGrid.width - 8 * this.extGrid.scaleFactor;
-            widget.height = this.extGrid.height - 8 * this.extGrid.scaleFactor;
+            widget.x = 4 * scale;
+            widget.y = 4 * scale;
+            widget.width = this.extGrid.width - 8 * scale;
+            widget.height = this.extGrid.height - 8 * scale;
             widget.opacity = 255;
             widget.effect = new Shell.BlurEffect({name: 'extgrid-dynamic'});
         }
@@ -130,8 +131,8 @@ export const BackgroundGroup = GObject.registerClass(
     }
 
     _updateBorderRadius() {
-        const {scaleFactor} = St.ThemeContext.get_for_stage(global.stage); 
-        const cornerRadius = scaleFactor * BACKGROUND_CORNER_RADIUS_PIXELS;
+        // const {scaleFactor} = St.ThemeContext.get_for_stage(global.stage); 
+        const cornerRadius = this.extGrid.scaleFactor * BACKGROUND_CORNER_RADIUS_PIXELS;
         // const cornerRadius = BACKGROUND_CORNER_RADIUS_PIXELS;
         const backgroundContent = this._bgManagers[0].backgroundActor.content;
         backgroundContent.rounded_clip_radius = cornerRadius;

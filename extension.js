@@ -72,7 +72,7 @@ var GlassGrid = GObject.registerClass(
             this.themeContext.connectObject('notify::scale-factor',
                 () => this._updateScale(), this);
             this.globalTheme = this.themeContext.get_theme();
-            this.scaleFactor = this.themeContext.scale_factor;
+            this.scaleFactor = (1 + this.themeContext.scale_factor)/2.0;
 
             this.backgroundGroup = new BackgroundGroup.BackgroundGroup(this); 
             this.insert_child_below(this.backgroundGroup, null);
@@ -115,6 +115,11 @@ var GlassGrid = GObject.registerClass(
             const SCREEN_HEIGHT = pMonitor.height;
             const WINDOW_WIDTH = 1300 * scale; //SCREEN_HEIGHT*1.38; //1.35
             const WINDOW_HEIGHT = 750 * scale; //SCREEN_HEIGHT*0.76; //0.75
+            //if (WINDOW_HEIGHT > 0.9 * SCREEN_HEIGHT) {
+            //    WINDOW_HEIGHT = 0.9 * SCREEN_HEIGHT;
+            //    WINDOW_WIDTH = 1300 * WINDOW_HEIGHT / 750;
+            //    this.scaleFactor = WINDOW_HEIGHT / 750;
+            //}
             const GRID_ROWS = 3;
             const GRID_COLS = 5; 
             const pageSize = GRID_COLS*2; 
@@ -137,7 +142,7 @@ var GlassGrid = GObject.registerClass(
         }
 
         _updateScale() {
-            this.scaleFactor = this.themeContext.scale_factor;
+            this.scaleFactor = (1 + this.themeContext.scale_factor)/2.0;
             this._setGlassGridParams();
             this.headerBox.setHeaderBoxParams();
             this._fillGrid();
@@ -300,6 +305,10 @@ var GlassGrid = GObject.registerClass(
                 y_expand: true,
                 reactive: true,                
             });
+            
+            const scale = this.scaleFactor;
+            const scale_ratio = scale / (2*scale -1);
+            this.gridActor.style = ` margin: ${1*scale_ratio}em ${1*scale_ratio}em 0em ${1*scale_ratio}em; `;
 
             this.scroll.add_actor(this.gridActor);
         }
@@ -481,7 +490,8 @@ var GlassGrid = GObject.registerClass(
                 let prefsIcon = new St.Icon({
                     icon_name: 'emblem-system-symbolic',  
                     style_class: 'extension-pref-icon', 
-                    // icon_size: this.height*0.03, //30,
+                    width: this.height*0.022,
+                    height: this.height*0.022,//30,
                 });
                 let prefsButton = new St.Button({
                     style_class: 'extension-pref-button',
@@ -506,6 +516,9 @@ var GlassGrid = GObject.registerClass(
 
                 btnBox.add_child(prefsButton);
                 
+                const scale = this.scaleFactor;
+                const scale_ratio = scale / (2*scale -1);
+                
                 // Reload stylesheet
                 let reloadLabel = new St.Label({
                     text: '↺',
@@ -513,6 +526,7 @@ var GlassGrid = GObject.registerClass(
                     x_align: Clutter.ActorAlign.CENTER,
                     y_align: Clutter.ActorAlign.CENTER,
                 });
+                reloadLabel.style = ` font-size: ${1.5*scale_ratio}em; `;
                 let reloadStyleBtn = new St.Button({
                     child: reloadLabel,
                     style_class: 'reload-style-button',
@@ -900,4 +914,3 @@ export default class GlassGridExtension extends Extension {
         Main.layoutManager.disconnect(this._monitorsChangedId);
     }
 }
-

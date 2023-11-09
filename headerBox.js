@@ -69,13 +69,18 @@ export const HeaderBox = GObject.registerClass(
     }
 
     setHeaderBoxParams() {
+        const scale = this.extGrid.scaleFactor;
+        const scale_ratio = scale / (2*scale -1);
+                
         this.aboutBtn.width = this.extGrid.height*0.052;
         this.aboutBtn.height = this.extGrid.height*0.052;
         
         this.egoBtn.height = this.extGrid.height*0.053; //40,
-        this.egoBtn.width = this.extGrid.height*0.065; //80,
+        this.egoBtn.width = this.extGrid.height*0.075; //80,
+        this.egoBtn.style = ` padding:  ${3*scale_ratio}px ${1*scale_ratio}px ${1*scale_ratio}px ${1*scale_ratio}px; `;
         
-        // this.settingsIcon.icon_size = this.extGrid.height*0.029;
+        this.settingsIcon.width = this.extGrid.height*0.026;
+        this.settingsIcon.height = this.extGrid.height*0.026;
         // this.settingsBtn.style = ` margin-right: ${this.extGrid.height*0.40}px;`;
 
         // this.hotkeyMenuItem._entry.height =  this.extGrid.height*0.038;
@@ -84,11 +89,13 @@ export const HeaderBox = GObject.registerClass(
         this.indicatorMenuItem._switch.height = this.extGrid.height*0.028;
         this.indicatorMenuItem._switch.width = this.extGrid.height*0.052;
         
-        this.titleLabel.width = this.extGrid.height*0.36;
-        // this.titleLabel.style = ` margin-right: ${this.extGrid.height*0.35}px;`;
+        this.titleLabel.width = this.extGrid.height*0.95;
+        // this.titleLabel.style = ` margin-right: ${this.extGrid.height*0.1}px; margin-left: ${this.extGrid.height*0.1}px; `;
         
-        // this.extAppIcon.icon_size = this.extGrid.height*0.028;       
-        // this.allStateBtn.height = this.extGrid.height*0.045;
+        this.extAppIcon.width = this.extGrid.height*0.022; 
+        this.extAppIcon.height = this.extGrid.height*0.022; 
+        
+        this.allStateBtn.height = this.extGrid.height*0.040;
         
         this.modeBtn.height = this.extGrid.height*0.052; //40,
         this.modeBtn.width = this.extGrid.height*0.052;        
@@ -293,14 +300,14 @@ export const HeaderBox = GObject.registerClass(
         this.add_child(this.titleLabel);
 
         //  ẹg̣ọ
-        let egoLabel = new St.Label({
+        this.egoLabel = new St.Label({
             text: 'ẹg̣ọ',
             style_class: 'extension-ego-label',
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.START,
         });
         this.egoBtn = new St.Button({
-            child: egoLabel,
+            child: this.egoLabel,
             style_class: 'extension-ego-button',
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,

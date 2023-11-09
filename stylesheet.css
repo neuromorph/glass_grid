@@ -85,7 +85,7 @@
 
 .extension-about-label {
   font-weight: normal;
-  font-size: large;
+  font-size: medium;
   font-family: 'Open Sans', sans-serif;
   padding: 0px 0px 0px 0px;
 }
@@ -94,23 +94,25 @@
   border-radius: 0.85em; 
   border-width: 2px;
   /* border-color: #7e7c68; */
-  padding: 0px 2px 2px 2px;
+  padding: 0px 2px 0px 2px;
   color: rgba(255, 255, 255, 0.9);
   /* margin-right: 8px; */
 }
 
 .extension-ego-label {
   font-weight: normal;
-  font-size: large;
+  font-size: medium;
   font-family: 'Open Sans', sans-serif;
-  padding: 0px 0px 0px 0px;
+  padding: auto;
+  text-align: center;
+  margin: auto;
 }
 
 .extension-ego-button {
   border-radius: 0.85em; 
   border-width: 2px;
   /* border-color: #7e7c68; */
-  padding: 2px 2px 2px 2px;  /* Gnome 45 mod */
+  /*padding: 4px 0px 0px 0px;  /* Gnome 45 mod */
   color: rgba(255, 255, 255, 0.9);
   /* margin-right: 8px; */
 }
@@ -129,24 +131,25 @@
   
 .extension-title-label {
   color: rgba(255, 255, 255, 0.95);
-  font-weight: 525;
-  font-size: large;
+  /* font-weight: 525; */
+  font-size: medium;
   font-family: serif;
   padding: 4px 0px 4px 16px;
   letter-spacing: 5px;
   text-shadow: 0px 1px 2px 0px rgba(50, 50, 50, 0.1);
-  margin-left: 10em;
-  margin-right: 10em;
+  /*margin-left: 10em;
+  margin-right: 10em;*/
   border-radius: 0.5em;
+  text-align: center;
 }
 .extension-title-label:hover, .extension-title-label:focus {
   color: rgba(255, 255, 255, 1);
-  background-color: rgba(255, 255, 255, 0.04);
+  /*background-color: rgba(255, 255, 255, 0.04);*/
 }
 
 .ext-app-icon {
-  width: 1.6em;
-  height: 1.6em;
+ /* width: 1.6em;
+  height: 1.6em; */
 }
 .ext-app-button {
   border-radius: 0.85em; 
@@ -176,8 +179,8 @@
 
 .settings-icon {
   /* size: 1rem; */
-  width: 1.65em;
-  height: 1.65em;
+  /*width: 1.65em;
+  height: 1.65em;*/
   margin: 0px 4px;
 }
 .settings-button {
@@ -211,7 +214,7 @@
 
 .extension-mode-label {
   font-weight: 800;
-  font-size: large;
+  font-size: medium;
   font-family: 'Open Sans', sans-serif;
   padding: 0px 0px 0px 0px;
 }
@@ -346,7 +349,7 @@
   border-radius: 0.85em; 
   border-width: 2px;
   /* border-color: #7e7c68; */
-  padding: 2px 5px;
+  padding: 4px 5px;
   margin-left: 2px;
   margin-right: 6px;
 }
@@ -361,7 +364,7 @@
   border-radius: 0.85em; 
   border-width: 2px;
   /* border-color: #7e7c68; */
-  padding: 2px 5px;
+  padding: 4px 5px;
   margin-left: 2px;
   margin-right: 6px;
   color: #8d8c8c;
@@ -373,7 +376,7 @@
 
 .reload-style-label {
   padding: 0px 0px; 
-  font-size: large;
+  /*font-size: 1.5em;*/
   font-weight: normal;
 }
 .reload-style-button {
@@ -421,8 +424,8 @@
 }
 
 .grid-viewport {
-  /* padding: 0.2em 0.25em 0.2em 0.25em; */
-  margin: 1em 1em 0em 1em;
+  /* padding: 0.2em 0.25em 0.2em 0.25em; 
+  margin: 1em 1em 0em 1em;*/
   /* border-width: 1px;
   border-color: red;  */
 }
@@ -433,20 +436,19 @@
   border: 1px solid rgba(255, 255, 255, 0.45);
   border-radius: 999px;
 
-  margin-top: 0.4em;
+  /*margin-top: 0.4em;
   spacing: 0.3em;
-  padding: 0.4em 0.8em;
+  padding: 0.4em 0.8em;*/
 }
 
 .pg-switcher-indicator {
   background-color: rgba(0, 0, 0, 0.7);
-  padding: 0.2em 0.2em;
-  margin: 0.3em;
+  /*padding: 0.2em 0.2em;
+  margin: 0.3em;*/
   border-radius: 1em;
 }
 .pg-switcher-indicator-active  {
   background-color: rgba(0, 0, 0, 0.9);
-  padding: 0.2em 1.0em;
-  margin: 0.3em;
+  /*padding: 0.2em 1.0em;
+  margin: 0.3em;*/
 }
-
