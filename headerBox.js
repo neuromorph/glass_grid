@@ -70,14 +70,14 @@ export const HeaderBox = GObject.registerClass(
 
     setHeaderBoxParams() {
         const scale = this.extGrid.scaleFactor;
-        const scale_ratio = scale / (2*scale -1);
+        // const scale_ratio = 0.85*scale / (2*scale -1);
                 
         this.aboutBtn.width = this.extGrid.height*0.052;
         this.aboutBtn.height = this.extGrid.height*0.052;
         
-        this.egoBtn.height = this.extGrid.height*0.053; //40,
+        this.egoBtn.height = this.extGrid.height*0.052; //40,
         this.egoBtn.width = this.extGrid.height*0.075; //80,
-        this.egoBtn.style = ` padding:  ${3*scale_ratio}px ${1*scale_ratio}px ${1*scale_ratio}px ${1*scale_ratio}px; `;
+        this.egoBtn.style = ` padding:  ${5-2*scale}px ${1*scale}px ${1*scale}px ${1*scale}px; `;
         
         this.settingsIcon.width = this.extGrid.height*0.026;
         this.settingsIcon.height = this.extGrid.height*0.026;

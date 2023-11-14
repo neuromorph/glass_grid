@@ -64,6 +64,7 @@ var GlassGrid = GObject.registerClass(
             this.enablingDisablingAll = false;
             this.menuOpen = false; // To avoid hiding window since focus changed
             this.menuOpening = false; // To void closing menu as soon as opened (on click)
+            this.isClippedRedrawsSet = false; // Is the redraw debug flag set externally (by Blur My Shell e.g.)
 
             global.focus_manager.add_group(this);
             // this.add_constraint(new Layout.MonitorConstraint({primary: true}));
@@ -209,6 +210,8 @@ var GlassGrid = GObject.registerClass(
             this._swipeTracker.connect('begin', this._swipeBegin.bind(this));
             this._swipeTracker.connect('update', this._swipeUpdate.bind(this));
             this._swipeTracker.connect('end', this._swipeEnd.bind(this));
+
+            this._swipeTracker.enabled = false;
 
         }
 
@@ -415,7 +418,7 @@ var GlassGrid = GObject.registerClass(
                     x_expand: true,
                 });
                 let fontSize = this._settings.get_double('font-size');
-                nameLabel.style = ` font-size: ${fontSize*scale_ratio}em !important; `;
+                nameLabel.style = ` font-size: ${fontSize*scale_ratio*1.25}em !important; `;
                 let nameTxt = nameLabel.get_clutter_text();
                 nameTxt.set_line_wrap(true);
                 nameTxt.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
@@ -445,25 +448,25 @@ var GlassGrid = GObject.registerClass(
                         if (nameLabel.text == extension.metadata.name) {
                             nameLabel.text = extension.error;
                             nameBtn.add_style_class_name('extension-name-button-error-msg');
-                            nameLabel.style = ` font-size: ${fontSize*scale_ratio*0.75}em !important; `;
+                            nameLabel.style = ` font-size: ${fontSize*scale_ratio*1.25*0.75}em !important; `;
 
                         }
                         else {
                             nameLabel.text = extension.metadata.name;
                             nameBtn.remove_style_class_name('extension-name-button-error-msg');
-                            nameLabel.style = ` font-size: ${fontSize*scale_ratio}em !important; `;
+                            nameLabel.style = ` font-size: ${fontSize*scale_ratio*1.25}em !important; `;
                         }
                     }
                     else if (extension.hasUpdate) {
                         if (nameLabel.text == extension.metadata.name) {
                             nameLabel.text = "Update Available. It'll apply on next login. ";
                             nameBtn.add_style_class_name('extension-name-button-update-msg');
-                            nameLabel.style = ` font-size: ${fontSize*scale_ratio*0.75}em !important; `;
+                            nameLabel.style = ` font-size: ${fontSize*scale_ratio*1.25*0.75}em !important; `;
                         }
                         else {
                             nameLabel.text = extension.metadata.name;
                             nameBtn.remove_style_class_name('extension-name-button-update-msg');
-                            nameLabel.style = ` font-size: ${fontSize*scale_ratio}em !important; `;
+                            nameLabel.style = ` font-size: ${fontSize*scale_ratio*1.25}em !important; `;
                         }
                     }
                     else {
@@ -628,9 +631,18 @@ var GlassGrid = GObject.registerClass(
             global.stage.set_key_focus(this.headerBox.titleLabel);
 
             let activeTheme = this._settings.get_string('bg-theme');
-            if (activeTheme == "Dynamic Blur" || activeTheme == "Background Crop")
-                Meta.add_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+            if (activeTheme == "Dynamic Blur" || activeTheme == "Background Crop") {
+                const enabledFlags = Meta.get_clutter_debug_flags(); //log(enabledFlags);
+                if (enabledFlags.includes(Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS)) {
+                    this.isClippedRedrawsSet = true;
+                }
+                else {
+                    this.isClippedRedrawsSet = false;
+                    Meta.add_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+                }
+            }
 
+            this._swipeTracker.enabled = true;
             // log('scale factor '+this.scaleFactor);
         }
 
@@ -641,7 +653,10 @@ var GlassGrid = GObject.registerClass(
 
             this.visible = false;
 
-            Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+            if (!this.isClippedRedrawsSet)
+                Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+
+            this._swipeTracker.enabled = false;
         }
 
         _getGridXY(idx) {
@@ -744,7 +759,7 @@ var GlassGrid = GObject.registerClass(
                 let extBox = this.grid.get_child_at(col, row);
                 let extNameBtn = extBox.get_child_at_index(0); 
                 let nameLabel = extNameBtn.get_child(); 
-                nameLabel.style = ` font-size: ${fontSize*scale_ratio}em !important; `;
+                nameLabel.style = ` font-size: ${fontSize*scale_ratio*1.25}em !important; `;
             }
         }
 

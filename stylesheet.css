@@ -308,6 +308,7 @@
   white-space: normal;
   text-align: center;
   padding: 5px 5px;
+  
 }
 
 .extension-name-button-update {
@@ -321,23 +322,23 @@
   background-size: cover;
 }
 .extension-name-button-update-msg {
-  font-weight: lighter;
+  font-weight: light;
   font-size: small;
 }
 
 .extension-name-button-error {
 
-  /*color: rgb(216, 86, 0);  */
-  background-color: rgba(253, 82, 82, 0.15);
+  /*color: rgb(255, 255, 255); */ 
+  background-color: rgba(255, 180, 180, 0.15);
 }
 .extension-name-button-error:hover, .extension-name-button-error:focus {
-  color: rgb(201, 0, 0);
+  color: rgb(255, 255, 255);
   background-image: url(media/label_error.svg);
   background-repeat: no-repeat;
   background-size: cover;
 }
 .extension-name-button-error-msg {
-  font-weight: lighter;
+  font-weight: light;
   font-size: small;
 }
 
@@ -432,8 +433,8 @@
 
 .page-switcher {
   color: rgba(0, 0, 0, 1);
-  background-color: rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  background-color: rgba(100, 100, 100, 0.33);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 999px;
 
   /*margin-top: 0.4em;
@@ -442,13 +443,13 @@
 }
 
 .pg-switcher-indicator {
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(255, 255, 255, 0.8);
   /*padding: 0.2em 0.2em;
   margin: 0.3em;*/
   border-radius: 1em;
 }
 .pg-switcher-indicator-active  {
-  background-color: rgba(0, 0, 0, 0.9);
+  background-color: rgba(255, 255, 255, 0.9);
   /*padding: 0.2em 1.0em;
   margin: 0.3em;*/
 }
