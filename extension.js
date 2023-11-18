@@ -316,13 +316,20 @@ var GlassGrid = GObject.registerClass(
             this.scroll.add_actor(this.gridActor);
         }
 
-        _toggleGlassGridView() {
-            if (this.visible) {
-                this.hide();
-            }
-            else {
-                this.show();
-            }
+        _toggleGlassGridView(event) {
+        
+            if (event == 'hotkey' || 
+                event.type() == Clutter.EventType.TOUCH_BEGIN || 
+                (event.type() == Clutter.EventType.BUTTON_PRESS && !event.is_pointer_emulated())){
+             
+                if (this.visible) {
+                    this.hide();
+                }
+                else {
+                    this.show();
+                }
+           }
+           return Clutter.EVENT_PROPAGATE;   
         }
 
         _findIdx(el, arr, start, end) {
@@ -895,7 +902,7 @@ export default class GlassGridExtension extends Extension {
             this.extGrid._settings,
             Meta.KeyBindingFlags.NONE,
             Shell.ActionMode.NORMAL,
-            this.extGrid._toggleGlassGridView.bind(this.extGrid)
+            this.extGrid._toggleGlassGridView.bind(this.extGrid, 'hotkey')
         );
     
         // Connect monitors-changed with setting Glass Grid position/size params

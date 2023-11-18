@@ -532,11 +532,13 @@ export const HeaderBox = GObject.registerClass(
             // Add the panel button to the right of the panel
             Main.panel.addToStatusArea('extgridPanelIndicator', this.panelIndicator, 0, 'right');
 
-            this.panelIndicatorId = this.panelIndicator.connect('button-press-event', () => this.extGrid._toggleGlassGridView());
+            this.panelIndicatorId1 = this.panelIndicator.connect('button-press-event', (actor, event) => this.extGrid._toggleGlassGridView(event));
+            this.panelIndicatorId2 = this.panelIndicator.connect('touch-event', (actor, event) => this.extGrid._toggleGlassGridView(event));
         }
         else {
             if (this.panelIndicator) {
-                this.panelIndicator.disconnect(this.panelIndicatorId);
+                this.panelIndicator.disconnect(this.panelIndicatorId1);
+                this.panelIndicator.disconnect(this.panelIndicatorId2);
                 this.panelIndicator.destroy();
                 this.panelIndicator = null;
             }
@@ -593,7 +595,8 @@ export const HeaderBox = GObject.registerClass(
             this.aboutDialog.destroy();
         
         if (this.panelIndicator) {
-            this.panelIndicator.disconnect(this.panelIndicatorId);
+            this.panelIndicator.disconnect(this.panelIndicatorId1);
+            this.panelIndicator.disconnect(this.panelIndicatorId2);
             this.panelIndicator.destroy();
             this.panelIndicator = null;
         }
