@@ -246,7 +246,7 @@ export const HeaderBox = GObject.registerClass(
         let menuChildren = this.settingsBtn.menu.box.get_children();
         menuChildren.forEach(menuItem => {
             menuItem.connect('key-press-event', (actor, event) => {
-                // log('btn key event '+ event.get_key_symbol());
+                // console.log('btn key event '+ event.get_key_symbol());
                 if (event.get_key_symbol() == Clutter.KEY_Escape) {
                     this.settingsBtn.menu.close(true);
                     return Clutter.EVENT_STOP;
@@ -352,10 +352,10 @@ export const HeaderBox = GObject.registerClass(
         this.extAppButton.connect('clicked', () => {
             this.extGrid.hide();
             try {
-                log('trying gnome-extensions-app');
+                // console.log('trying gnome-extensions-app');
                 Util.trySpawn(['gnome-extensions-app']);
             } catch (e) {
-                log('failed gnome-extensions-app, trying extension manager');
+                // console.log('failed gnome-extensions-app, trying extension manager');
                 Util.spawn(['extension-manager']);
             }
         });
@@ -556,10 +556,10 @@ export const HeaderBox = GObject.registerClass(
 
     _enableAllExtensions() {
         let enabledExtensions = this._settings.get_strv('enabled-extensions');
-        log('enabled extensions: ' + enabledExtensions);
+        // console.log('enabled extensions: ' + enabledExtensions);
         this.extGrid.enablingDisablingAll = true;
         for (const uuid of enabledExtensions) { 
-            console.log('enabling uuid: ' + uuid);
+            // console.log('enabling uuid: ' + uuid);
             try {
                 ExtensionManager.enableExtension(uuid); 
             }
@@ -574,7 +574,7 @@ export const HeaderBox = GObject.registerClass(
     _disableAllExtensions() {
 
         const extensionsToDisable = ExtensionManager._extensionOrder.slice();
-        log('extensions to disable: ' + extensionsToDisable);
+        // console.log('extensions to disable: ' + extensionsToDisable);
         this._settings.set_strv('enabled-extensions', extensionsToDisable);
         this.extGrid.enablingDisablingAll = true; 
 
@@ -584,7 +584,7 @@ export const HeaderBox = GObject.registerClass(
 
         for (const uuid of extensionsToDisable) {
             if (uuid != this.extGrid.metadata.uuid) {
-                console.log('disabling uuid: ' + uuid);
+                // console.log('disabling uuid: ' + uuid);
                 try {
                     ExtensionManager.disableExtension(uuid);
                 }
@@ -652,7 +652,7 @@ const PopupEntryMenuItem = GObject.registerClass(
             });
 
             this._entry.connect('key-press-event', (entry, event) => {
-                // log('entry key '+event.get_key_symbol());
+                // console.log('entry key '+event.get_key_symbol());
                 if (event.get_key_symbol() == Clutter.KEY_Escape) {
                     headerBox.settingsBtn.menu.close(true);
                     return Clutter.EVENT_STOP;
