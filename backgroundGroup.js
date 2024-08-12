@@ -19,15 +19,21 @@
 
 /* exported BackgroundGroup, MAINBOX_STYLE, MAINBOX_MODE */
 
-const { Clutter, GObject, St, Meta, Shell, Graphene } = imports.gi;
-const Main = imports.ui.main;
-const Background = imports.ui.background;
+import Clutter from 'gi://Clutter';
+import St from 'gi://St';
+import Graphene from 'gi://Graphene';
+import GObject from 'gi://GObject';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
+
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as Background from 'resource:///org/gnome/shell/ui/background.js';
 
 const BLUR_BRIGHTNESS = 0.85; //0.65
 const BLUR_SIGMA = 50; //45
 const BACKGROUND_CORNER_RADIUS_PIXELS = 15;
 
-var MAINBOX_STYLE = {
+export const MAINBOX_STYLE = {
     "Color Gradient": "mainbox-color-gradient",
     "Grey Gradient": "mainbox-grey-gradient",
     "Background Crop": "mainbox-bg-crop", 
@@ -35,7 +41,7 @@ var MAINBOX_STYLE = {
     "Dynamic Blur": "mainbox-dynamic-blur",
 }
 
-var MAINBOX_MODE = {
+export const MAINBOX_MODE = {
     "Gradient_Dark": "mainbox-gradient-dark",
     "Gradient_Light": "mainbox-gradient-light",
     "Crop_Dark": "mainbox-crop-dark",
@@ -44,7 +50,7 @@ var MAINBOX_MODE = {
     "Blur_Light": "mainbox-blur-light",
 }
 
-var BackgroundGroup = GObject.registerClass(
+export const BackgroundGroup = GObject.registerClass(
     class BackgroundGroup extends Clutter.Actor {
 
     _init(extGrid) {
@@ -55,7 +61,8 @@ var BackgroundGroup = GObject.registerClass(
 
     _createBackground(mode) {
             
-        let pMonitor = Main.layoutManager.primaryMonitor;
+        const pMonitor = Main.layoutManager.primaryMonitor;
+        const scale = 2 * this.extGrid.scaleFactor - 1;
         
         let widget = new St.Widget({
             style_class: 'bg-widget',
@@ -76,10 +83,10 @@ var BackgroundGroup = GObject.registerClass(
                 widget.opacity = 252;
             }
             else if (mode == 'blur') {
-                widget.x = 4 * this.extGrid.scaleFactor; //2
-                widget.y = 4 * this.extGrid.scaleFactor; //3
-                widget.width = this.extGrid.width - 8 * this.extGrid.scaleFactor; //4
-                widget.height = this.extGrid.height - 8 * this.extGrid.scaleFactor; //6
+                widget.x = 4 * scale;
+                widget.y = 4 * scale;
+                widget.width = this.extGrid.width - 8 * scale;
+                widget.height = this.extGrid.height - 8 * scale;
                 widget.opacity = 253;
                 widget.effect = new Shell.BlurEffect({name: 'extgrid-blur'});
             }
@@ -96,12 +103,12 @@ var BackgroundGroup = GObject.registerClass(
             this._bgManagers.push(bgManager);
         }
         else if (mode == 'dynamic') {
-                widget.x = 4 * this.extGrid.scaleFactor; //5
-                widget.y = 4 * this.extGrid.scaleFactor; //4
-                widget.width = this.extGrid.width - 8 * this.extGrid.scaleFactor; //10
-                widget.height = this.extGrid.height - 8 * this.extGrid.scaleFactor; //8
-                widget.opacity = 255;
-                widget.effect = new Shell.BlurEffect({name: 'extgrid-dynamic'});
+            widget.x = 4 * scale;
+            widget.y = 4 * scale;
+            widget.width = this.extGrid.width - 8 * scale;
+            widget.height = this.extGrid.height - 8 * scale;
+            widget.opacity = 255;
+            widget.effect = new Shell.BlurEffect({name: 'extgrid-dynamic'});
         }
 
         this.add_child(widget);
@@ -124,8 +131,8 @@ var BackgroundGroup = GObject.registerClass(
     }
 
     _updateBorderRadius() {
-        const {scaleFactor} = St.ThemeContext.get_for_stage(global.stage); 
-        const cornerRadius = scaleFactor * BACKGROUND_CORNER_RADIUS_PIXELS;   
+        // const {scaleFactor} = St.ThemeContext.get_for_stage(global.stage); 
+        const cornerRadius = this.extGrid.scaleFactor * BACKGROUND_CORNER_RADIUS_PIXELS;
         // const cornerRadius = BACKGROUND_CORNER_RADIUS_PIXELS;
         const backgroundContent = this._bgManagers[0].backgroundActor.content;
         backgroundContent.rounded_clip_radius = cornerRadius;
@@ -193,7 +200,7 @@ var BackgroundGroup = GObject.registerClass(
         }
         else {
             this.extGrid._addRemoveNameEffect(false);
-        }
+        }            
 
         switch (activeTheme) {
             case "Background Crop":
@@ -216,7 +223,7 @@ var BackgroundGroup = GObject.registerClass(
 
             default:
                 break;
-        }        
+        }
     }
 
     _repaintWidget() {
@@ -249,9 +256,9 @@ var BackgroundGroup = GObject.registerClass(
             const boxChildren = extbox.get_children();
             boxChildren.forEach(child => connectRp(child));
             boxChildren[1].get_children().forEach(child => connectRp(child));
-        })       
+        })        
     }
-    
+
     destroy() {
         for (let i = 0; i < this._bgManagers.length; i++)
             this._bgManagers[i].destroy();
@@ -267,5 +274,4 @@ var BackgroundGroup = GObject.registerClass(
 
         super.destroy();
     }
-    
 }); 

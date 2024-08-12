@@ -19,20 +19,22 @@
 
 /* exported HeaderBox */
 
-const { Clutter, GObject, Gio, St } = imports.gi;
-const Main = imports.ui.main;
+import Clutter from 'gi://Clutter';
+import St from 'gi://St';
+import Gio from 'gi://Gio';
+import GObject from 'gi://GObject';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import * as Dialog from 'resource:///org/gnome/shell/ui/dialog.js';
+import * as ModalDialog from 'resource:///org/gnome/shell/ui/modalDialog.js';
+import * as Util from 'resource:///org/gnome/shell/misc/util.js';
+
+import * as BackgroundGroup from './backgroundGroup.js';
 const ExtensionManager = Main.extensionManager;
-const PanelMenu = imports.ui.panelMenu;
-const PopupMenu = imports.ui.popupMenu;
-const Dialog = imports.ui.dialog;
-const ModalDialog = imports.ui.modalDialog;
-const Util = imports.misc.util;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const BackgroundGroup = Me.imports.backgroundGroup;
 
 
-var HeaderBox = GObject.registerClass(
+export const HeaderBox = GObject.registerClass(
     class HeaderBox extends St.BoxLayout {
 
     _init(extGrid) {
@@ -67,30 +69,38 @@ var HeaderBox = GObject.registerClass(
     }
 
     setHeaderBoxParams() {
+        const scale = this.extGrid.scaleFactor;
+        // const scale_ratio = 0.85*scale / (2*scale -1);
+                
         this.aboutBtn.width = this.extGrid.height*0.052;
         this.aboutBtn.height = this.extGrid.height*0.052;
-
-        this.egoBtn.height = this.extGrid.height*0.053; //40,
-        this.egoBtn.width = this.extGrid.height*0.065; //80,
-
-        // this.settingsIcon.icon_size = this.extGrid.height*0.029;
-        // this.settingsBtn.style = ` margin-right: ${this.extGrid.height*0.40}px;`;
         
+        this.egoBtn.height = this.extGrid.height*0.052; //40,
+        this.egoBtn.width = this.extGrid.height*0.075; //80,
+        this.egoBtn.style = ` padding:  ${5-2*scale}px ${1*scale}px ${1*scale}px ${1*scale}px; `;
+        
+        this.settingsIcon.width = this.extGrid.height*0.026;
+        this.settingsIcon.height = this.extGrid.height*0.026;
+        // this.settingsBtn.style = ` margin-right: ${this.extGrid.height*0.40}px;`;
+
         // this.hotkeyMenuItem._entry.height =  this.extGrid.height*0.038;
         // this.hotkeyMenuItem._entry.width =  this.extGrid.height*0.125;
-        
+
         this.indicatorMenuItem._switch.height = this.extGrid.height*0.028;
         this.indicatorMenuItem._switch.width = this.extGrid.height*0.052;
-
-        this.titleLabel.width = this.extGrid.height*0.36;
-        // this.titleLabel.style = ` margin-right: ${this.extGrid.height*0.35}px;`;
-
-        // this.extAppIcon.icon_size = this.extGrid.height*0.028;
-        // this.allStateBtn.height = this.extGrid.height*0.04;
-
+        
+        this.titleLabel.width = this.extGrid.height*0.95;
+        // this.titleLabel.style = ` margin-right: ${this.extGrid.height*0.1}px; margin-left: ${this.extGrid.height*0.1}px; `;
+        
+        this.extAppIcon.width = this.extGrid.height*0.022; 
+        this.extAppIcon.height = this.extGrid.height*0.022; 
+        
+        this.allStateBtn.height = this.extGrid.height*0.040;
+        
         this.modeBtn.height = this.extGrid.height*0.052; //40,
-        this.modeBtn.width = this.extGrid.height*0.052;
+        this.modeBtn.width = this.extGrid.height*0.052;        
     }
+        
 
     // Create header box with buttons
     _createHeaderBox() {
@@ -127,21 +137,10 @@ var HeaderBox = GObject.registerClass(
         this.settingsBtn = new PanelMenu.Button(0.0, 'extgridSettingsBtn', false);
         this.settingsBtn.can_focus = true;
         this.settingsBtn.add_style_class_name('settings-button');
+
         this.settingsBtn.add_child(this.settingsIcon);
         this.settingsBtn.menu.sensitive = true;
-        this.settingsBtn.menu.connect('open-state-changed', (actor, open) => {
-            if (open) {
-                this.extGrid.menuOpen = true;
-                this.extGrid.menuOpening = true;
-                global.stage.set_key_focus(this.settingsBtn.menu.firstMenuItem);
-                this.menuTimeoutId = setTimeout(() => {this.extGrid.menuOpening = false;}, 200);
-            }
-            else {
-                global.stage.set_key_focus(this.settingsBtn);
-                this.extGrid.menuOpen = false;
-            }
-            return Clutter.EVENT_PROPAGATE;
-        });
+        
 
         let themeMenuItem = new PopupMenu.PopupSubMenuMenuItem('Background Theme', false, {can_focus: true});
         let themeMenuSection = new PopupMenu.PopupMenuSection({can_focus: true, isOpen: false});
@@ -198,6 +197,13 @@ var HeaderBox = GObject.registerClass(
 
         this.indicatorMenuItem = new PopupMenu.PopupSwitchMenuItem("Panel Indicator", this._settings.get_boolean('show-indicator'), { can_focus: false }); 
         this.indicatorMenuItem.connect('toggled', (actor, state) => {
+            if(!state && this._settings.get_strv('hotkey')[0] == '') {
+                const msg = "Extensions Glass Grid";
+                const details = "Please set a hotkey before removing panel indicator. Do not remove both.";
+                Main.notify(msg, details);
+                actor._switch.state = true;
+                return Clutter.EVENT_PROPAGATE;
+            }
             this._addRemovePanelIndicator(state)
             return Clutter.EVENT_PROPAGATE;
         });
@@ -215,6 +221,27 @@ var HeaderBox = GObject.registerClass(
             parent.remove_actor(container);
 
         this.add_child(container);
+
+        this.settingsBtn.menu.connect('open-state-changed', (actor, open) => {
+            if (open) {
+                this.extGrid.menuOpen = true;
+                this.extGrid.menuOpening = true;
+                global.stage.set_key_focus(this.settingsBtn.menu.firstMenuItem);
+                this.menuTimeoutId = setTimeout(() => {this.extGrid.menuOpening = false;}, 200);
+            }
+            else {
+                if(!this._settings.get_boolean('show-indicator') && this._settings.get_strv('hotkey')[0] == '') {
+                    const msg = "Extensions Glass Grid";
+                    const details = "Hotkey is not set. Turning On panel indicator. Do not remove both.";
+                    Main.notify(msg, details);
+                    this.indicatorMenuItem._switch.state = true;
+                    this._addRemovePanelIndicator(true);
+                }
+                global.stage.set_key_focus(this.settingsBtn);
+                this.extGrid.menuOpen = false;
+            }
+            return Clutter.EVENT_PROPAGATE;
+        });
 
         let menuChildren = this.settingsBtn.menu.box.get_children();
         menuChildren.forEach(menuItem => {
@@ -272,7 +299,7 @@ var HeaderBox = GObject.registerClass(
                 this._settings.set_string('theme-mode','Neutral');
             }
             this.extGrid.backgroundGroup._updateBackgrounds();
-        });          
+        });         
         this.add_child(this.modeBtn);
 
         // Title Glass Grid
@@ -289,14 +316,14 @@ var HeaderBox = GObject.registerClass(
         this.add_child(this.titleLabel);
 
         //  ẹg̣ọ
-        let egoLabel = new St.Label({
+        this.egoLabel = new St.Label({
             text: 'ẹg̣ọ',
             style_class: 'extension-ego-label',
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.START,
         });
         this.egoBtn = new St.Button({
-            child: egoLabel,
+            child: this.egoLabel,
             style_class: 'extension-ego-button',
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,
@@ -310,6 +337,7 @@ var HeaderBox = GObject.registerClass(
         });          
         this.add_child(this.egoBtn);
 
+        // Extensions App
         this.extAppIcon = new St.Icon({
             icon_name: 'application-x-addon-symbolic',
             style_class: 'ext-app-icon',
@@ -351,7 +379,6 @@ var HeaderBox = GObject.registerClass(
         this.add_child(this.allStateBtn);
 
         this.setHeaderBoxParams();
-
     }
 
     _createAboutDialog() {
@@ -392,7 +419,7 @@ var HeaderBox = GObject.registerClass(
         const messageLayout = new Dialog.MessageDialogContent({
             title: 'Glass Grid',
             description: `Overlay glass panel for quick view of installed extensions.
-            Version: ${Me.metadata.version}  |  © neuromorph`,
+            Version: ${this.extGrid.metadata.version}  |  © neuromorph`,
         });
         this.aboutDialog.contentLayout.add_child(messageLayout);
 
@@ -401,7 +428,7 @@ var HeaderBox = GObject.registerClass(
             title: `Tool Guide`,
         });
         listLayout.x_expand = true;
-        this.aboutDialog.contentLayout.add_child(listLayout);       
+        this.aboutDialog.contentLayout.add_child(listLayout);
 
         const topBar = new Dialog.ListSectionItem({
             title: '= Top Bar =',        
@@ -434,7 +461,7 @@ var HeaderBox = GObject.registerClass(
         });
         listLayout.list.add_child(extApp);
 
-        const switchIconPath = Me.path + '/media/toggle-on.svg';
+        const switchIconPath = this.extGrid.path + '/media/toggle-on.svg';
         const switchIcon = Gio.FileIcon.new(Gio.File.new_for_path(switchIconPath));
         const allSwitch = new Dialog.ListSectionItem({
             icon_actor: new St.Icon({gicon: switchIcon, 
@@ -505,11 +532,13 @@ var HeaderBox = GObject.registerClass(
             // Add the panel button to the right of the panel
             Main.panel.addToStatusArea('extgridPanelIndicator', this.panelIndicator, 0, 'right');
 
-            this.panelIndicatorId = this.panelIndicator.connect('button-press-event', () => this.extGrid._toggleGlassGridView());
+            this.panelIndicatorId1 = this.panelIndicator.connect('button-press-event', (actor, event) => this.extGrid._toggleGlassGridView(event));
+            this.panelIndicatorId2 = this.panelIndicator.connect('touch-event', (actor, event) => this.extGrid._toggleGlassGridView(event));
         }
         else {
             if (this.panelIndicator) {
-                this.panelIndicator.disconnect(this.panelIndicatorId);
+                this.panelIndicator.disconnect(this.panelIndicatorId1);
+                this.panelIndicator.disconnect(this.panelIndicatorId2);
                 this.panelIndicator.destroy();
                 this.panelIndicator = null;
             }
@@ -546,7 +575,7 @@ var HeaderBox = GObject.registerClass(
         extensionsToDisable.reverse();
 
         for (const uuid of extensionsToDisable) {
-            if (uuid != Me.metadata.uuid) {
+            if (uuid != this.extGrid.metadata.uuid) {
                 // console.debug('disabling uuid: ' + uuid);
                 try {
                     ExtensionManager.disableExtension(uuid);
@@ -560,13 +589,14 @@ var HeaderBox = GObject.registerClass(
         global.stage.set_key_focus(this.allStateBtn);
         this.extGrid.enablingDisablingAll = false; 
     }
-    
+
     destroy() {
         if (this.aboutDialog)
             this.aboutDialog.destroy();
         
         if (this.panelIndicator) {
-            this.panelIndicator.disconnect(this.panelIndicatorId);
+            this.panelIndicator.disconnect(this.panelIndicatorId1);
+            this.panelIndicator.disconnect(this.panelIndicatorId2);
             this.panelIndicator.destroy();
             this.panelIndicator = null;
         }

@@ -13,32 +13,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * SPDX-License-Identifier: GPL-2.0-or-later 
+ * SPDX-License-Identifier: GPL-2.0-or-later
  * author: neuromorph
  */
 
 /* exported init */
 
-const { Clutter, Gio, GObject, St, Pango, Atk, Meta, Shell, GLib } = imports.gi;
-const Main = imports.ui.main;
-const PopupMenu = imports.ui.popupMenu;
-const Layout = imports.ui.layout;
-const SwipeTracker = imports.ui.swipeTracker;
-const ExtensionUtils = imports.misc.extensionUtils;
+import Clutter from 'gi://Clutter';
+import St from 'gi://St';
+import Gio from 'gi://Gio';
+import GObject from 'gi://GObject';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
+import Atk from 'gi://Atk';
+import Pango from 'gi://Pango';
+import GLib from 'gi://GLib';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import * as Layout from 'resource:///org/gnome/shell/ui/layout.js';
+import * as SwipeTracker from 'resource:///org/gnome/shell/ui/swipeTracker.js';
+import * as ExtensionUtils from 'resource:///org/gnome/shell/misc/extensionUtils.js';
+import {Extension, gettext as _, pgettext} from 'resource:///org/gnome/shell/extensions/extension.js';
 
-const {gettext: _, pgettext} = ExtensionUtils;
+import * as BackgroundGroup from './backgroundGroup.js';
+import * as HeaderBox from './headerBox.js';
+import * as SwitcherPopup from './pageSwitcherPopup.js';
+
 const ExtensionManager = Main.extensionManager;
 const ExtensionState = ExtensionUtils.ExtensionState;
 
-const Me = ExtensionUtils.getCurrentExtension();
-const BackgroundGroup = Me.imports.backgroundGroup;
-const HeaderBox = Me.imports.headerBox;
-const SwitcherPopup = Me.imports.pageSwitcherPopup;
 
 // Class for the overlay window
 var GlassGrid = GObject.registerClass(
     class GlassGrid extends St.Widget {
-        _init() {
+        _init(Ext) {
             super._init({
                 accessible_role: Atk.Role.WINDOW,
                 visible: false,
@@ -47,13 +55,16 @@ var GlassGrid = GObject.registerClass(
                 style_class: 'extension-grid-wrapper'
             });
 
-            this._settings = ExtensionUtils.getSettings();
+            this._settings = Ext.getSettings();
+            this.metadata = Ext.metadata;
+            this.path = Ext.path;
             this.extList = [];
             this.grid = null;
             this.enablingDisabling = false;
             this.enablingDisablingAll = false;
             this.menuOpen = false; // To avoid hiding window since focus changed
             this.menuOpening = false; // To void closing menu as soon as opened (on click)
+            this.isClippedRedrawsSet = false; // Is the redraw debug flag set externally (by Blur My Shell e.g.)
 
             global.focus_manager.add_group(this);
             // this.add_constraint(new Layout.MonitorConstraint({primary: true}));
@@ -62,7 +73,7 @@ var GlassGrid = GObject.registerClass(
             this.themeContext.connectObject('notify::scale-factor',
                 () => this._updateScale(), this);
             this.globalTheme = this.themeContext.get_theme();
-            this.scaleFactor = this.themeContext.scale_factor;
+            this.scaleFactor = (1 + this.themeContext.scale_factor)/2.0;
 
             this.backgroundGroup = new BackgroundGroup.BackgroundGroup(this); 
             this.insert_child_below(this.backgroundGroup, null);
@@ -76,6 +87,7 @@ var GlassGrid = GObject.registerClass(
             })
             this.add_child(this.mainbox);
 
+
             // Initialize position / size params
             this._setGlassGridParams();
 
@@ -86,13 +98,14 @@ var GlassGrid = GObject.registerClass(
             // Create Scroll Grid
             this._createScrollView();
             this._createGridBox();
+
             this._fillGrid();
-            
+ 
             // Page switcher popup
             this.switcherPopup = new SwitcherPopup.PageSwitcherPopup(this);
             this.insert_child_above(this.switcherPopup, null);
- 
-            this.backgroundGroup._updateBackgrounds(); 
+
+            this.backgroundGroup._updateBackgrounds();
         }
 
         _setGlassGridParams() {
@@ -103,6 +116,11 @@ var GlassGrid = GObject.registerClass(
             const SCREEN_HEIGHT = pMonitor.height;
             const WINDOW_WIDTH = 1300 * scale; //SCREEN_HEIGHT*1.38; //1.35
             const WINDOW_HEIGHT = 750 * scale; //SCREEN_HEIGHT*0.76; //0.75
+            //if (WINDOW_HEIGHT > 0.9 * SCREEN_HEIGHT) {
+            //    WINDOW_HEIGHT = 0.9 * SCREEN_HEIGHT;
+            //    WINDOW_WIDTH = 1300 * WINDOW_HEIGHT / 750;
+            //    this.scaleFactor = WINDOW_HEIGHT / 750;
+            //}
             const GRID_ROWS = 3;
             const GRID_COLS = 5; 
             const pageSize = GRID_COLS*2; 
@@ -121,17 +139,18 @@ var GlassGrid = GObject.registerClass(
             this.gridRows = GRID_ROWS;
             this.pageSize = pageSize; 
             this.extBoxWidth = (WINDOW_WIDTH * 0.88) / GRID_COLS; //reduce margin/spacing
-            this.extBoxHeight = this.extBoxWidth / 1.38;                      
+            this.extBoxHeight = this.extBoxWidth / 1.38;
         }
 
         _updateScale() {
-            this.scaleFactor = this.themeContext.scale_factor;
+            this.scaleFactor = (1 + this.themeContext.scale_factor)/2.0;
             this._setGlassGridParams();
             this.headerBox.setHeaderBoxParams();
             this._fillGrid();
             this.switcherPopup.setSwitcherPopupParams();
-            this.backgroundGroup._updateBackgrounds(); 
+            this.backgroundGroup._updateBackgrounds();
         }
+            
 
         _focusActorChanged() {
             let focusedActor = global.stage.get_key_focus();
@@ -147,8 +166,7 @@ var GlassGrid = GObject.registerClass(
                 // log('grid contains '+focusedActor.name);
                 const i = parseInt(focusedActor.name.split('_')[1]);
                 const pageNum = Math.floor((i) / (this.gridCols*this.gridRows)); 
-                // log('grid col,row '+this.gridCols+' '+this.gridRows);
-                // log('i, pgnum, scrollval '+i+' '+pageNum+' '+scrollAdjust.value);
+
                 const value = pageNum * this._adjustment.page_increment;
                 const duration = 300;
                 this._adjustment.ease(value, {
@@ -157,9 +175,9 @@ var GlassGrid = GObject.registerClass(
                     onComplete: () => this.switcherPopup.display(),
                 });
                 // log('new scroll val '+this._adjustment.value);
-
             }
             return Clutter.EVENT_PROPAGATE;
+                
         }
 
 
@@ -180,7 +198,6 @@ var GlassGrid = GObject.registerClass(
             this.scroll.get_vscroll_bar().style_class = 'extgrid-scrollbar';
             this._adjustment = this.scroll.hscroll.adjustment;
             this.mainbox.add_child(this.scroll);
-            // log('created scrollview. Adj '+ this._adjustment);
 
             // Connect mouse scroll handle
             this.scroll.connect('scroll-event', this._onScroll.bind(this));
@@ -193,6 +210,8 @@ var GlassGrid = GObject.registerClass(
             this._swipeTracker.connect('begin', this._swipeBegin.bind(this));
             this._swipeTracker.connect('update', this._swipeUpdate.bind(this));
             this._swipeTracker.connect('end', this._swipeEnd.bind(this));
+
+            this._swipeTracker.enabled = false;
 
         }
 
@@ -221,9 +240,9 @@ var GlassGrid = GObject.registerClass(
                     break;
             }
             // console.debug('scroll  direction '+ event.get_scroll_direction() + ' '+ this._adjustment.value);
-
-            this.switcherPopup.display();
             
+            this.switcherPopup.display();
+
             return Clutter.EVENT_STOP;
         }
 
@@ -248,7 +267,7 @@ var GlassGrid = GObject.registerClass(
             const adjustment = this._adjustment;
             adjustment.value = progress * adjustment.page_size;
             // console.debug('swipe update '+ adjustment.value);
-            
+
             this.switcherPopup.display();
 
             return Clutter.EVENT_PROPAGATE;
@@ -289,17 +308,28 @@ var GlassGrid = GObject.registerClass(
                 y_expand: true,
                 reactive: true,                
             });
+            
+            const scale = this.scaleFactor;
+            const scale_ratio = scale / (2*scale -1);
+            this.gridActor.style = ` margin: ${1*scale_ratio}em ${1*scale_ratio}em 0em ${1*scale_ratio}em; `;
 
             this.scroll.add_actor(this.gridActor);
         }
 
-        _toggleGlassGridView() {
-            if (this.visible) {
-                this.hide();
-            }
-            else {
-                this.show();
-            }
+        _toggleGlassGridView(event) {
+        
+            if (event == 'hotkey' || 
+                event.type() == Clutter.EventType.TOUCH_BEGIN || 
+                (event.type() == Clutter.EventType.BUTTON_PRESS && !event.is_pointer_emulated())){
+             
+                if (this.visible) {
+                    this.hide();
+                }
+                else {
+                    this.show();
+                }
+           }
+           return Clutter.EVENT_PROPAGATE;   
         }
 
         _findIdx(el, arr, start, end) {
@@ -333,6 +363,11 @@ var GlassGrid = GObject.registerClass(
                 let extension = ExtensionManager.lookup(uuid);
                 this.extList.push([uuid, extension]);
             }
+            // this.extList.sort(function(a, b) {
+            //     let nameA = a[1].metadata.name.toUpperCase();
+            //     let nameB = b[1].metadata.name.toUpperCase();
+            //     return (nameA < nameB)? -1 : (nameA > nameB)? 1 : 0;
+            // });
 
             this.extList.sort(this._compareUuids);
         }
@@ -349,7 +384,7 @@ var GlassGrid = GObject.registerClass(
                 else
                     break;
 
-                if (i>=1000) break; 
+                if (i>=1000) break;
 
                 i++;
             }
@@ -360,7 +395,9 @@ var GlassGrid = GObject.registerClass(
 
             this._destroyGridChildren();            
             this._sortExtList();
-            // const scale = this.scaleFactor;
+
+            const scale = this.scaleFactor;
+            const scale_ratio = scale / (2*scale -1);
 
             // Loop through the extensions and add them to the grid
             let i = 0;
@@ -388,7 +425,7 @@ var GlassGrid = GObject.registerClass(
                     x_expand: true,
                 });
                 let fontSize = this._settings.get_double('font-size');
-                nameLabel.style = ` font-size: ${fontSize}em !important; `;
+                nameLabel.style = ` font-size: ${fontSize*scale_ratio*1.25}em !important; `;
                 let nameTxt = nameLabel.get_clutter_text();
                 nameTxt.set_line_wrap(true);
                 nameTxt.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
@@ -402,14 +439,15 @@ var GlassGrid = GObject.registerClass(
                     height: this.height*0.16, //120,
                     width: this.height*0.24, //150,
                     name: 'name_'+i,
-                }); 
-                if (extension.hasUpdate) { 
+                });
+                if (extension.hasUpdate) {
                     nameBtn.add_style_class_name('extension-name-button-update');
                 }
                 if (extension.state == ExtensionState.ERROR) {
                     nameBtn.add_style_class_name('extension-name-button-error');
                 }
-                // console.log('Name: ' + extension.metadata.name);        
+                // console.debug('Name button: ' + nameBtn);
+                
                 nameBtn.set_child(nameLabel);
                 nameBtn.connect('clicked', () => {
                     let fontSize = this._settings.get_double('font-size');
@@ -417,25 +455,25 @@ var GlassGrid = GObject.registerClass(
                         if (nameLabel.text == extension.metadata.name) {
                             nameLabel.text = extension.error;
                             nameBtn.add_style_class_name('extension-name-button-error-msg');
-                            nameLabel.style = ` font-size: ${fontSize*0.75}em !important; `;
+                            nameLabel.style = ` font-size: ${fontSize*scale_ratio*1.25*0.75}em !important; `;
 
                         }
                         else {
                             nameLabel.text = extension.metadata.name;
                             nameBtn.remove_style_class_name('extension-name-button-error-msg');
-                            nameLabel.style = ` font-size: ${fontSize}em !important; `;
+                            nameLabel.style = ` font-size: ${fontSize*scale_ratio*1.25}em !important; `;
                         }
                     }
                     else if (extension.hasUpdate) {
                         if (nameLabel.text == extension.metadata.name) {
                             nameLabel.text = "Update Available. It'll apply on next login. ";
                             nameBtn.add_style_class_name('extension-name-button-update-msg');
-                            nameLabel.style = ` font-size: ${fontSize*0.75}em !important; `;
+                            nameLabel.style = ` font-size: ${fontSize*scale_ratio*1.25*0.75}em !important; `;
                         }
                         else {
                             nameLabel.text = extension.metadata.name;
                             nameBtn.remove_style_class_name('extension-name-button-update-msg');
-                            nameLabel.style = ` font-size: ${fontSize}em !important; `;
+                            nameLabel.style = ` font-size: ${fontSize*scale_ratio*1.25}em !important; `;
                         }
                     }
                     else {
@@ -456,8 +494,8 @@ var GlassGrid = GObject.registerClass(
                     x_align: Clutter.ActorAlign.CENTER,
                     y_align: Clutter.ActorAlign.CENTER,
                     // vertical: true,
-                    // height: this.height*0.06 , //120,
-                    // width: this.height*0.14 , //50,
+                    // height: this.height*0.06, //120,
+                    // width: this.height*0.14, //50,
                     reactive: true,
                     track_hover: true,
                 });
@@ -465,7 +503,8 @@ var GlassGrid = GObject.registerClass(
                 let prefsIcon = new St.Icon({
                     icon_name: 'emblem-system-symbolic',  
                     style_class: 'extension-pref-icon', 
-                    // icon_size: this.height*0.03, //30,
+                    width: this.height*0.022,
+                    height: this.height*0.022,//30,
                 });
                 let prefsButton = new St.Button({
                     style_class: 'extension-pref-button',
@@ -490,6 +529,7 @@ var GlassGrid = GObject.registerClass(
 
                 btnBox.add_child(prefsButton);
                 
+                
                 // Reload stylesheet
                 let reloadLabel = new St.Label({
                     text: '↺',
@@ -497,6 +537,7 @@ var GlassGrid = GObject.registerClass(
                     x_align: Clutter.ActorAlign.CENTER,
                     y_align: Clutter.ActorAlign.CENTER,
                 });
+                reloadLabel.style = ` font-size: ${1.5*scale_ratio}em; `;
                 let reloadStyleBtn = new St.Button({
                     child: reloadLabel,
                     style_class: 'reload-style-button',
@@ -578,15 +619,15 @@ var GlassGrid = GObject.registerClass(
         // Reload the grid and show the window
         show() {
             let extArr = ExtensionManager._extensionOrder; 
-            let extGridIdx = extArr.indexOf(Me.metadata.uuid);    
-            if (extGridIdx != 0) {   
+            let extGridIdx = extArr.indexOf(this.metadata.uuid);    
+            if (extGridIdx != 0) {        
                 extArr.splice(0, 0, extArr.splice(extGridIdx, 1)[0]); 
             }
 
             // this._fillGrid();
 
             this._adjustment.value = 0;
-            
+
             this.switcherPopup.display();
 
             this.visible = true;
@@ -597,9 +638,18 @@ var GlassGrid = GObject.registerClass(
             global.stage.set_key_focus(this.headerBox.titleLabel);
 
             let activeTheme = this._settings.get_string('bg-theme');
-            if (activeTheme == "Dynamic Blur" || activeTheme == "Background Crop")
-                Meta.add_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+            if (activeTheme == "Dynamic Blur" || activeTheme == "Background Crop") {
+                const enabledFlags = Meta.get_clutter_debug_flags(); //log(enabledFlags);
+                if (enabledFlags.includes(Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS)) {
+                    this.isClippedRedrawsSet = true;
+                }
+                else {
+                    this.isClippedRedrawsSet = false;
+                    Meta.add_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+                }
+            }
 
+            this._swipeTracker.enabled = true;
             // log('scale factor '+this.scaleFactor);
         }
 
@@ -609,8 +659,11 @@ var GlassGrid = GObject.registerClass(
             global.stage.disconnectObject(this);
 
             this.visible = false;
-            
-            Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+
+            if (!this.isClippedRedrawsSet)
+                Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+
+            this._swipeTracker.enabled = false;
         }
 
         _getGridXY(idx) {
@@ -627,7 +680,7 @@ var GlassGrid = GObject.registerClass(
                 this.instTimeoutId = setTimeout(() => { this._fillGrid(); }, 200);
                 return Clutter.EVENT_PROPAGATE;
             }
-             
+
             let [col, row] = this._getGridXY(idx); 
             let extBox = this.grid.get_child_at(col, row);
             let extNameBtn = extBox.get_child_at_index(0); 
@@ -638,8 +691,8 @@ var GlassGrid = GObject.registerClass(
                 extNameBtn.add_style_class_name('extension-name-button-update');
             }
 
-            switch (extension.state) { 
-                case ExtensionState.ERROR:
+            switch (extension.state) {
+                case ExtensionState.ERROR: 
                     extSwitch.state = false;                                  
                     extNameBtn.add_style_class_name('extension-name-button-error');
                     break;
@@ -706,12 +759,14 @@ var GlassGrid = GObject.registerClass(
         }
 
         _setFontUpDown(fontSize) {
+            const scale = this.scaleFactor;
+            const scale_ratio = scale / (2*scale -1);
             for (let idx in this.extList) {
                 let [col, row] = this._getGridXY(idx); 
                 let extBox = this.grid.get_child_at(col, row);
                 let extNameBtn = extBox.get_child_at_index(0); 
                 let nameLabel = extNameBtn.get_child(); 
-                nameLabel.style = ` font-size: ${fontSize}em !important; `;
+                nameLabel.style = ` font-size: ${fontSize*scale_ratio*1.25}em !important; `;
             }
         }
 
@@ -726,9 +781,9 @@ var GlassGrid = GObject.registerClass(
         // Handle key press events for keyboard navigation
         vfunc_key_press_event(event) {
 
-            // console.log('key pressed: '+event.keyval);
+            // console.log('key pressed: '+event.get_key_symbol());
 
-            if (event.keyval == Clutter.KEY_Escape) {
+            if (event.get_key_symbol() == Clutter.KEY_Escape) {
                 if (this.menuOpen) {
                     this.headerBox.settingsBtn.menu.close(true);
                     return Clutter.EVENT_STOP;
@@ -736,10 +791,10 @@ var GlassGrid = GObject.registerClass(
                 this.hide();
                 return Clutter.EVENT_STOP;
             }
-            else if (event.keyval == Clutter.KEY_c) {
+            else if (event.get_key_symbol() == Clutter.KEY_c) {
                 ExtensionManager.openExtensionPrefs('custom-osd@neuromorph', '', {});
                 return Clutter.EVENT_STOP;
-            }          
+            }
 
             return Clutter.EVENT_PROPAGATE;
         }                
@@ -825,14 +880,12 @@ var GlassGrid = GObject.registerClass(
 );
 
 
-class GlassGridExtension {
+export default class GlassGridExtension extends Extension {
 
     enable() {
 
-        // log('Enabling Glass Grid');
-
         // Create new Glass Grid
-        this.extGrid = new GlassGrid();
+        this.extGrid = new GlassGrid(this);
 
         // Panel indicator initialize as per settings
         this.extGrid.headerBox._addRemovePanelIndicator(this.extGrid._settings.get_boolean('show-indicator'));
@@ -849,7 +902,7 @@ class GlassGridExtension {
             this.extGrid._settings,
             Meta.KeyBindingFlags.NONE,
             Shell.ActionMode.NORMAL,
-            this.extGrid._toggleGlassGridView.bind(this.extGrid)
+            this.extGrid._toggleGlassGridView.bind(this.extGrid, 'hotkey')
         );
     
         // Connect monitors-changed with setting Glass Grid position/size params
@@ -858,7 +911,6 @@ class GlassGridExtension {
     
     disable() {
     
-        // log('Disabling Glass Grid');
         global.stage.set_key_focus(null);
         if (this.extGrid.visible) {
             this.extGrid.hide();
@@ -886,9 +938,4 @@ class GlassGridExtension {
 
         Main.layoutManager.disconnect(this._monitorsChangedId);
     }
-}
-
-function init() {
-    ExtensionUtils.initTranslations();
-    return new GlassGridExtension();
 }

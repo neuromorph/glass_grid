@@ -19,13 +19,16 @@
 
 /* exported PageSwitcherPopup */
 
-const { Clutter, GObject, St, GLib } = imports.gi;
+import Clutter from 'gi://Clutter';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import St from 'gi://St';
 
 const ANIMATION_TIME = 100;
 const DISPLAY_TIMEOUT = 800;
 
 
-var PageSwitcherPopup = GObject.registerClass(
+export const PageSwitcherPopup = GObject.registerClass(
 class PageSwitcherPopup extends Clutter.Actor {
     _init(extGrid) {
         super._init({
@@ -44,32 +47,39 @@ class PageSwitcherPopup extends Clutter.Actor {
         this.add_child(this._list);
 
     }
-    
+
     setSwitcherPopupParams() {
         this.x = this.extGrid.width/2 - this.width/2;
         this.y = this.extGrid.height*0.92;
     }
 
     _redisplay() {
+        const scale = this.extGrid.scaleFactor;
+        const scale_ratio = scale / (2*scale -1);
+        
+        this._list.style = ` margin-top: ${0.4*scale_ratio}em; padding: ${0.4*scale_ratio}em ${0.8*scale_ratio}em; spacing: ${0.3*scale_ratio}em; `;
+        
         const nExts = this.extGrid.extList.length;
         const nPages = Math.ceil(nExts / (this.extGrid.gridCols*this.extGrid.gridRows));
         const currentPage = Math.ceil(this.extGrid._adjustment.value / this.extGrid._adjustment.page_increment);
 
         this._list.destroy_all_children();
-       // log('npages '+ nPages);
+
         for (let i = 0; i < nPages; i++) {
 
             const indicator = new St.Bin({
                 style_class: 'pg-switcher-indicator',
             });
+            indicator.style = ` padding: ${0.2*scale_ratio}em ${0.2*scale_ratio}em; margin: ${0.3*scale_ratio}em; `;
 
-            if (i === currentPage) {
+            if (i === currentPage) { 
                 indicator.add_style_class_name('pg-switcher-indicator-active');
+                indicator.style = ` padding: ${0.2*scale_ratio}em ${1*scale_ratio}em; margin: ${0.3*scale_ratio}em; `;
             }
 
             this._list.add_actor(indicator);
         }
-        
+
         this.x = this.extGrid.width/2 - this.width/2;
     }
 
@@ -77,7 +87,7 @@ class PageSwitcherPopup extends Clutter.Actor {
 
         this._redisplay();
         if (this._timeoutId !== 0)
-             GLib.source_remove(this._timeoutId);
+            GLib.source_remove(this._timeoutId);
         this._timeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, DISPLAY_TIMEOUT, this._onTimeout.bind(this));
         GLib.Source.set_name_by_id(this._timeoutId, '[gnome-shell] this._onTimeout');
 

@@ -8,11 +8,9 @@
   "name": "Extensions Glass Grid",
   "settings-schema": "org.gnome.shell.extensions.extgrid",
   "shell-version": [
-    "42",
-    "43",
-    "44"
+    "45"
   ],
   "url": "https://github.com/neuromorph/glass_grid",
   "uuid": "extgrid@neuromorph",
-  "version": 11
+  "version": 14
 }
