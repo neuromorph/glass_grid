@@ -129,19 +129,7 @@ var HeaderBox = GObject.registerClass(
         this.settingsBtn.add_style_class_name('settings-button');
         this.settingsBtn.add_child(this.settingsIcon);
         this.settingsBtn.menu.sensitive = true;
-        this.settingsBtn.menu.connect('open-state-changed', (actor, open) => {
-            if (open) {
-                this.extGrid.menuOpen = true;
-                this.extGrid.menuOpening = true;
-                global.stage.set_key_focus(this.settingsBtn.menu.firstMenuItem);
-                this.menuTimeoutId = setTimeout(() => {this.extGrid.menuOpening = false;}, 200);
-            }
-            else {
-                global.stage.set_key_focus(this.settingsBtn);
-                this.extGrid.menuOpen = false;
-            }
-            return Clutter.EVENT_PROPAGATE;
-        });
+        
 
         let themeMenuItem = new PopupMenu.PopupSubMenuMenuItem('Background Theme', false, {can_focus: true});
         let themeMenuSection = new PopupMenu.PopupMenuSection({can_focus: true, isOpen: false});
@@ -198,6 +186,13 @@ var HeaderBox = GObject.registerClass(
 
         this.indicatorMenuItem = new PopupMenu.PopupSwitchMenuItem("Panel Indicator", this._settings.get_boolean('show-indicator'), { can_focus: false }); 
         this.indicatorMenuItem.connect('toggled', (actor, state) => {
+            if(!state && this._settings.get_strv('hotkey')[0] == '') {
+                const msg = "Extensions Glass Grid";
+                const details = "Please set a hotkey before removing panel indicator. Do not remove both.";
+                Main.notify(msg, details);
+                actor._switch.state = true;
+                return Clutter.EVENT_PROPAGATE;
+            }
             this._addRemovePanelIndicator(state)
             return Clutter.EVENT_PROPAGATE;
         });
@@ -215,6 +210,27 @@ var HeaderBox = GObject.registerClass(
             parent.remove_actor(container);
 
         this.add_child(container);
+
+        this.settingsBtn.menu.connect('open-state-changed', (actor, open) => {
+            if (open) {
+                this.extGrid.menuOpen = true;
+                this.extGrid.menuOpening = true;
+                global.stage.set_key_focus(this.settingsBtn.menu.firstMenuItem);
+                this.menuTimeoutId = setTimeout(() => {this.extGrid.menuOpening = false;}, 200);
+            }
+            else {
+                if(!this._settings.get_boolean('show-indicator') && this._settings.get_strv('hotkey')[0] == '') {
+                    const msg = "Extensions Glass Grid";
+                    const details = "Hotkey is not set. Turning On panel indicator. Do not remove both.";
+                    Main.notify(msg, details);
+                    this.indicatorMenuItem._switch.state = true;
+                    this._addRemovePanelIndicator(true);
+                }
+                global.stage.set_key_focus(this.settingsBtn);
+                this.extGrid.menuOpen = false;
+            }
+            return Clutter.EVENT_PROPAGATE;
+        });
 
         let menuChildren = this.settingsBtn.menu.box.get_children();
         menuChildren.forEach(menuItem => {
@@ -505,11 +521,13 @@ var HeaderBox = GObject.registerClass(
             // Add the panel button to the right of the panel
             Main.panel.addToStatusArea('extgridPanelIndicator', this.panelIndicator, 0, 'right');
 
-            this.panelIndicatorId = this.panelIndicator.connect('button-press-event', () => this.extGrid._toggleGlassGridView());
+            this.panelIndicatorId1 = this.panelIndicator.connect('button-press-event', (actor, event) => this.extGrid._toggleGlassGridView(event));
+            this.panelIndicatorId2 = this.panelIndicator.connect('touch-event', (actor, event) => this.extGrid._toggleGlassGridView(event));
         }
         else {
             if (this.panelIndicator) {
-                this.panelIndicator.disconnect(this.panelIndicatorId);
+                this.panelIndicator.disconnect(this.panelIndicatorId1);
+                this.panelIndicator.disconnect(this.panelIndicatorId2);
                 this.panelIndicator.destroy();
                 this.panelIndicator = null;
             }
@@ -566,7 +584,8 @@ var HeaderBox = GObject.registerClass(
             this.aboutDialog.destroy();
         
         if (this.panelIndicator) {
-            this.panelIndicator.disconnect(this.panelIndicatorId);
+            this.panelIndicator.disconnect(this.panelIndicatorId1);
+            this.panelIndicator.disconnect(this.panelIndicatorId2);
             this.panelIndicator.destroy();
             this.panelIndicator = null;
         }
@@ -612,15 +631,15 @@ const PopupEntryMenuItem = GObject.registerClass(
             this._entry.clutter_text.connect('text-changed', () => {
                 this._settings.set_strv('hotkey', [this._entry.text]);
             });
-
-            this._entry.connect('key-press-event', (entry, event) => {
-                // log('entry key '+event.get_key_symbol());
-                if (event.get_key_symbol() == Clutter.KEY_Escape) {
-                    headerBox.settingsBtn.menu.close(true);
-                    return Clutter.EVENT_STOP;
-                }
-                return Clutter.EVENT_PROPAGATE;
-            });
+ 
+             this._entry.connect('key-press-event', (entry, event) => {
+                 // log('entry key '+event.get_key_symbol());
+                 if (event.get_key_symbol() == Clutter.KEY_Escape) {
+                     headerBox.settingsBtn.menu.close(true);
+                     return Clutter.EVENT_STOP;
+                 }
+                 return Clutter.EVENT_PROPAGATE;
+             });
         }
 
         activate(event) {

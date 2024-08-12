@@ -54,6 +54,7 @@ var GlassGrid = GObject.registerClass(
             this.enablingDisablingAll = false;
             this.menuOpen = false; // To avoid hiding window since focus changed
             this.menuOpening = false; // To void closing menu as soon as opened (on click)
+            this.isClippedRedrawsSet = false; // Is the redraw debug flag set externally (by Blur My Shell e.g.)
 
             global.focus_manager.add_group(this);
             // this.add_constraint(new Layout.MonitorConstraint({primary: true}));
@@ -194,6 +195,8 @@ var GlassGrid = GObject.registerClass(
             this._swipeTracker.connect('update', this._swipeUpdate.bind(this));
             this._swipeTracker.connect('end', this._swipeEnd.bind(this));
 
+            this._swipeTracker.enabled = false;
+            
         }
 
         _onScroll(actor, event) {
@@ -293,13 +296,20 @@ var GlassGrid = GObject.registerClass(
             this.scroll.add_actor(this.gridActor);
         }
 
-        _toggleGlassGridView() {
-            if (this.visible) {
-                this.hide();
-            }
-            else {
-                this.show();
-            }
+        _toggleGlassGridView(event) {
+        
+            if (event == 'hotkey' || 
+                event.type() == Clutter.EventType.TOUCH_BEGIN || 
+                (event.type() == Clutter.EventType.BUTTON_PRESS && !event.is_pointer_emulated())){
+             
+                if (this.visible) {
+                    this.hide();
+                }
+                else {
+                    this.show();
+                }
+           }
+           return Clutter.EVENT_PROPAGATE;   
         }
 
         _findIdx(el, arr, start, end) {
@@ -597,8 +607,18 @@ var GlassGrid = GObject.registerClass(
             global.stage.set_key_focus(this.headerBox.titleLabel);
 
             let activeTheme = this._settings.get_string('bg-theme');
-            if (activeTheme == "Dynamic Blur" || activeTheme == "Background Crop")
-                Meta.add_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+            if (activeTheme == "Dynamic Blur" || activeTheme == "Background Crop") {
+                const enabledFlags = Meta.get_clutter_debug_flags(); //log(enabledFlags);
+                if (enabledFlags.includes(Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS)) {
+                    this.isClippedRedrawsSet = true;
+                }
+                else {
+                    this.isClippedRedrawsSet = false;
+                    Meta.add_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+                }
+            }
+
+            this._swipeTracker.enabled = true;
 
             // log('scale factor '+this.scaleFactor);
         }
@@ -610,7 +630,10 @@ var GlassGrid = GObject.registerClass(
 
             this.visible = false;
             
-            Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+            if (!this.isClippedRedrawsSet)
+                Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
+
+            this._swipeTracker.enabled = false;
         }
 
         _getGridXY(idx) {
@@ -849,7 +872,7 @@ class GlassGridExtension {
             this.extGrid._settings,
             Meta.KeyBindingFlags.NONE,
             Shell.ActionMode.NORMAL,
-            this.extGrid._toggleGlassGridView.bind(this.extGrid)
+            this.extGrid._toggleGlassGridView.bind(this.extGrid, 'hotkey')
         );
     
         // Connect monitors-changed with setting Glass Grid position/size params

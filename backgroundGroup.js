@@ -55,7 +55,7 @@ var BackgroundGroup = GObject.registerClass(
 
     _createBackground(mode) {
             
-        let pMonitor = Main.layoutManager.primaryMonitor;
+        const pMonitor = Main.layoutManager.primaryMonitor;
         
         let widget = new St.Widget({
             style_class: 'bg-widget',
