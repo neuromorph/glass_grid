@@ -5,12 +5,12 @@
     "buymeacoffee": "neuromorph"
   },
   "gettext-domain": "extgrid",
-  "name": "Extensions Glass Grid",
+  "name": "Glass Grid: Extension Manager",
   "settings-schema": "org.gnome.shell.extensions.extgrid",
   "shell-version": [
-    "45"
+    "45", "46"
   ],
   "url": "https://github.com/neuromorph/glass_grid",
   "uuid": "extgrid@neuromorph",
-  "version": 14
+  "version": 13
 }
