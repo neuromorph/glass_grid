@@ -77,7 +77,7 @@ export const HeaderBox = GObject.registerClass(
         
         this.egoBtn.height = this.extGrid.height*0.052; //40,
         this.egoBtn.width = this.extGrid.height*0.075; //80,
-        this.egoBtn.style = ` padding:  ${5-2*scale}px ${1*scale}px ${1*scale}px ${1*scale}px; `;
+        // this.egoBtn.style = ` padding:  ${0.75*scale}px ${1*scale}px ${1*scale}px ${1*scale}px; `;
         
         this.settingsIcon.width = this.extGrid.height*0.026;
         this.settingsIcon.height = this.extGrid.height*0.026;
@@ -351,7 +351,13 @@ export const HeaderBox = GObject.registerClass(
         });
         this.extAppButton.connect('clicked', () => {
             this.extGrid.hide();
-            Util.spawn(['gnome-extensions-app']);
+            try {
+                log('trying gnome-extensions-app');
+                Util.trySpawn(['gnome-extensions-app']);
+            } catch (e) {
+                log('failed gnome-extensions-app, trying extension manager');
+                Util.spawn(['extension-manager']);
+            }
         });
         this.add_child(this.extAppButton);
 
@@ -465,9 +471,7 @@ export const HeaderBox = GObject.registerClass(
         const switchIcon = Gio.FileIcon.new(Gio.File.new_for_path(switchIconPath));
         const allSwitch = new Dialog.ListSectionItem({
             icon_actor: new St.Icon({gicon: switchIcon, 
-                                     width: 13,
-                                     height: 2, 
-                                     }),
+                                     icon_size: 14}),
             description: `   Enable/Disable all extensions except Glass Grid.`,
         });
         listLayout.list.add_child(allSwitch);
@@ -497,9 +501,7 @@ export const HeaderBox = GObject.registerClass(
         
         const extSwtch = new Dialog.ListSectionItem({
             icon_actor: new St.Icon({gicon: switchIcon, 
-                                     width: 13,
-                                     height: 2, 
-                                     }),
+                                     icon_size: 14}),
             description: `   Enable/Disable selected extension.`,
         });
         listLayout.list.add_child(extSwtch);
@@ -507,6 +509,10 @@ export const HeaderBox = GObject.registerClass(
 
         // Adding buttons
         this.aboutDialog.setButtons([
+            {
+                label: 'CANCEL',
+                action: () => this.aboutDialog.close(),
+            },
             {
                 label: 'OK',
                 action: () => this.aboutDialog.close(),
@@ -521,16 +527,17 @@ export const HeaderBox = GObject.registerClass(
             if (this.panelIndicator) {
                 return;
             }
-            this.panelIndicator = new PanelMenu.Button(0.0, 'extgridPanelIndicator', true);
+            this.panelIndicator = new PanelMenu.Button(0.0, 'GlassGridExtManager', true);
 
             let icon = new St.Icon({
                 icon_name: 'application-x-addon-symbolic',
-                style_class: 'system-status-icon'
+                style_class: 'system-status-icon',
             });
+            icon.style = `margin: 0px;`;
             this.panelIndicator.add_child(icon);
 
             // Add the panel button to the right of the panel
-            Main.panel.addToStatusArea('extgridPanelIndicator', this.panelIndicator, 0, 'right');
+            Main.panel.addToStatusArea('GlassGridExtManager', this.panelIndicator, 0, 'right');
 
             this.panelIndicatorId1 = this.panelIndicator.connect('button-press-event', (actor, event) => this.extGrid._toggleGlassGridView(event));
             this.panelIndicatorId2 = this.panelIndicator.connect('touch-event', (actor, event) => this.extGrid._toggleGlassGridView(event));
@@ -549,9 +556,10 @@ export const HeaderBox = GObject.registerClass(
 
     _enableAllExtensions() {
         let enabledExtensions = this._settings.get_strv('enabled-extensions');
-
+        log('enabled extensions: ' + enabledExtensions);
         this.extGrid.enablingDisablingAll = true;
         for (const uuid of enabledExtensions) { 
+            console.log('enabling uuid: ' + uuid);
             try {
                 ExtensionManager.enableExtension(uuid); 
             }
@@ -566,7 +574,7 @@ export const HeaderBox = GObject.registerClass(
     _disableAllExtensions() {
 
         const extensionsToDisable = ExtensionManager._extensionOrder.slice();
-
+        log('extensions to disable: ' + extensionsToDisable);
         this._settings.set_strv('enabled-extensions', extensionsToDisable);
         this.extGrid.enablingDisablingAll = true; 
 
@@ -576,7 +584,7 @@ export const HeaderBox = GObject.registerClass(
 
         for (const uuid of extensionsToDisable) {
             if (uuid != this.extGrid.metadata.uuid) {
-                // console.debug('disabling uuid: ' + uuid);
+                console.log('disabling uuid: ' + uuid);
                 try {
                     ExtensionManager.disableExtension(uuid);
                 }

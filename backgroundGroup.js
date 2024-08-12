@@ -29,14 +29,15 @@ import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as Background from 'resource:///org/gnome/shell/ui/background.js';
 
-const BLUR_BRIGHTNESS = 0.85; //0.65
-const BLUR_SIGMA = 50; //45
+const BLUR_BRIGHTNESS = 0.85;
+const BLUR_SIGMA = 40;
+const BLUR_RADIUS = BLUR_SIGMA*2;
 const BACKGROUND_CORNER_RADIUS_PIXELS = 15;
 
 export const MAINBOX_STYLE = {
     "Color Gradient": "mainbox-color-gradient",
     "Grey Gradient": "mainbox-grey-gradient",
-    "Background Crop": "mainbox-bg-crop", 
+    "Grid Blur": "mainbox-grid-blur", 
     "Background Blur": "mainbox-bg-blur",
     "Dynamic Blur": "mainbox-dynamic-blur",
 }
@@ -124,6 +125,7 @@ export const BackgroundGroup = GObject.registerClass(
                 effect.set({
                     brightness: BLUR_BRIGHTNESS,
                     sigma: BLUR_SIGMA * themeContext.scale_factor,
+                    radius: BLUR_RADIUS * themeContext.scale_factor,
                     mode: (mode == 'blur')? Shell.BlurMode.ACTOR: Shell.BlurMode.BACKGROUND, 
                 });
             }
@@ -133,7 +135,6 @@ export const BackgroundGroup = GObject.registerClass(
     _updateBorderRadius() {
         // const {scaleFactor} = St.ThemeContext.get_for_stage(global.stage); 
         const cornerRadius = this.extGrid.scaleFactor * BACKGROUND_CORNER_RADIUS_PIXELS;
-        // const cornerRadius = BACKGROUND_CORNER_RADIUS_PIXELS;
         const backgroundContent = this._bgManagers[0].backgroundActor.content;
         backgroundContent.rounded_clip_radius = cornerRadius;
 
@@ -188,14 +189,14 @@ export const BackgroundGroup = GObject.registerClass(
         });
 
 
-        if (activeTheme == "Dynamic Blur" || activeTheme == "Background Crop") {
+        if (activeTheme == "Dynamic Blur" || activeTheme == "Grid Blur") {
             Meta.add_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
         }
         else {
             Meta.remove_clutter_debug_flags(null, Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS, null);
         }
 
-        if (activeTheme == "Background Crop") {
+        if (activeTheme == "Grid Blur") {
             this.extGrid._addRemoveNameEffect(true);
         }
         else {
@@ -203,7 +204,7 @@ export const BackgroundGroup = GObject.registerClass(
         }            
 
         switch (activeTheme) {
-            case "Background Crop":
+            case "Grid Blur":
                 this._createBackground('crop');
                 this._updateBorderRadius();
                 this._updateRoundedClipBounds();
