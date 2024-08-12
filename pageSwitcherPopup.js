@@ -77,7 +77,7 @@ class PageSwitcherPopup extends Clutter.Actor {
                 indicator.style = ` padding: ${0.2*scale_ratio}em ${1*scale_ratio}em; margin: ${0.3*scale_ratio}em; `;
             }
 
-            this._list.add_actor(indicator);
+            this._list.add_child(indicator);
         }
 
         this.x = this.extGrid.width/2 - this.width/2;
